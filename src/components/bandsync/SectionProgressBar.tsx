@@ -1,3 +1,4 @@
+
 import type { SongSection } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -27,7 +28,12 @@ export function SectionProgressBar({ sections, currentSectionId, currentTime }: 
               style={{ width: `${sectionWidthPercentage}%` }}
               title={`${section.name} (${section.duration}s)`}
             >
-              <span className="truncate px-1">{section.name}</span>
+              <span className={cn(
+                "px-1",
+                !isActive && "truncate" // Apply truncate only if not the active section
+              )}>
+                {section.name}
+              </span>
             </div>
           );
         })}
