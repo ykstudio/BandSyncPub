@@ -24,8 +24,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords: allChords }: Lyrics
 
         return (
           <div key={lineIndex} className="mb-3">
-            {/* Removed items-start, rely on consistent height of children */}
-            <p className="flex flex-wrap gap-x-1.5">
+            <p className="flex flex-wrap items-start gap-x-1.5"> {/* Added items-start */}
               {line.map((word, wordIndex) => {
                 const isActiveWord = currentTime >= word.startTime && currentTime < word.endTime;
                 const activeChordForWord = getChordAtTime(word.startTime, allChords);
@@ -53,9 +52,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords: allChords }: Lyrics
                 return (
                   <span
                     key={wordIndex}
-                    // Removed min-h-[3em], height will be natural (chord slot + word)
-                    // items-start ensures chord is above word in the column
-                    className="inline-flex flex-col items-start"
+                    className="inline-flex flex-col items-start" // items-start here is for within the word unit
                   >
                     {displayChordData ? (
                       <span
@@ -72,7 +69,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords: allChords }: Lyrics
                     )}
                     <span
                       className={cn(
-                        'transition-colors duration-100',
+                        'transition-colors duration-100 leading-snug', // Added leading-snug for consistent line height
                         isActiveWord ? 'text-accent font-bold' : 'text-foreground'
                       )}
                     >
