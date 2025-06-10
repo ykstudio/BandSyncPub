@@ -85,12 +85,12 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                   <span
                     key={wordIndex}
                     id={`word-${lineIndex}-${wordIndex}`}
-                    className="relative inline-block pt-1" // Changed from pt-2.5 to pt-1
+                    className="relative inline-block pt-px" // Changed from pt-1
                   >
                     {chordToDisplayAboveWord && (
                       <span
                         className={cn(
-                          "absolute bottom-full left-0 mb-0.5 text-xs sm:text-sm font-semibold leading-none",
+                          "absolute bottom-full left-0 text-xs sm:text-sm font-semibold leading-none", // Removed mb-0.5
                           isThisDisplayedChordTheOverallCurrent ? "text-accent font-bold" : "text-primary"
                         )}
                       >
