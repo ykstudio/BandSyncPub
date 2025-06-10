@@ -18,6 +18,7 @@ const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChan
 export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const overallCurrentChord = getChordActiveAtTime(currentTime, chords);
+  let overallCurrentChordHasBeenHighlightedThisRender = false;
 
   useEffect(() => {
     if (!scrollContainerRef.current || !lyrics || lyrics.length === 0) return;
@@ -75,22 +76,28 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                   lastDisplayedChordText = null; 
                 }
                 
-                const isThisDisplayedChordTheOverallCurrent =
+                let highlightThisDisplayedChord = false;
+                if (
                   chordToDisplayAboveWord !== null &&
                   overallCurrentChord !== undefined &&
-                  chordToDisplayAboveWord === overallCurrentChord; // Use strict object equality
+                  chordToDisplayAboveWord === overallCurrentChord && // Strict object equality
+                  !overallCurrentChordHasBeenHighlightedThisRender // Check the flag
+                ) {
+                  highlightThisDisplayedChord = true;
+                  overallCurrentChordHasBeenHighlightedThisRender = true; // Set the flag for this render cycle
+                }
 
                 return (
                   <span
                     key={wordIndex}
                     id={`word-${lineIndex}-${wordIndex}`}
-                    className="relative inline-block pt-px"
+                    className="relative inline-block pt-px" 
                   >
                     {chordToDisplayAboveWord && (
                       <span
                         className={cn(
                           "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none",
-                          isThisDisplayedChordTheOverallCurrent ? "text-accent font-bold" : "text-primary"
+                          highlightThisDisplayedChord ? "text-accent font-bold" : "text-primary"
                         )}
                       >
                         {chordToDisplayAboveWord.chord}
