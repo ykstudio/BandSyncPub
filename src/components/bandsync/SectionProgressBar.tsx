@@ -29,8 +29,8 @@ export function SectionProgressBar({ sections, currentSectionId, currentTime }: 
               title={`${section.name} (${section.duration}s)`}
             >
               <span className={cn(
-                "px-1",
-                !isActive && "truncate" // Apply truncate only if not the active section
+                "inline-block px-1", // Ensure inline-block for better layout control
+                isActive ? "whitespace-nowrap" : "truncate" // Active: no wrap, Inactive: truncate with ellipsis
               )}>
                 {section.name}
               </span>
