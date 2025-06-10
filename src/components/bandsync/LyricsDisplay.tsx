@@ -19,13 +19,11 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const overallCurrentChord = getChordActiveAtTime(currentTime, chords);
 
-  useEffect(() => {
-    if (!scrollContainerRef.current || !lyrics || lyrics.length === 0) return;
+  let activeWordLineIndex = -1;
+  let activeWordIndexInLine = -1;
 
-    let activeWordElement: HTMLElement | null = null;
-    let activeWordLineIndex = -1;
-    let activeWordIndexInLine = -1;
-
+  // Determine the currently active word's indices
+  if (lyrics && lyrics.length > 0) {
     for (let lIdx = 0; lIdx < lyrics.length; lIdx++) {
       for (let wIdx = 0; wIdx < lyrics[lIdx].length; wIdx++) {
         const word = lyrics[lIdx][wIdx];
@@ -37,10 +35,12 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
       }
       if (activeWordLineIndex !== -1) break;
     }
+  }
 
-    if (activeWordLineIndex !== -1 && activeWordIndexInLine !== -1) {
-      activeWordElement = document.getElementById(`word-${activeWordLineIndex}-${activeWordIndexInLine}`);
-    }
+  useEffect(() => {
+    if (!scrollContainerRef.current || activeWordLineIndex === -1 || activeWordIndexInLine === -1) return;
+
+    const activeWordElement = document.getElementById(`word-${activeWordLineIndex}-${activeWordIndexInLine}`);
 
     if (activeWordElement) {
       activeWordElement.scrollIntoView({
@@ -48,7 +48,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
         block: 'center',
       });
     }
-  }, [currentTime, lyrics]);
+  }, [currentTime, lyrics, activeWordLineIndex, activeWordIndexInLine]);
 
   return (
     <div
@@ -62,7 +62,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
           <div key={lineIndex} className="mb-6">
             <p className="flex flex-wrap items-baseline gap-x-1.5">
               {line.map((word, wordIndex) => {
-                const isActiveWord = currentTime >= word.startTime && currentTime < word.endTime;
+                const isThisTheCurrentActiveWord = lineIndex === activeWordLineIndex && wordIndex === activeWordIndexInLine;
                 const chordAssociatedWithWord = getChordActiveAtTime(word.startTime, chords);
                 let chordToDisplayAboveWord: ChordChange | null = null;
 
@@ -79,7 +79,8 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                 if (
                   chordToDisplayAboveWord !== null &&
                   overallCurrentChord !== undefined &&
-                  chordToDisplayAboveWord === overallCurrentChord // Strict object equality
+                  chordToDisplayAboveWord === overallCurrentChord && // Strict object equality
+                  isThisTheCurrentActiveWord // Highlight only if it's above the active word
                 ) {
                   highlightThisDisplayedChord = true;
                 }
@@ -103,7 +104,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                     <span
                       className={cn(
                         'transition-colors duration-100 leading-snug',
-                        isActiveWord ? 'text-accent font-bold' : 'text-foreground'
+                        isThisTheCurrentActiveWord ? 'text-accent font-bold' : 'text-foreground'
                       )}
                     >
                       {word.text}
