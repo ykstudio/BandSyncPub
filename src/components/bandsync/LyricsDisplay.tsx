@@ -86,7 +86,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                   <span
                     key={wordIndex}
                     id={`word-${lineIndex}-${wordIndex}`} // Unique ID for scrolling
-                    className="relative inline-block pt-5"
+                    className="relative inline-block pt-1.5" // Changed pt-5 to pt-1.5
                   >
                     {chordToDisplayAboveWord && (
                       <span
