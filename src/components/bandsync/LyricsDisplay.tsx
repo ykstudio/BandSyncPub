@@ -18,7 +18,6 @@ const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChan
 export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const overallCurrentChord = getChordActiveAtTime(currentTime, chords);
-  let overallCurrentChordHasBeenHighlightedThisRender = false;
 
   useEffect(() => {
     if (!scrollContainerRef.current || !lyrics || lyrics.length === 0) return;
@@ -80,11 +79,9 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                 if (
                   chordToDisplayAboveWord !== null &&
                   overallCurrentChord !== undefined &&
-                  chordToDisplayAboveWord === overallCurrentChord && // Strict object equality
-                  !overallCurrentChordHasBeenHighlightedThisRender // Check the flag
+                  chordToDisplayAboveWord === overallCurrentChord // Strict object equality
                 ) {
                   highlightThisDisplayedChord = true;
-                  overallCurrentChordHasBeenHighlightedThisRender = true; // Set the flag for this render cycle
                 }
 
                 return (
