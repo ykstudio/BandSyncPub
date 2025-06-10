@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
@@ -19,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 
 
 const SESSION_ID = 'global-bandsync-session'; // All users share this one session
+const TIME_DRIFT_THRESHOLD = 0.5; // Seconds
 
 export function SongDisplay() {
   const songData: SongData = sampleSong;
@@ -31,29 +33,42 @@ export function SongDisplay() {
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [firebaseInitialized, setFirebaseInitialized] = useState(false);
 
+  // Ref to hold the current isPlaying state to avoid stale closures in onSnapshot
+  const isPlayingRef = useRef(isPlaying);
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
   useEffect(() => {
     if (db) {
       setFirebaseInitialized(true);
-      setIsLoadingSession(true); // Reset loading state if db becomes available
+      // console.log("Firebase is configured.");
+      if (isSyncEnabled) setIsLoadingSession(true); 
     } else {
+      // console.warn("Firebase (db object) is not available. Real-time sync will be disabled.");
       setFirebaseInitialized(false);
-      setIsLoadingSession(false); // Not loading if db is not available
+      setIsLoadingSession(false);
       if (isSyncEnabled) {
-         // console.log("Firebase not configured, disabling sync automatically.");
-        // setIsSyncEnabled(false); // Auto-disable if db is missing and sync was on
+        // console.log("Firebase not configured, disabling sync automatically because it was enabled.");
+        // setIsSyncEnabled(false); // Auto-disable if db is missing and sync was on - this can cause an infinite loop if not careful
       }
     }
-  }, [isSyncEnabled]); // Rerun if db object reference changes (e.g. on hot reload if re-initialized)
+  }, [isSyncEnabled]);
 
 
   const updateFirestoreSession = useCallback(async (newState: Partial<SessionState>) => {
-    if (!isSyncEnabled || !db || !firebaseInitialized) return;
+    if (!isSyncEnabled || !db || !firebaseInitialized) {
+      // console.log("Update Firestore skipped: Sync disabled or Firebase not ready.", { isSyncEnabled, dbExists: !!db, firebaseInitialized });
+      return;
+    }
     const sessionDocRef = doc(db, 'sessions', SESSION_ID);
+    // console.log("Updating Firestore session:", newState);
     try {
       await setDoc(sessionDocRef, {
         ...newState,
         lastUpdated: serverTimestamp()
       }, { merge: true });
+      // console.log("Firestore session updated successfully.");
     } catch (error) {
       console.error("Error updating Firestore session:", error);
       toast({
@@ -62,43 +77,62 @@ export function SongDisplay() {
         variant: "destructive",
       });
     }
-  }, [isSyncEnabled, firebaseInitialized, toast]);
+  }, [isSyncEnabled, firebaseInitialized, toast]); // db is stable, not needed as dep
 
   // Effect for Firestore listener
   useEffect(() => {
     if (!isSyncEnabled || !db || !firebaseInitialized) {
       setIsLoadingSession(false);
+      // console.log("Firestore listener not attached: Sync disabled or Firebase not ready.");
       return;
     }
 
+    // console.log("Attempting to attach Firestore listener...");
     setIsLoadingSession(true);
     const sessionDocRef = doc(db, 'sessions', SESSION_ID);
 
     const unsubscribe = onSnapshot(sessionDocRef, (snapshot) => {
       setIsLoadingSession(false);
       if (snapshot.metadata.hasPendingWrites) {
+        // console.log("Firestore snapshot ignored (local echo with pending writes)");
         return; // Ignore local echoes
       }
 
+      // console.log("Firestore snapshot received:", snapshot.id, snapshot.data());
       if (snapshot.exists()) {
         const remoteState = snapshot.data() as SessionState;
-        const localIsPlayingBeforeUpdate = isPlaying;
+        // console.log("Processing remote state:", remoteState);
 
-        setIsPlaying(currentLocalVal => {
-          if (currentLocalVal !== remoteState.isPlaying) return remoteState.isPlaying;
-          return currentLocalVal;
-        });
+        const currentLocalIsPlaying = isPlayingRef.current;
 
-        setCurrentTime(currentLocalVal => {
-          if (localIsPlayingBeforeUpdate !== remoteState.isPlaying || Math.abs(remoteState.currentTime - currentLocalVal) > 0.3) {
-             // If playback state changed OR time drifted significantly, apply remote time
+        // Update isPlaying state based on remote
+        if (currentLocalIsPlaying !== remoteState.isPlaying) {
+          // console.log(`Sync: isPlaying changing from ${currentLocalIsPlaying} to ${remoteState.isPlaying}`);
+          setIsPlaying(remoteState.isPlaying);
+        }
+
+        // Update currentTime based on remote
+        setCurrentTime(currentLocalTime => {
+          const timeDifference = Math.abs(remoteState.currentTime - currentLocalTime);
+
+          // Sync time if:
+          // 1. Playback state has changed locally due to this remote update (e.g., remote started/stopped playing)
+          // 2. Or, if both are supposed to be playing and time has drifted significantly
+          // 3. Or, if remote is paused, and we are not, sync to their paused time (covered by #1)
+          // 4. Or, if both are paused but times differ (e.g. one scrubbed while paused - not yet a feature but for robustness)
+          if (currentLocalIsPlaying !== remoteState.isPlaying ||
+              (remoteState.isPlaying && currentLocalIsPlaying && timeDifference > TIME_DRIFT_THRESHOLD) ||
+              (!remoteState.isPlaying && !currentLocalIsPlaying && currentLocalTime !== remoteState.currentTime) // Sync if both paused and times differ
+          ) {
+            // console.log(`Sync: currentTime changing from ${currentLocalTime.toFixed(1)} to ${remoteState.currentTime.toFixed(1)}. Reason: playstate change (${currentLocalIsPlaying !== remoteState.isPlaying}), drift (${timeDifference > TIME_DRIFT_THRESHOLD}), both paused time diff (${!remoteState.isPlaying && !currentLocalIsPlaying && currentLocalTime !== remoteState.currentTime})`);
             return remoteState.currentTime;
           }
-          return currentLocalVal;
+          // console.log(`Sync: currentTime not changed. Local: ${currentLocalTime.toFixed(1)}, Remote: ${remoteState.currentTime.toFixed(1)}. Drift: ${timeDifference.toFixed(1)}`);
+          return currentLocalTime;
         });
 
       } else {
-        // Session document doesn't exist, initialize it with default state
+        // console.log("Session document doesn't exist, initializing with defaults...");
         updateFirestoreSession({
           isPlaying: false,
           currentTime: 0,
@@ -114,46 +148,64 @@ export function SongDisplay() {
       setIsLoadingSession(false);
     });
 
-    return () => unsubscribe();
-  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, toast, isPlaying]); // Added isPlaying to capture its state for localIsPlayingBeforeUpdate
+    return () => {
+      // console.log("Unsubscribing from Firestore session");
+      unsubscribe();
+    };
+  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, toast]); // Removed isPlaying, using isPlayingRef.current inside.
 
   // Effect for local timer (advances currentTime when isPlaying)
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let intervalId: NodeJS.Timeout | undefined = undefined;
     if (isPlaying) {
+      // console.log("Local timer starting / continuing because isPlaying is true.");
       intervalId = setInterval(() => {
         setCurrentTime((prevTime) => {
           const nextTime = prevTime + 0.1;
           if (nextTime >= songData.totalDuration) {
+            // console.log("Song ended locally. Stopping playback.");
             setIsPlaying(false); // Stop playback locally
             updateFirestoreSession({ isPlaying: false, currentTime: songData.totalDuration });
             return songData.totalDuration;
           }
+          // console.log(`Local timer tick: ${nextTime.toFixed(1)}s`);
           return nextTime;
         });
       }, 100);
+    } else {
+      // console.log("Local timer stopping / paused because isPlaying is false.");
+      if (intervalId) clearInterval(intervalId);
     }
-    return () => clearInterval(intervalId);
+    return () => {
+      if (intervalId) {
+        // console.log("Clearing local timer interval on cleanup.");
+        clearInterval(intervalId);
+      }
+    };
   }, [isPlaying, songData.totalDuration, updateFirestoreSession]);
 
 
   const handlePlayPause = useCallback(() => {
-    const newIsPlayingState = !isPlaying;
+    const newIsPlayingState = !isPlayingRef.current; // Use ref for current value
     let newCurrentTimeState = currentTime;
 
     if (newCurrentTimeState >= songData.totalDuration && newIsPlayingState) {
       newCurrentTimeState = 0; // Reset if at end and play is clicked
     }
+    
+    // console.log(`handlePlayPause: newIsPlayingState=${newIsPlayingState}, newCurrentTimeState=${newCurrentTimeState.toFixed(1)}`);
 
+    // Set local state immediately for responsiveness
     setIsPlaying(newIsPlayingState); 
     setCurrentTime(newCurrentTimeState);
 
     if (isSyncEnabled && firebaseInitialized) {
         updateFirestoreSession({ isPlaying: newIsPlayingState, currentTime: newCurrentTimeState });
     }
-  }, [currentTime, isPlaying, songData.totalDuration, isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
+  }, [currentTime, isSyncEnabled, firebaseInitialized, updateFirestoreSession, songData.totalDuration]); // isPlayingRef is not a state/prop, so not needed here. currentTime is.
 
   const handleReset = useCallback(() => {
+    // console.log("handleReset called.");
     setIsPlaying(false);
     setCurrentTime(0);
     if (isSyncEnabled && firebaseInitialized) {
@@ -164,7 +216,9 @@ export function SongDisplay() {
   const formatTime = (timeInSeconds: number) => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
+    const tenths = Math.floor((timeInSeconds * 10) % 10); // For debugging if needed
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    // return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${tenths}`; // Debug with tenths
   };
 
   const SyncToggle = () => (
@@ -173,6 +227,7 @@ export function SongDisplay() {
         id="sync-toggle"
         checked={isSyncEnabled}
         onCheckedChange={(checked) => {
+          // console.log(`Sync toggle changed to: ${checked}`);
           setIsSyncEnabled(checked);
           if (!checked) {
             toast({ title: "Sync Disabled", description: "Playback is now local." });
@@ -250,3 +305,6 @@ export function SongDisplay() {
     </div>
   );
 }
+
+
+    

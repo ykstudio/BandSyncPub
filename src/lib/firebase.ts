@@ -9,15 +9,14 @@ import { getFirestore, type Firestore } from 'firebase/firestore';
 // import { getAuth } from "firebase/auth"; // Uncomment if you plan to use Firebase Authentication
 
 const firebaseConfig = {
-  // --- START: REPLACE WITH YOUR FIREBASE CONFIG ---
-  apiKey: "YOUR_API_KEY", // Replace with your actual API key from Firebase console
-  authDomain: "YOUR_AUTH_DOMAIN", // Replace with your actual authDomain from Firebase console
-  projectId: "YOUR_PROJECT_ID", // Replace with your actual projectId from Firebase console
-  storageBucket: "YOUR_STORAGE_BUCKET", // Replace with your actual storageBucket from Firebase console
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your actual messagingSenderId from Firebase console
-  appId: "YOUR_APP_ID", // Replace with your actual appId from Firebase console
-  // measurementId: "YOUR_MEASUREMENT_ID" // Optional: Replace if you use Google Analytics
-  // --- END: REPLACE WITH YOUR FIREBASE CONFIG ---
+  apiKey: "AIzaSyBi6-fIDVkqmWt8FZsVAZTZNUmuwTA0o8g",
+  authDomain: "bandsync-20c7f.firebaseapp.com",
+  databaseURL: "https://bandsync-20c7f-default-rtdb.firebaseio.com",
+  projectId: "bandsync-20c7f",
+  storageBucket: "bandsync-20c7f.firebasestorage.app",
+  messagingSenderId: "931569766178",
+  appId: "1:931569766178:web:a044fb78504cfb3d9f9f7b",
+  measurementId: "G-50KMNBXE34"
 };
 
 // Initialize Firebase
