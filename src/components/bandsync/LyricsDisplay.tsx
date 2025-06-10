@@ -1,6 +1,9 @@
 
-import type { ChordChange, LyricLine, LyricWord } from '@/lib/types';
+'use client';
+
+import type { ChordChange, LyricLine } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useEffect, useRef } from 'react';
 
 interface LyricsDisplayProps {
   lyrics: LyricLine[];
@@ -8,51 +11,72 @@ interface LyricsDisplayProps {
   chords: ChordChange[];
 }
 
-// Helper to find the chord active at a specific time
 const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChange | undefined => {
   return allChords.find(c => time >= c.startTime && time < c.endTime);
 };
 
 export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProps) {
-  // Determine the chord that is currently active for the whole song (matches ChordsDisplay)
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const overallCurrentChord = getChordActiveAtTime(currentTime, chords);
+
+  useEffect(() => {
+    if (!scrollContainerRef.current || !lyrics || lyrics.length === 0) return;
+
+    let activeWordElement: HTMLElement | null = null;
+    let activeWordLineIndex = -1;
+    let activeWordIndexInLine = -1;
+
+    // Find the active word
+    for (let lIdx = 0; lIdx < lyrics.length; lIdx++) {
+      for (let wIdx = 0; wIdx < lyrics[lIdx].length; wIdx++) {
+        const word = lyrics[lIdx][wIdx];
+        if (currentTime >= word.startTime && currentTime < word.endTime) {
+          activeWordLineIndex = lIdx;
+          activeWordIndexInLine = wIdx;
+          break;
+        }
+      }
+      if (activeWordLineIndex !== -1) break;
+    }
+
+    if (activeWordLineIndex !== -1 && activeWordIndexInLine !== -1) {
+      activeWordElement = document.getElementById(`word-${activeWordLineIndex}-${activeWordIndexInLine}`);
+    }
+
+    if (activeWordElement) {
+      activeWordElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center', 
+      });
+    }
+  }, [currentTime, lyrics]);
 
   return (
     <div
+      ref={scrollContainerRef}
       className="p-4 space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto"
     >
       {lyrics.map((line, lineIndex) => {
-        // Tracks the text of the last chord displayed *on this line* to avoid redundancy.
         let lastChordTextDisplayedOnLine: string | null = null;
 
         return (
-          <div key={lineIndex} className="mb-3"> {/* Use div for block layout of lines */}
-            <p className="flex flex-wrap items-baseline gap-x-1.5"> {/* P for semantic line, flex for words */}
+          <div key={lineIndex} className="mb-3">
+            <p className="flex flex-wrap items-baseline gap-x-1.5">
               {line.map((word, wordIndex) => {
                 const isActiveWord = currentTime >= word.startTime && currentTime < word.endTime;
-
-                // Determine the chord that should be associated with this specific word's timing.
                 const chordAssociatedWithWord = getChordActiveAtTime(word.startTime, chords);
-                
                 let chordToDisplayAboveWord: ChordChange | null = null;
 
                 if (chordAssociatedWithWord) {
-                  // Display the chord if it's different from the last one shown on this line,
-                  // or if it's the first word of the line (to ensure a chord is shown if active).
                   if (wordIndex === 0 || lastChordTextDisplayedOnLine !== chordAssociatedWithWord.chord) {
                     chordToDisplayAboveWord = chordAssociatedWithWord;
                     lastChordTextDisplayedOnLine = chordAssociatedWithWord.chord;
                   }
                 } else {
-                  // If no chord is active at this word's start time, ensure we reset tracker
-                  // so a new chord can be shown for the next word if one starts.
-                  // This handles cases where a word might fall in a gap between defined chords.
                   lastChordTextDisplayedOnLine = null;
                 }
 
-                // Check if the chord displayed above this word is the *overall* current chord for highlighting.
-                // Compare by chord text and start time to ensure it's the exact same chord segment.
-                const isThisDisplayedChordTheOverallCurrent = 
+                const isThisDisplayedChordTheOverallCurrent =
                   chordToDisplayAboveWord !== null &&
                   overallCurrentChord !== undefined &&
                   chordToDisplayAboveWord.chord === overallCurrentChord.chord &&
@@ -61,7 +85,8 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                 return (
                   <span
                     key={wordIndex}
-                    className="relative inline-block pt-5" // Padding-top to make space for absolutely positioned chord
+                    id={`word-${lineIndex}-${wordIndex}`} // Unique ID for scrolling
+                    className="relative inline-block pt-5"
                   >
                     {chordToDisplayAboveWord && (
                       <span
@@ -75,7 +100,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                     )}
                     <span
                       className={cn(
-                        'transition-colors duration-100 leading-snug', // ensure words themselves are aligned
+                        'transition-colors duration-100 leading-snug',
                         isActiveWord ? 'text-accent font-bold' : 'text-foreground'
                       )}
                     >
