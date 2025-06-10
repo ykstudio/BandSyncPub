@@ -26,6 +26,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
     let activeWordLineIndex = -1;
     let activeWordIndexInLine = -1;
 
+    // Find the active word
     for (let lIdx = 0; lIdx < lyrics.length; lIdx++) {
       for (let wIdx = 0; wIdx < lyrics[lIdx].length; wIdx++) {
         const word = lyrics[lIdx][wIdx];
@@ -56,7 +57,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
       className="p-4 space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto"
     >
       {lyrics.map((line, lineIndex) => {
-        let lastChordTextDisplayedOnLine: string | null = null;
+        let lastDisplayedChordText: string | null = null; 
 
         return (
           <div key={lineIndex} className="mb-6">
@@ -67,15 +68,15 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                 let chordToDisplayAboveWord: ChordChange | null = null;
 
                 if (chordAssociatedWithWord) {
-                  if (wordIndex === 0 || lastChordTextDisplayedOnLine !== chordAssociatedWithWord.chord) {
+                  if (wordIndex === 0 || lastDisplayedChordText !== chordAssociatedWithWord.chord) {
                     chordToDisplayAboveWord = chordAssociatedWithWord;
-                    lastChordTextDisplayedOnLine = chordAssociatedWithWord.chord;
+                    lastDisplayedChordText = chordAssociatedWithWord.chord;
                   }
                 } else {
-                  lastChordTextDisplayedOnLine = null;
+                  lastDisplayedChordText = null;
                 }
-
-                const isThisDisplayedChordTheOverallCurrent =
+                
+                const isThisDisplayedChordTheOverallCurrent = 
                   chordToDisplayAboveWord !== null &&
                   overallCurrentChord !== undefined &&
                   chordToDisplayAboveWord.chord === overallCurrentChord.chord &&
@@ -85,12 +86,12 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                   <span
                     key={wordIndex}
                     id={`word-${lineIndex}-${wordIndex}`}
-                    className="relative inline-block pt-px"
+                    className="relative inline-block pt-px" 
                   >
                     {chordToDisplayAboveWord && (
                       <span
                         className={cn(
-                          "absolute bottom-full left-0 text-xs sm:text-sm font-semibold leading-none",
+                          "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none",
                           isThisDisplayedChordTheOverallCurrent ? "text-accent font-bold" : "text-primary"
                         )}
                       >
