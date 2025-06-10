@@ -37,10 +37,11 @@ export function Metronome({ bpm, isPlaying }: MetronomeProps) {
 
   return (
     <div className="flex flex-col items-center md:items-start">
-      <div className="text-sm text-muted-foreground mb-1">Metronome: {bpm} BPM</div>
+      <div className="text-sm text-muted-foreground">Metronome: {bpm}</div>
+      <div className="text-xs text-muted-foreground -mt-1 mb-1">BPM</div>
       <div
         className={cn(
-          'w-6 h-6 rounded-full transition-all duration-100 ease-in-out', // Smaller size
+          'w-4 h-4 rounded-full transition-all duration-100 ease-in-out', // Smaller size
           'animate-metronome-pulse'
         )}
         style={{
