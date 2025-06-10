@@ -26,7 +26,6 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
     let activeWordLineIndex = -1;
     let activeWordIndexInLine = -1;
 
-    // Find the active word
     for (let lIdx = 0; lIdx < lyrics.length; lIdx++) {
       for (let wIdx = 0; wIdx < lyrics[lIdx].length; wIdx++) {
         const word = lyrics[lIdx][wIdx];
@@ -46,7 +45,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
     if (activeWordElement) {
       activeWordElement.scrollIntoView({
         behavior: 'smooth',
-        block: 'center', 
+        block: 'center',
       });
     }
   }, [currentTime, lyrics]);
@@ -85,8 +84,8 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                 return (
                   <span
                     key={wordIndex}
-                    id={`word-${lineIndex}-${wordIndex}`} // Unique ID for scrolling
-                    className="relative inline-block pt-2.5" // Changed to pt-2.5 for 10px padding
+                    id={`word-${lineIndex}-${wordIndex}`}
+                    className="relative inline-block pt-1" // Changed from pt-2.5 to pt-1
                   >
                     {chordToDisplayAboveWord && (
                       <span
