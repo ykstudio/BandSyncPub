@@ -59,7 +59,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
         let lastChordTextDisplayedOnLine: string | null = null;
 
         return (
-          <div key={lineIndex} className="mb-3">
+          <div key={lineIndex} className="mb-6">
             <p className="flex flex-wrap items-baseline gap-x-1.5">
               {line.map((word, wordIndex) => {
                 const isActiveWord = currentTime >= word.startTime && currentTime < word.endTime;
@@ -85,12 +85,12 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                   <span
                     key={wordIndex}
                     id={`word-${lineIndex}-${wordIndex}`}
-                    className="relative inline-block pt-px" // Changed from pt-1
+                    className="relative inline-block pt-px"
                   >
                     {chordToDisplayAboveWord && (
                       <span
                         className={cn(
-                          "absolute bottom-full left-0 text-xs sm:text-sm font-semibold leading-none", // Removed mb-0.5
+                          "absolute bottom-full left-0 text-xs sm:text-sm font-semibold leading-none",
                           isThisDisplayedChordTheOverallCurrent ? "text-accent font-bold" : "text-primary"
                         )}
                       >
