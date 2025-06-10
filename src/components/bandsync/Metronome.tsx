@@ -40,14 +40,14 @@ export function Metronome({ bpm, isPlaying }: MetronomeProps) {
       <div className="text-sm text-muted-foreground mb-1">Metronome: {bpm} BPM</div>
       <div
         className={cn(
-          'w-8 h-8 rounded-full bg-primary transition-all duration-100 ease-in-out',
+          'w-6 h-6 rounded-full transition-all duration-100 ease-in-out', // Smaller size
           'animate-metronome-pulse'
         )}
         style={{
           animationDuration: `${pulseDuration}s`,
           opacity: isPlaying && isPulsing ? 1 : 0.3,
           transform: isPlaying && isPulsing ? 'scale(1.1)' : 'scale(1)',
-          backgroundColor: isPlaying ? 'hsl(var(--primary))' : 'hsl(var(--muted))'
+          backgroundColor: isPlaying ? 'hsl(var(--chart-2))' : 'hsl(var(--muted))' // Green color when playing
         }}
         aria-hidden="true"
       />
