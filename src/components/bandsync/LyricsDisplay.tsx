@@ -26,7 +26,6 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
     let activeWordLineIndex = -1;
     let activeWordIndexInLine = -1;
 
-    // Find the active word
     for (let lIdx = 0; lIdx < lyrics.length; lIdx++) {
       for (let wIdx = 0; wIdx < lyrics[lIdx].length; wIdx++) {
         const word = lyrics[lIdx][wIdx];
@@ -57,7 +56,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
       className="p-4 space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto"
     >
       {lyrics.map((line, lineIndex) => {
-        let lastDisplayedChordText: string | null = null; 
+        let lastDisplayedChordText: string | null = null;
 
         return (
           <div key={lineIndex} className="mb-6">
@@ -75,8 +74,8 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                 } else {
                   lastDisplayedChordText = null;
                 }
-                
-                const isThisDisplayedChordTheOverallCurrent = 
+
+                const isThisDisplayedChordTheOverallCurrent =
                   chordToDisplayAboveWord !== null &&
                   overallCurrentChord !== undefined &&
                   chordToDisplayAboveWord.chord === overallCurrentChord.chord &&
@@ -86,7 +85,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                   <span
                     key={wordIndex}
                     id={`word-${lineIndex}-${wordIndex}`}
-                    className="relative inline-block pt-px" 
+                    className="relative inline-block pt-px"
                   >
                     {chordToDisplayAboveWord && (
                       <span
