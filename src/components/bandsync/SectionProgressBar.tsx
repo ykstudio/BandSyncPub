@@ -23,14 +23,14 @@ export function SectionProgressBar({ sections, currentSectionId, currentTime }: 
               key={section.id}
               className={cn(
                 'flex items-center justify-center text-xs md:text-sm font-medium transition-colors duration-300 ease-in-out border-r last:border-r-0',
-                isActive ? 'bg-accent text-accent-foreground' : 'bg-secondary text-secondary-foreground hover:bg-muted',
+                isActive ? 'bg-accent text-accent-foreground flex-shrink-0' : 'bg-secondary text-secondary-foreground hover:bg-muted',
               )}
               style={{ width: `${sectionWidthPercentage}%` }}
               title={`${section.name} (${section.duration}s)`}
             >
               <span className={cn(
-                "inline-block px-1", // Ensure inline-block for better layout control
-                isActive ? "whitespace-nowrap" : "truncate" // Active: no wrap, Inactive: truncate with ellipsis
+                "inline-block px-1", 
+                isActive ? "whitespace-nowrap" : "truncate"
               )}>
                 {section.name}
               </span>
@@ -41,3 +41,4 @@ export function SectionProgressBar({ sections, currentSectionId, currentTime }: 
     </div>
   );
 }
+
