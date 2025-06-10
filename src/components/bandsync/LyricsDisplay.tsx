@@ -24,7 +24,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords: allChords }: Lyrics
 
         return (
           <div key={lineIndex} className="mb-3">
-            <p className="flex flex-wrap items-start gap-x-1.5"> {/* Added items-start */}
+            <p className="flex flex-wrap items-baseline gap-x-1.5">
               {line.map((word, wordIndex) => {
                 const isActiveWord = currentTime >= word.startTime && currentTime < word.endTime;
                 const activeChordForWord = getChordAtTime(word.startTime, allChords);
@@ -52,24 +52,21 @@ export function LyricsDisplay({ lyrics, currentTime, chords: allChords }: Lyrics
                 return (
                   <span
                     key={wordIndex}
-                    className="inline-flex flex-col items-start" // items-start here is for within the word unit
+                    className="relative inline-block pt-5" // pt-5 to make space for absolute positioned chord
                   >
-                    {displayChordData ? (
+                    {displayChordData && (
                       <span
                         className={cn(
-                          "text-xs sm:text-sm font-semibold leading-none h-[1.2em] mb-0.5", // Fixed height for chord slot
+                          "absolute bottom-full left-0 mb-0.5 text-xs sm:text-sm font-semibold leading-none",
                           isChordOverallCurrent ? "text-accent font-bold" : "text-primary"
                         )}
                       >
                         {displayChordData.chord}
                       </span>
-                    ) : (
-                      // Crucial: Placeholder with IDENTICAL height properties
-                      <span className="h-[1.2em] mb-0.5"></span>
                     )}
                     <span
                       className={cn(
-                        'transition-colors duration-100 leading-snug', // Added leading-snug for consistent line height
+                        'transition-colors duration-100 leading-snug',
                         isActiveWord ? 'text-accent font-bold' : 'text-foreground'
                       )}
                     >
