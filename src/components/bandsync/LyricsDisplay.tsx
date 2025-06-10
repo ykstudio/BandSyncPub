@@ -72,14 +72,13 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                     lastDisplayedChordText = chordAssociatedWithWord.chord;
                   }
                 } else {
-                  lastDisplayedChordText = null;
+                  lastDisplayedChordText = null; 
                 }
-
+                
                 const isThisDisplayedChordTheOverallCurrent =
                   chordToDisplayAboveWord !== null &&
                   overallCurrentChord !== undefined &&
-                  chordToDisplayAboveWord.chord === overallCurrentChord.chord &&
-                  chordToDisplayAboveWord.startTime === overallCurrentChord.startTime;
+                  chordToDisplayAboveWord === overallCurrentChord; // Use strict object equality
 
                 return (
                   <span
