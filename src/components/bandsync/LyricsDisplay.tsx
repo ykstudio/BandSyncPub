@@ -20,11 +20,12 @@ export function LyricsDisplay({ lyrics, currentTime, chords: allChords }: Lyrics
       className="p-4 space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto"
     >
       {lyrics.map((line, lineIndex) => {
-        let lastDisplayedChordText: string | null = null; 
+        let lastDisplayedChordText: string | null = null;
 
         return (
           <div key={lineIndex} className="mb-3">
-            <p className="flex flex-wrap items-start gap-x-1.5">
+            {/* Removed items-start, rely on consistent height of children */}
+            <p className="flex flex-wrap gap-x-1.5">
               {line.map((word, wordIndex) => {
                 const isActiveWord = currentTime >= word.startTime && currentTime < word.endTime;
                 const activeChordForWord = getChordAtTime(word.startTime, allChords);
@@ -52,18 +53,21 @@ export function LyricsDisplay({ lyrics, currentTime, chords: allChords }: Lyrics
                 return (
                   <span
                     key={wordIndex}
-                    className="inline-flex flex-col items-start min-h-[3em]"
+                    // Removed min-h-[3em], height will be natural (chord slot + word)
+                    // items-start ensures chord is above word in the column
+                    className="inline-flex flex-col items-start"
                   >
                     {displayChordData ? (
                       <span
                         className={cn(
-                          "text-xs sm:text-sm font-semibold leading-none h-[1.2em] mb-0.5",
+                          "text-xs sm:text-sm font-semibold leading-none h-[1.2em] mb-0.5", // Fixed height for chord slot
                           isChordOverallCurrent ? "text-accent font-bold" : "text-primary"
                         )}
                       >
                         {displayChordData.chord}
                       </span>
                     ) : (
+                      // Crucial: Placeholder with IDENTICAL height properties
                       <span className="h-[1.2em] mb-0.5"></span>
                     )}
                     <span
