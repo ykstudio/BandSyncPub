@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import type { SongData, SongSection } from '@/lib/types';
-import { sampleSong } from '@/lib/song-data'; // Using the pre-processed data
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import type { SongData, SessionState } from '@/lib/types';
+import { sampleSong } from '@/lib/song-data';
 import { SongInfo } from './SongInfo';
 import { Metronome } from './Metronome';
 import { SectionProgressBar } from './SectionProgressBar';
@@ -10,14 +10,114 @@ import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Play, Pause, SkipBack, Settings2 } from 'lucide-react'; // Added Settings2 icon
+import { Play, Pause, SkipBack, Settings2, Wifi, WifiOff } from 'lucide-react';
+import { db } from '@/lib/firebase'; // Firebase Firestore instance
+import { doc, onSnapshot, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useToast } from "@/hooks/use-toast";
+
+
+const SESSION_ID = 'global-bandsync-session'; // All users share this one session
 
 export function SongDisplay() {
-  const songData: SongData = sampleSong; // Use the imported, processed song data
+  const songData: SongData = sampleSong;
+  const { toast } = useToast();
 
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const [isSyncEnabled, setIsSyncEnabled] = useState(true);
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
+
+  useEffect(() => {
+    if (db) {
+      setFirebaseInitialized(true);
+      setIsLoadingSession(true); // Reset loading state if db becomes available
+    } else {
+      setFirebaseInitialized(false);
+      setIsLoadingSession(false); // Not loading if db is not available
+      if (isSyncEnabled) {
+         // console.log("Firebase not configured, disabling sync automatically.");
+        // setIsSyncEnabled(false); // Auto-disable if db is missing and sync was on
+      }
+    }
+  }, [isSyncEnabled]); // Rerun if db object reference changes (e.g. on hot reload if re-initialized)
+
+
+  const updateFirestoreSession = useCallback(async (newState: Partial<SessionState>) => {
+    if (!isSyncEnabled || !db || !firebaseInitialized) return;
+    const sessionDocRef = doc(db, 'sessions', SESSION_ID);
+    try {
+      await setDoc(sessionDocRef, {
+        ...newState,
+        lastUpdated: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      console.error("Error updating Firestore session:", error);
+      toast({
+        title: "Sync Error",
+        description: "Could not update shared session. Changes might not be synced.",
+        variant: "destructive",
+      });
+    }
+  }, [isSyncEnabled, firebaseInitialized, toast]);
+
+  // Effect for Firestore listener
+  useEffect(() => {
+    if (!isSyncEnabled || !db || !firebaseInitialized) {
+      setIsLoadingSession(false);
+      return;
+    }
+
+    setIsLoadingSession(true);
+    const sessionDocRef = doc(db, 'sessions', SESSION_ID);
+
+    const unsubscribe = onSnapshot(sessionDocRef, (snapshot) => {
+      setIsLoadingSession(false);
+      if (snapshot.metadata.hasPendingWrites) {
+        return; // Ignore local echoes
+      }
+
+      if (snapshot.exists()) {
+        const remoteState = snapshot.data() as SessionState;
+        const localIsPlayingBeforeUpdate = isPlaying;
+
+        setIsPlaying(currentLocalVal => {
+          if (currentLocalVal !== remoteState.isPlaying) return remoteState.isPlaying;
+          return currentLocalVal;
+        });
+
+        setCurrentTime(currentLocalVal => {
+          if (localIsPlayingBeforeUpdate !== remoteState.isPlaying || Math.abs(remoteState.currentTime - currentLocalVal) > 0.3) {
+             // If playback state changed OR time drifted significantly, apply remote time
+            return remoteState.currentTime;
+          }
+          return currentLocalVal;
+        });
+
+      } else {
+        // Session document doesn't exist, initialize it with default state
+        updateFirestoreSession({
+          isPlaying: false,
+          currentTime: 0,
+        });
+      }
+    }, (error) => {
+      console.error("Error listening to Firestore session:", error);
+      toast({
+        title: "Connection Error",
+        description: "Could not connect to shared session. Real-time sync may be affected.",
+        variant: "destructive",
+      });
+      setIsLoadingSession(false);
+    });
+
+    return () => unsubscribe();
+  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, toast, isPlaying]); // Added isPlaying to capture its state for localIsPlayingBeforeUpdate
+
+  // Effect for local timer (advances currentTime when isPlaying)
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     if (isPlaying) {
@@ -25,7 +125,8 @@ export function SongDisplay() {
         setCurrentTime((prevTime) => {
           const nextTime = prevTime + 0.1;
           if (nextTime >= songData.totalDuration) {
-            setIsPlaying(false);
+            setIsPlaying(false); // Stop playback locally
+            updateFirestoreSession({ isPlaying: false, currentTime: songData.totalDuration });
             return songData.totalDuration;
           }
           return nextTime;
@@ -33,40 +134,87 @@ export function SongDisplay() {
       }, 100);
     }
     return () => clearInterval(intervalId);
-  }, [isPlaying, songData.totalDuration]);
+  }, [isPlaying, songData.totalDuration, updateFirestoreSession]);
 
-  const currentSection = useMemo(() => {
-    return songData.sections.find(
-      (section) => currentTime >= section.startTime && currentTime < section.endTime
-    ) || null;
-  }, [currentTime, songData.sections]);
 
   const handlePlayPause = useCallback(() => {
-    if (currentTime >= songData.totalDuration && !isPlaying) {
-      setCurrentTime(0); // Reset if at end and play is clicked
+    const newIsPlayingState = !isPlaying;
+    let newCurrentTimeState = currentTime;
+
+    if (newCurrentTimeState >= songData.totalDuration && newIsPlayingState) {
+      newCurrentTimeState = 0; // Reset if at end and play is clicked
     }
-    setIsPlaying((prev) => !prev);
-  }, [currentTime, songData.totalDuration, isPlaying]);
+
+    setIsPlaying(newIsPlayingState); 
+    setCurrentTime(newCurrentTimeState);
+
+    if (isSyncEnabled && firebaseInitialized) {
+        updateFirestoreSession({ isPlaying: newIsPlayingState, currentTime: newCurrentTimeState });
+    }
+  }, [currentTime, isPlaying, songData.totalDuration, isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
 
   const handleReset = useCallback(() => {
     setIsPlaying(false);
     setCurrentTime(0);
-  }, []);
+    if (isSyncEnabled && firebaseInitialized) {
+        updateFirestoreSession({ isPlaying: false, currentTime: 0 });
+    }
+  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
 
-  // Format time as MM:SS
   const formatTime = (timeInSeconds: number) => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   };
+
+  const SyncToggle = () => (
+    <div className="flex items-center space-x-2">
+      <Switch
+        id="sync-toggle"
+        checked={isSyncEnabled}
+        onCheckedChange={(checked) => {
+          setIsSyncEnabled(checked);
+          if (!checked) {
+            toast({ title: "Sync Disabled", description: "Playback is now local." });
+          } else if (!firebaseInitialized) {
+             toast({ title: "Sync Failed", description: "Firebase not configured. Sync remains off.", variant: "destructive" });
+             setIsSyncEnabled(false); // Force off if Firebase isn't there
+          } else {
+             toast({ title: "Sync Enabled", description: "Attempting to connect to shared session." });
+             setIsLoadingSession(true); // Show loading when re-enabling
+          }
+        }}
+        disabled={!firebaseInitialized && isSyncEnabled} // Disable toggle if firebase not init but user wants to turn on
+      />
+      <Label htmlFor="sync-toggle" className="text-sm flex items-center gap-1">
+        {isSyncEnabled ? <Wifi className="w-4 h-4 text-green-500" /> : <WifiOff className="w-4 h-4 text-red-500" />}
+        Real-time Sync
+      </Label>
+      {!firebaseInitialized && (
+        <p className="text-xs text-destructive"> (Firebase not configured)</p>
+      )}
+    </div>
+  );
+
+  if (isSyncEnabled && isLoadingSession && firebaseInitialized) {
+    return (
+      <div className="container mx-auto p-4 flex flex-col justify-center items-center min-h-[400px] space-y-4">
+        <p className="text-lg text-muted-foreground">Connecting to session...</p>
+        <SyncToggle />
+      </div>
+    );
+  }
   
   return (
     <div className="container mx-auto p-4 space-y-6">
       <Card className="shadow-xl">
         <CardHeader>
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <SongInfo title={songData.title} author={songData.author} />
-            <Metronome bpm={songData.bpm} isPlaying={isPlaying} />
+            <div className="flex flex-col items-center md:items-end gap-2">
+              <Metronome bpm={songData.bpm} isPlaying={isPlaying} />
+              <SyncToggle />
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -89,7 +237,7 @@ export function SongDisplay() {
 
           <SectionProgressBar
             sections={songData.sections}
-            currentSectionId={currentSection?.id || null}
+            currentSectionId={songData.sections.find(s => currentTime >= s.startTime && currentTime < s.endTime)?.id || null}
             currentTime={currentTime}
           />
 

@@ -29,3 +29,10 @@ export interface SongData {
   chords: ChordChange[];
   totalDuration: number; // in seconds
 }
+
+export interface SessionState {
+  isPlaying: boolean;
+  currentTime: number;
+  lastUpdated: any; // Firestore Timestamp (or ServerTimestamp sentinel)
+  // songId?: string; // Future: if multiple songs are supported
+}
