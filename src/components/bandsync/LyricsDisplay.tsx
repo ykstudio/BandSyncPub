@@ -1,3 +1,4 @@
+
 import type { LyricLine, LyricWord, ChordChange } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -12,53 +13,56 @@ const getChordAtTime = (time: number, allChords: ChordChange[]): ChordChange | u
 };
 
 export function LyricsDisplay({ lyrics, currentTime, chords: allChords }: LyricsDisplayProps) {
+  const overallCurrentChord = allChords.find(c => currentTime >= c.startTime && currentTime < c.endTime);
+
   return (
-    <div className="p-4 space-y-1 text-lg md:text-xl leading-relaxed bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto">
+    <div className="p-4 space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto">
       {lyrics.map((line, lineIndex) => {
         let lastDisplayedChordText: string | null = null; 
 
         return (
-          <div key={lineIndex} className="mb-3"> {/* More compact line spacing */}
-            <p className="flex flex-wrap items-start gap-x-1.5"> {/* Changed items-end to items-start */}
+          <div key={lineIndex} className="mb-3">
+            <p className="flex flex-wrap items-start gap-x-1.5"> {/* items-start for top alignment of word units */}
               {line.map((word, wordIndex) => {
-                const isActive = currentTime >= word.startTime && currentTime < word.endTime;
+                const isActiveWord = currentTime >= word.startTime && currentTime < word.endTime;
                 const activeChordForWord = getChordAtTime(word.startTime, allChords);
-                let displayChord: string | null = null;
+                let displayChordData: ChordChange | null = null;
 
                 if (activeChordForWord) {
                   if (lastDisplayedChordText !== activeChordForWord.chord) {
-                    displayChord = activeChordForWord.chord;
+                    displayChordData = activeChordForWord;
                     lastDisplayedChordText = activeChordForWord.chord;
                   }
                 } else {
-                  // If no chord is active for this word's start time, ensure we don't carry over lastDisplayedChordText
-                  // if the previous chord has ended.
                   const isPreviousChordStillActive = lastDisplayedChordText && allChords.find(c => c.chord === lastDisplayedChordText && word.startTime < c.endTime);
                   if (!isPreviousChordStillActive) {
                      lastDisplayedChordText = null;
                   }
                 }
                 
-                // If it's the very first word of the line and no chord has been displayed yet for this line,
-                // but a chord is active, ensure it's shown.
-                if (wordIndex === 0 && activeChordForWord && !displayChord) {
-                    displayChord = activeChordForWord.chord;
+                if (wordIndex === 0 && activeChordForWord && !displayChordData) {
+                    displayChordData = activeChordForWord;
                     lastDisplayedChordText = activeChordForWord.chord;
                 }
 
+                const isChordOverallCurrent = displayChordData !== null && displayChordData === overallCurrentChord;
 
                 return (
-                  <span key={wordIndex} className="inline-flex flex-col items-start min-h-[2.5em]"> {/* Ensure space for chord */}
-                    {displayChord && (
-                      <span className="text-xs sm:text-sm font-semibold text-primary mb-0 leading-none h-[1.2em]"> {/* Adjusted size & spacing */}
-                        {displayChord}
+                  <span key={wordIndex} className="inline-flex flex-col items-start min-h-[3em]"> {/* min-h to ensure consistent height for word units */}
+                    {displayChordData ? (
+                      <span className={cn(
+                        "text-xs sm:text-sm font-semibold leading-none h-[1.2em] mb-0.5", // Fixed height for chord slot + margin
+                        isChordOverallCurrent ? "text-accent font-bold" : "text-primary"
+                      )}>
+                        {displayChordData.chord}
                       </span>
+                    ) : (
+                      <span className="h-[1.2em] mb-0.5"></span> {/* Placeholder to maintain alignment */}
                     )}
-                    {!displayChord && <span className="h-[1.2em]"></span>} {/* Placeholder for spacing if no chord */}
                     <span
                       className={cn(
-                        'transition-colors duration-100',
-                        isActive ? 'text-accent font-bold' : 'text-foreground'
+                        'transition-colors duration-100', // text-lg is inherited from parent
+                        isActiveWord ? 'text-accent font-bold' : 'text-foreground'
                       )}
                     >
                       {word.text}
