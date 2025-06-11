@@ -254,33 +254,38 @@ export const sampleSong: SongData = preProcessSongData({
   ],
   chords: [
     // Intro
-    { chord: "Am", startTime: 0, endTime: 4 },
-    { chord: "G", startTime: 4, endTime: 8 },
+    { chord: "Am", startTime: 0, endTime: 2 },
+    { chord: "Am", startTime: 2, endTime: 4 },
+    { chord: "G", startTime: 4, endTime: 6 },
+    { chord: "G", startTime: 6, endTime: 8 },
     // Verse 1
-    { chord: "C", startTime: 8, endTime: 12 },
-    { chord: "F", startTime: 12, endTime: 16 },
-    { chord: "Am", startTime: 16, endTime: 20 },
-    { chord: "G", startTime: 20, endTime: 24 },
+    { chord: "C", startTime: 8, endTime: 10 },
+    { chord: "C", startTime: 10, endTime: 12 },
+    { chord: "F", startTime: 12, endTime: 14 },
+    { chord: "F", startTime: 14, endTime: 16 },
+    { chord: "Am", startTime: 16, endTime: 18 },
+    { chord: "Am", startTime: 18, endTime: 20 },
+    { chord: "G", startTime: 20, endTime: 24 }, // Kept as 4s for variety
     // Chorus 1
     { chord: "F", startTime: 24, endTime: 28 },
     { chord: "C", startTime: 28, endTime: 32 },
     { chord: "G", startTime: 32, endTime: 36 },
     { chord: "Am", startTime: 36, endTime: 40 },
-    // Verse 2 (similar to Verse 1)
+    // Verse 2
     { chord: "C", startTime: 40, endTime: 44 },
     { chord: "F", startTime: 44, endTime: 48 },
     { chord: "Am", startTime: 48, endTime: 52 },
     { chord: "G", startTime: 52, endTime: 56 },
-    // Chorus 2 (similar to Chorus 1)
+    // Chorus 2
     { chord: "F", startTime: 56, endTime: 60 },
-    { chord: "C", startTime: 60, endTime: 62 }, // First C object for testing
-    { chord: "C", startTime: 62, endTime: 64 }, // Second C object for testing
+    { chord: "C", startTime: 60, endTime: 62 }, // Existing split
+    { chord: "C", startTime: 62, endTime: 64 }, // Existing split
     { chord: "G", startTime: 64, endTime: 68 },
     { chord: "Am", startTime: 68, endTime: 72 },
     // Bridge
     { chord: "Dm", startTime: 72, endTime: 76 },
     { chord: "G", startTime: 76, endTime: 80 },
-    // Solo (let's use verse chords)
+    // Solo
     { chord: "C", startTime: 80, endTime: 84 },
     { chord: "F", startTime: 84, endTime: 88 },
     { chord: "Am", startTime: 88, endTime: 92 },
