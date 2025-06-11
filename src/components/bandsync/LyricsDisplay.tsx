@@ -66,6 +66,7 @@ export function LyricsDisplay({
       elementToScroll = lineItemRefs.current[activeLineKeyForHighlight];
       targetType = 'line';
     } else if (currentSectionId && sectionHeaderRefs.current[currentSectionId]) {
+      // Fallback to current section header if no active lyric line
       elementToScroll = sectionHeaderRefs.current[currentSectionId];
       targetType = 'header';
     }
@@ -76,25 +77,19 @@ export function LyricsDisplay({
     if (songIsPlaying && !initialScrollDoneRef.current) {
       elementToScroll.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
       initialScrollDoneRef.current = true;
-      return; // Prevent further processing in this effect run after initial scroll
+      return; 
     }
     
-    // Subsequent scrolling logic while song is playing
     if (songIsPlaying && elementToScroll) {
       const elementRect = elementToScroll.getBoundingClientRect();
-      const topOffset = elementRect.top - containerRect.top; // Relative to container's visible top
+      const topOffset = elementRect.top - containerRect.top;
 
       if (targetType === 'line') {
-        // If lyric line is cut off at the top (topOffset < 0)
-        // OR if its top is visible but too far down (e.g. > 15% of container height from the top)
-        // We aim to bring it towards the top, respecting scroll-padding.
         if (topOffset < 0 || topOffset > containerRect.height * 0.15) { 
              elementToScroll.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
         }
       } else if (targetType === 'header') { 
-        // If section header not at the very top (with tolerance for sub-pixel rendering issues)
-        // and it's the primary target (no active lyric line).
-        if (Math.abs(topOffset) > 5) { // 5px tolerance
+        if (Math.abs(topOffset) > 5) { 
              elementToScroll.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
         }
       }
@@ -105,7 +100,7 @@ export function LyricsDisplay({
   return (
     <div
       ref={scrollContainerRef}
-      className="space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-scroll border border-border scroll-pt-16" // Increased scroll-pt-10 to scroll-pt-16
+      className="space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-scroll border border-border scroll-pt-[4.5rem]"
     >
       {sections.map((section, sectionIndex) => {
         const lyricLinesInSection = lyrics.filter(line => {
@@ -138,19 +133,18 @@ export function LyricsDisplay({
                   
                   const isThisLineCurrentlySinging = activeLineKeyForHighlight === lineKey;
                   
-                  // Determine if the line should be styled as "active" (upcoming words blue)
-                  // This happens if it IS the singing line, OR it was the LAST singing line and we're still close to its end time.
                   let isLineActiveForStyling = isThisLineCurrentlySinging;
-                  if (!isLineActiveForStyling && lastTrackedActiveLineKey === lineKey && line.length > 0) {
-                    if (currentTime < (line[line.length - 1].endTime + LYRIC_LINE_RELEVANCE_BUFFER)) {
-                      isLineActiveForStyling = true;
-                    }
+                  if (!isLineActiveForStyling && line.length > 0) {
+                     const lineStartTime = line[0].startTime;
+                     const lineEndTime = line[line.length-1].endTime;
+                     if (lastTrackedActiveLineKey === lineKey && currentTime >= lineStartTime && currentTime < (lineEndTime + LYRIC_LINE_RELEVANCE_BUFFER)) {
+                       isLineActiveForStyling = true;
+                     }
                   }
-                  // Special case for the very first line before playback starts and activeLineKeyForHighlight is null
+                  
                   if (!songIsPlaying && !activeLineKeyForHighlight && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0)) {
                     isLineActiveForStyling = true;
                   }
-
 
                   return (
                     <div
@@ -185,19 +179,23 @@ export function LyricsDisplay({
                             wordTextStyle = 'text-accent bg-accent-lightBg rounded-sm';
                           } else if (isWordPast) {
                             wordTextStyle = 'text-muted-foreground';
-                          } else { // Upcoming word
+                          } else { 
                             if (isLineActiveForStyling) {
                                 wordTextStyle = 'text-primary';
                             } else {
-                                wordTextStyle = 'text-foreground'; // Default dark for upcoming in inactive lines
+                                wordTextStyle = 'text-foreground';
                             }
+                          }
+                          
+                          if (!songIsPlaying && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0) && !isWordPast && !isThisTheCurrentSingingWord) {
+                            wordTextStyle = 'text-primary';
                           }
                           
                           return (
                             <span
                               key={`word-${section.id}-${lineIdxInSection}-${wordIndex}`}
                               className={cn(
-                                "relative inline-block leading-snug", // Removed transition-colors and duration
+                                "relative inline-block leading-snug",
                                 wordTextStyle
                               )}
                             >
@@ -271,3 +269,4 @@ export function LyricsDisplay({
     </div>
   );
 }
+
