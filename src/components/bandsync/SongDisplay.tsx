@@ -56,7 +56,6 @@ export function SongDisplay() {
     }
     const sessionDocRef = doc(db, 'sessions', SESSION_ID);
     try {
-      // console.log("Updating Firestore session:", newState);
       await setDoc(sessionDocRef, {
         ...newState,
         lastUpdated: serverTimestamp()
@@ -84,62 +83,54 @@ export function SongDisplay() {
     const unsubscribe = onSnapshot(sessionDocRef, (snapshot) => {
       setIsLoadingSession(false);
       if (snapshot.metadata.hasPendingWrites) {
-        // console.log("Firestore snapshot pending writes, skipping local update");
-        return; 
+        return;
       }
 
-      // console.log("Firestore snapshot received:", snapshot.data());
       if (snapshot.exists()) {
         const remoteState = snapshot.data() as SessionState;
-        // console.log("Processing remote state:", remoteState);
         
-        if (isPlayingRef.current !== remoteState.isPlaying) {
-          // console.log(`Sync: isPlaying changing from ${isPlayingRef.current} to ${remoteState.isPlaying}`);
-          setIsPlaying(remoteState.isPlaying);
-        }
-
         setCurrentTime(currentLocalTime => {
-          const remoteIsPlayingVal = remoteState.isPlaying;
-          const remoteTime = remoteState.currentTime;
-          const localIsPlayingVal = isPlayingRef.current; 
+            const remoteIsPlaying = remoteState.isPlaying;
+            const remoteTime = remoteState.currentTime;
+            const localWantsToPlay = isPlayingRef.current;
 
-          // console.log(`Sync: localIsPlaying (ref): ${localIsPlayingVal}, remoteIsPlaying: ${remoteIsPlayingVal}, localTime: ${currentLocalTime}, remoteTime: ${remoteTime}`);
-
-          // Scenario 1: Playback state mismatch (e.g., remote played/paused by another user).
-          // This is the primary path for reacting to another user initiating a play/pause or reset.
-          if (localIsPlayingVal !== remoteIsPlayingVal) {
-            // console.log(`Sync: State mismatch. Adopting remote time: ${remoteTime}`);
-            return remoteTime; // Always adopt remote time on play/pause state change
-          }
-
-          // Scenario 2: Both local (ref) and remote are PLAYING.
-          if (remoteIsPlayingVal && localIsPlayingVal) {
-            const timeDifference = remoteTime - currentLocalTime; // Positive if remote is ahead, negative if remote is behind.
-
-            if (timeDifference > TIME_DRIFT_THRESHOLD) {
-              // console.log(`Sync: Remote is ahead by ${timeDifference.toFixed(2)}s. Catching up to ${remoteTime}`);
-              return remoteTime; // Local client is behind, catch up.
-            } 
-            // If remote is behind (timeDifference is negative), local client is ahead. DON'T jump back.
-            // Let local timer continue. Local client won't send updates if it's just slightly ahead due to its own timer.
-            // console.log(`Sync: Both playing. Remote is ${timeDifference > 0 ? 'ahead' : 'behind'} by ${Math.abs(timeDifference).toFixed(2)}s. Local time: ${currentLocalTime}`);
-            return currentLocalTime; // Keep local time if remote is not significantly ahead.
-          }
-
-          // Scenario 3: Both local (ref) and remote are PAUSED.
-          if (!remoteIsPlayingVal && !localIsPlayingVal) { 
-            if (Math.abs(currentLocalTime - remoteTime) > 0.05) { // Sync if paused and times differ slightly (e.g. remote seek)
-              // console.log(`Sync: Both paused. Times differ. Adopting remote time: ${remoteTime}`);
-              return remoteTime;
+            // Scenario A: Local client has definitively finished the song.
+            // Its state (paused at end) should be resilient against stale updates.
+            if (!localWantsToPlay && currentLocalTime >= songData.totalDuration) {
+                // If remote is trying to play something *before* the end, ignore it. Stay finished.
+                if (remoteIsPlaying && remoteTime < songData.totalDuration) {
+                    if (isPlaying) setIsPlaying(false); // Ensure React state `isPlaying` is also false if it wasn't.
+                    return songData.totalDuration; // Stay at the end.
+                }
+                // If remote is also paused, but at an earlier time (and not a reset to 0), stay finished.
+                if (!remoteIsPlaying && remoteTime < songData.totalDuration && remoteTime > 0.1) {
+                    return songData.totalDuration; // Stay at the end.
+                }
+                // Fall through for other cases (e.g., remote resets to 0, or remote is also at/past end).
             }
-          }
-          
-          // console.log("Sync: No currentTime change based on conditions.");
-          return currentLocalTime; 
+
+            // Scenario B: General state mismatch (play/pause status)
+            if (localWantsToPlay !== remoteIsPlaying) {
+                setIsPlaying(remoteIsPlaying);
+                return remoteTime;
+            }
+
+            // Scenario C: Both agree on play/pause status
+            if (localWantsToPlay) { // Both are playing
+                const timeDifference = remoteTime - currentLocalTime;
+                if (timeDifference > TIME_DRIFT_THRESHOLD) { // Remote is significantly ahead
+                    return remoteTime;
+                }
+                return currentLocalTime; // Local is ahead or close enough
+            } else { // Both are paused
+                if (Math.abs(currentLocalTime - remoteTime) > 0.05) { // Times differ significantly
+                    return remoteTime;
+                }
+                return currentLocalTime;
+            }
         });
 
       } else {
-        // console.log("Firestore document does not exist, creating initial session state.");
         updateFirestoreSession({
           isPlaying: false,
           currentTime: 0,
@@ -158,7 +149,7 @@ export function SongDisplay() {
     return () => {
       unsubscribe();
     };
-  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, toast]); 
+  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, toast, songData.totalDuration, isPlaying]);
 
 
   // Effect for local timer and periodic Firestore updates
@@ -171,20 +162,21 @@ export function SongDisplay() {
         setCurrentTime((prevTime) => {
           const nextTime = prevTime + 0.1;
           if (nextTime >= songData.totalDuration) {
-            setIsPlaying(false); 
-            if (isSyncEnabled && firebaseInitialized && isPlayingRef.current) { 
-                 updateFirestoreSession({ isPlaying: false, currentTime: songData.totalDuration });
+            const thisClientWasPlaying = isPlayingRef.current; // Capture before setIsPlaying call
+            setIsPlaying(false); // Stop local playback behavior, this will trigger cleanup of intervals via its own useEffect
+
+            if (thisClientWasPlaying && isSyncEnabled && firebaseInitialized) {
+              updateFirestoreSession({ isPlaying: false, currentTime: songData.totalDuration });
             }
-            return songData.totalDuration;
+            return songData.totalDuration; // Update React state to totalDuration
           }
-          // console.log(`Local timer tick: ${nextTime.toFixed(1)}s`);
           return nextTime;
         });
       }, 100);
 
       if (isSyncEnabled && firebaseInitialized) {
         firestoreUpdateIntervalId = setInterval(() => {
-          if (isPlayingRef.current) { // Only the playing client sends updates
+          if (isPlayingRef.current) { 
              setCurrentTime(latestCurrentTime => { 
                 updateFirestoreSession({ currentTime: latestCurrentTime, isPlaying: true });
                 return latestCurrentTime; 
@@ -194,14 +186,7 @@ export function SongDisplay() {
       }
     } else {
       if (localTimerIntervalId) clearInterval(localTimerIntervalId);
-      if (firestoreUpdateIntervalId) {
-        clearInterval(firestoreUpdateIntervalId);
-        // When stopping, ensure Firestore has the final state.
-        // Check isPlayingRef.current before to ensure this client *was* the one playing.
-        // However, the `handlePlayPause` and `handleReset` already update Firestore.
-        // This might be redundant or could cause a final update if isPlaying was set false by song end.
-        // Let's rely on explicit actions (play/pause/reset) or song end logic to update Firestore.
-      }
+      if (firestoreUpdateIntervalId) clearInterval(firestoreUpdateIntervalId);
     }
 
     return () => {
@@ -212,16 +197,15 @@ export function SongDisplay() {
 
 
   const handlePlayPause = useCallback(() => {
-    const newIsPlayingState = !isPlayingRef.current; // Target state
+    const newIsPlayingState = !isPlayingRef.current; 
     let newCurrentTimeState = currentTime;
 
-    // If was paused and currentTime is at the end, and trying to play, reset to 0.
     if (newCurrentTimeState >= songData.totalDuration && newIsPlayingState) {
       newCurrentTimeState = 0; 
     }
     
     setIsPlaying(newIsPlayingState); 
-    setCurrentTime(newCurrentTimeState); // Apply locally immediately
+    setCurrentTime(newCurrentTimeState); 
 
     if (isSyncEnabled && firebaseInitialized) {
         updateFirestoreSession({ isPlaying: newIsPlayingState, currentTime: newCurrentTimeState });
@@ -229,8 +213,8 @@ export function SongDisplay() {
   }, [currentTime, isSyncEnabled, firebaseInitialized, updateFirestoreSession, songData.totalDuration]);
 
   const handleReset = useCallback(() => {
-    setIsPlaying(false); // Stop playback
-    setCurrentTime(0);   // Reset time
+    setIsPlaying(false); 
+    setCurrentTime(0);   
     if (isSyncEnabled && firebaseInitialized) {
         updateFirestoreSession({ isPlaying: false, currentTime: 0 });
     }
@@ -256,7 +240,7 @@ export function SongDisplay() {
              setIsSyncEnabled(false);
           } else {
              toast({ title: "Sync Enabled", description: "Attempting to connect to shared session." });
-             setIsLoadingSession(true); // Re-trigger loading state when enabling
+             setIsLoadingSession(true); 
           }
         }}
         disabled={!firebaseInitialized}
@@ -328,3 +312,5 @@ export function SongDisplay() {
     </div>
   );
 }
+
+  
