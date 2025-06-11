@@ -11,7 +11,7 @@ import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
-import { Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff, AlertTriangle, Loader2, Info } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff, AlertTriangle, Loader2, Info, RefreshCw } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
@@ -158,7 +158,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       setIsLoadingSessionState(false);
       setIsLoadingJamData(false); // Session data arrived or initial setup done
 
-      if (snapshot.metadata.hasPendingWrites) return;
+      if (snapshot.metadata.hasPendingWrites || localUpdateInProgressRef.current) return;
 
       if (snapshot.exists()) {
         const remoteState = snapshot.data() as SessionState;
@@ -176,13 +176,13 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         // Sync isPlaying and currentTime
         const remoteIsPlaying = remoteState.isPlaying;
         const remoteTime = remoteState.currentTime;
-        const localWantsToPlay = isPlayingRef.current;
+        const localWantsToPlay = isPlayingRef.current; // Use ref for most current intent
 
         if (localWantsToPlay !== remoteIsPlaying) {
           setIsPlaying(remoteIsPlaying);
         }
         
-        // Time sync logic (simplified for brevity, can be expanded)
+        // Prioritize remote state if different, especially for time
         if (Math.abs(currentTime - remoteTime) > TIME_DRIFT_THRESHOLD || localWantsToPlay !== remoteIsPlaying) {
              setCurrentTime(remoteTime);
         }
@@ -204,7 +204,8 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       unsubscribe();
       localUpdateInProgressRef.current = false;
     }
-  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length]);
+  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length]); // Removed currentTime from here
+
 
   // Local timer and Firestore periodic update
   useEffect(() => {
@@ -217,20 +218,26 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           const nextTime = prevTime + 0.1;
           if (nextTime >= playableSongData.totalDuration) {
             // Song ended
+            const wasPlaying = isPlayingRef.current;
             setIsPlaying(false); // Stop current song
+
             const nextSongIndex = currentSongIndexRef.current + 1;
             if (nextSongIndex < playlist.length) {
               // Auto-advance to next song
+              localUpdateInProgressRef.current = true;
               setCurrentSongIndex(nextSongIndex);
               setCurrentTime(0);
               setIsPlaying(true); // Start next song
               if (isSyncEnabled && firebaseInitialized) {
                 updateFirestoreSession({ isPlaying: true, currentTime: 0, currentSongIndexInJam: nextSongIndex });
               }
+              localUpdateInProgressRef.current = false;
             } else {
               // Playlist ended
-              if (isSyncEnabled && firebaseInitialized) {
-                updateFirestoreSession({ isPlaying: false, currentTime: playableSongData.totalDuration, currentSongIndexInJam: currentSongIndexRef.current });
+              if (wasPlaying && isSyncEnabled && firebaseInitialized) { // only update if this client was the one playing
+                 localUpdateInProgressRef.current = true;
+                 updateFirestoreSession({ isPlaying: false, currentTime: playableSongData.totalDuration, currentSongIndexInJam: currentSongIndexRef.current });
+                 localUpdateInProgressRef.current = false;
               }
               return playableSongData.totalDuration;
             }
@@ -243,10 +250,12 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       if (isSyncEnabled && firebaseInitialized) {
         firestoreUpdateIntervalId = setInterval(() => {
           if (isPlayingRef.current) { // only update if this client is the one "driving" the play state
+            localUpdateInProgressRef.current = true; // Mark before potential async operation
             setCurrentTime(latestCurrentTime => { // Get the absolute latest time
               updateFirestoreSession({ currentTime: latestCurrentTime, isPlaying: true, currentSongIndexInJam: currentSongIndexRef.current });
               return latestCurrentTime;
             });
+            localUpdateInProgressRef.current = false; // Mark after
           }
         }, FIRESTORE_UPDATE_INTERVAL);
       }
@@ -294,7 +303,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       newIndex = Math.max(0, currentSongIndexRef.current - 1);
     }
 
-    if (newIndex !== currentSongIndexRef.current || currentTime > 0 || isPlaying) {
+    if (newIndex !== currentSongIndexRef.current || currentTime > 0 || isPlayingRef.current) { // use ref for isPlaying
       localUpdateInProgressRef.current = true;
       setCurrentSongIndex(newIndex);
       setCurrentTime(0);
@@ -304,7 +313,19 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       }
       localUpdateInProgressRef.current = false;
     }
-  }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession, currentTime, isPlaying]);
+  }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession, currentTime, isPlayingRef]); // use isPlayingRef
+
+  const handleReplayJam = useCallback(() => {
+    if (playlist.length === 0) return;
+    localUpdateInProgressRef.current = true;
+    setCurrentSongIndex(0);
+    setCurrentTime(0);
+    setIsPlaying(true);
+    if (isSyncEnabled && firebaseInitialized) {
+      updateFirestoreSession({ isPlaying: true, currentTime: 0, currentSongIndexInJam: 0 });
+    }
+    localUpdateInProgressRef.current = false;
+  }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
 
 
   const handleSectionSelect = useCallback((newTime: number) => {
@@ -337,7 +358,26 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             setIsSyncEnabled(false);
           } else {
             toast({ title: "Sync Enabled", description: "Attempting to connect to shared session." });
-            setIsLoadingSessionState(true);
+            setIsLoadingSessionState(true); // Trigger loading state when sync is re-enabled
+            // Explicitly fetch initial session state if enabling sync after it was off
+            if (db && firebaseInitialized && jamSession) {
+                const sessionDocRef = doc(db, 'sessions', currentSessionId);
+                getDoc(sessionDocRef).then(snapshot => {
+                    setIsLoadingSessionState(false);
+                    if (snapshot.exists()) {
+                        const remoteState = snapshot.data() as SessionState;
+                        localUpdateInProgressRef.current = true;
+                        if (remoteState.currentSongIndexInJam !== undefined && remoteState.currentSongIndexInJam < playlist.length) {
+                          setCurrentSongIndex(remoteState.currentSongIndexInJam);
+                        }
+                        setIsPlaying(remoteState.isPlaying);
+                        setCurrentTime(remoteState.currentTime);
+                        localUpdateInProgressRef.current = false;
+                    } else {
+                       updateFirestoreSession({ isPlaying: false, currentTime: 0, currentSongIndexInJam: currentSongIndexRef.current });
+                    }
+                }).catch(() => setIsLoadingSessionState(false));
+            }
           }
         }}
         disabled={!firebaseInitialized && !db}
@@ -411,6 +451,14 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   if (playlist.length === 0) {
      return (
       <div className="container mx-auto p-4 flex flex-col justify-center items-center min-h-[400px] text-center">
+        <div className="mb-6 self-start">
+          <Link href="/" passHref>
+            <Button variant="outline" size="sm">
+              <ListMusic className="mr-1 h-4 w-4" />
+              Back to Jams List
+            </Button>
+          </Link>
+        </div>
         <ListMusic className="w-12 h-12 text-muted-foreground mb-4" />
         <h2 className="text-2xl font-semibold mb-2">Empty Jam</h2>
         <p className="text-muted-foreground mb-6">This Jam Session doesn't have any songs yet.</p>
@@ -492,13 +540,19 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           <div className="text-sm text-muted-foreground text-center">
             Up Next: {currentSongIndex + 1 < playlist.length ? playlist[currentSongIndex + 1].title : "End of Jam"}
           </div>
-          <Button 
-            onClick={() => handleSongNavigation('next')} 
-            disabled={currentSongIndex >= playlist.length - 1}
-            variant="outline"
-          >
-            Next Song <SkipForward className="ml-2 h-4 w-4"/>
-          </Button>
+           {currentSongIndex >= playlist.length - 1 && !isPlaying && currentTime >= playableSongData.totalDuration ? (
+            <Button onClick={handleReplayJam} variant="default" className="bg-green-500 hover:bg-green-600 text-primary-foreground">
+              <RefreshCw className="mr-2 h-4 w-4"/> Replay Jam
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => handleSongNavigation('next')} 
+              disabled={currentSongIndex >= playlist.length - 1}
+              variant="outline"
+            >
+              Next Song <SkipForward className="ml-2 h-4 w-4"/>
+            </Button>
+          )}
         </CardFooter>
       </Card>
       {currentDisplaySongInfo.id !== sampleSong.id && (
@@ -514,3 +568,4 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </div>
   );
 }
+
