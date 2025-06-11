@@ -11,14 +11,14 @@ import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
-import { Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff, AlertTriangle, Loader2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff, AlertTriangle, Loader2, Info } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import Link from 'next/link'; // Added import
+import Link from 'next/link';
 
 const TIME_DRIFT_THRESHOLD = 1.0;
 const FIRESTORE_UPDATE_INTERVAL = 2000;
@@ -204,7 +204,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       unsubscribe();
       localUpdateInProgressRef.current = false;
     }
-  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length]); // Added jamSession and playlist.length
+  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length, currentTime]); // Added jamSession and playlist.length
 
   // Local timer and Firestore periodic update
   useEffect(() => {
