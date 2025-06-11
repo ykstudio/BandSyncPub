@@ -10,7 +10,7 @@ import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card'; // Removed CardFooter
 import {
   Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff,
   AlertTriangle, Loader2, Info, RefreshCw, ChevronLeft,
@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const TIME_DRIFT_THRESHOLD = 1.0;
 const FIRESTORE_UPDATE_INTERVAL = 2000;
@@ -498,6 +499,28 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
+          <div className="flex items-center justify-between p-2 mb-3 border-b border-border">
+            <Button
+                onClick={() => handleSongNavigation('prev')}
+                disabled={currentSongIndex === 0}
+                variant="outline"
+                size="sm"
+              >
+                <SkipBack className="mr-2 h-4 w-4"/> Previous Song
+              </Button>
+              <div className="text-sm text-muted-foreground text-center">
+                Up Next: {currentSongIndex + 1 < playlist.length ? playlist[currentSongIndex + 1].title : "End of Jam"}
+              </div>
+              <Button
+                onClick={() => handleSongNavigation('next')}
+                disabled={currentSongIndex >= playlist.length - 1}
+                variant="outline"
+                size="sm"
+              >
+                Next Song <SkipForward className="ml-2 h-4 w-4"/>
+              </Button>
+          </div>
+
           <div className="flex items-center justify-between p-2 bg-secondary rounded-md">
             <div className="flex items-center gap-1 sm:gap-2">
               <Button onClick={handlePlayPause} variant="ghost" size="icon" aria-label={isPlaying ? 'Pause' : 'Play'}>
@@ -533,25 +556,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             <ChordsDisplay chords={playableSongData.chords} currentTime={currentTime} songBpm={currentDisplaySongInfo.bpm} />
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-2 p-4 border-t">
-           <Button
-              onClick={() => handleSongNavigation('prev')}
-              disabled={currentSongIndex === 0}
-              variant="outline"
-            >
-              <SkipBack className="mr-2 h-4 w-4"/> Previous Song
-            </Button>
-            <div className="text-sm text-muted-foreground text-center">
-              Up Next: {currentSongIndex + 1 < playlist.length ? playlist[currentSongIndex + 1].title : "End of Jam"}
-            </div>
-            <Button
-              onClick={() => handleSongNavigation('next')}
-              disabled={currentSongIndex >= playlist.length - 1}
-              variant="outline"
-            >
-              Next Song <SkipForward className="ml-2 h-4 w-4"/>
-            </Button>
-        </CardFooter>
+        {/* CardFooter removed */}
       </Card>
       {currentDisplaySongInfo.id !== sampleSong.id && (
         <Alert variant="default" className="mt-4">
@@ -566,5 +571,3 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </div>
   );
 }
-
-    
