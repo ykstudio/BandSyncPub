@@ -204,7 +204,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       unsubscribe();
       localUpdateInProgressRef.current = false;
     }
-  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length]); // Removed currentTime from here
+  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length]);
 
 
   // Local timer and Firestore periodic update
@@ -486,11 +486,20 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
               {(!firebaseInitialized || !db) && (<p className="text-xs text-destructive mt-1"> (Firebase not configured - Sync disabled)</p>)}
             </div>
           </div>
-          <div className="mt-2 text-center md:text-left">
-            <h2 className="text-lg font-semibold text-primary">{jamSession?.name}</h2>
-            <p className="text-sm text-muted-foreground">
-              Song {currentSongIndex + 1} of {playlist.length}
-            </p>
+          <div className="mt-4 text-center md:text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <h2 className="text-lg font-semibold text-primary">{jamSession?.name}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Song {currentSongIndex + 1} of {playlist.length}
+                    </p>
+                </div>
+                {playlist.length > 0 && (
+                    <Button onClick={handleReplayJam} variant="outline" size="sm" className="self-center sm:self-auto">
+                        <RefreshCw className="mr-2 h-4 w-4" /> Restart Jam
+                    </Button>
+                )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -540,19 +549,13 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           <div className="text-sm text-muted-foreground text-center">
             Up Next: {currentSongIndex + 1 < playlist.length ? playlist[currentSongIndex + 1].title : "End of Jam"}
           </div>
-           {currentSongIndex >= playlist.length - 1 && !isPlaying && currentTime >= playableSongData.totalDuration ? (
-            <Button onClick={handleReplayJam} variant="default" className="bg-green-500 hover:bg-green-600 text-primary-foreground">
-              <RefreshCw className="mr-2 h-4 w-4"/> Replay Jam
-            </Button>
-          ) : (
-            <Button 
-              onClick={() => handleSongNavigation('next')} 
-              disabled={currentSongIndex >= playlist.length - 1}
-              variant="outline"
-            >
-              Next Song <SkipForward className="ml-2 h-4 w-4"/>
-            </Button>
-          )}
+          <Button 
+            onClick={() => handleSongNavigation('next')} 
+            disabled={currentSongIndex >= playlist.length - 1}
+            variant="outline"
+          >
+            Next Song <SkipForward className="ml-2 h-4 w-4"/>
+          </Button>
         </CardFooter>
       </Card>
       {currentDisplaySongInfo.id !== sampleSong.id && (
