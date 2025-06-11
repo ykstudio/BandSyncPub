@@ -72,7 +72,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
   const pulseDurationStr = pulseDuration.toFixed(2);
 
   return (
-    <div className="p-4 bg-card rounded-lg shadow-md h-48 md:h-96">
+    <div className="p-4 bg-card rounded-lg shadow-md h-24 md:h-96">
       <div 
         ref={scrollContainerRef} 
         className="flex overflow-x-auto h-full items-end space-x-6 py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
@@ -86,9 +86,9 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
           let animationStyle: React.CSSProperties = {};
 
           if (isVisuallyPrevious) {
-            chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-1 text-4xl sm:text-5xl md:text-7xl';
+            chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-1 text-4xl sm:text-5xl md:text-7xl leading-none';
           } else if (isVisuallyCurrent) {
-            chordSpecificClasses = 'font-bold text-accent text-6xl sm:text-8xl md:text-[10rem]';
+            chordSpecificClasses = 'font-bold text-accent text-6xl sm:text-8xl md:text-[10rem] leading-none';
             animationStyle = {
               animationName: 'metronome-pulse',
               animationDuration: `${pulseDurationStr}s`,
@@ -96,10 +96,10 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
               animationTimingFunction: 'ease-in-out',
             };
           } else if (isVisuallyNext) {
-            chordSpecificClasses = 'text-primary text-7xl sm:text-9xl md:text-[12rem]';
+            chordSpecificClasses = 'text-primary text-7xl sm:text-9xl md:text-[12rem] leading-none';
           } else {
             // Default style for other chords in the line
-            chordSpecificClasses = 'text-muted-foreground text-3xl sm:text-4xl md:text-6xl opacity-60';
+            chordSpecificClasses = 'text-muted-foreground text-3xl sm:text-4xl md:text-6xl opacity-60 leading-none';
           }
 
           return (
@@ -107,7 +107,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
               key={`${chord.chord}-${chord.startTime}`}
               ref={el => chordItemRefs.current[index] = el}
               className={cn(
-                'flex-shrink-0 leading-none p-1', // Added p-1 for a bit of spacing if text gets too large
+                'flex-shrink-0 p-1', 
                 chordSpecificClasses
               )}
               style={animationStyle}
