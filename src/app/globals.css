@@ -112,3 +112,14 @@ body {
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
 }
+
+@keyframes chord-visual-entry {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.85) translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0px);
+  }
+}

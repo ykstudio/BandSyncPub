@@ -321,7 +321,7 @@ export function SongDisplay() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <LyricsDisplay lyrics={songData.lyrics} currentTime={currentTime} chords={songData.chords} />
-            <ChordsDisplay chords={songData.chords} currentTime={currentTime} />
+            <ChordsDisplay chords={songData.chords} currentTime={currentTime} songBpm={songData.bpm} />
           </div>
         </CardContent>
       </Card>
