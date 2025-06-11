@@ -196,7 +196,7 @@ export function LyricsDisplay({
 
         if (shouldScroll || (!initialScrollDoneRef.current && songIsPlaying) ) {
              elementToScrollTo.scrollIntoView({ 
-                behavior: (initialScrollDoneRef.current && songIsPlaying) ? 'auto' : 'auto', // was 'smooth'
+                behavior: (initialScrollDoneRef.current && songIsPlaying) ? 'auto' : 'auto',
                 block: (scrollTargetIsSectionHeader || lineItemRefs.current[activeLineKeyForHighlight!] === elementToScrollTo) ? 'start' : 'nearest', // active line & headers to top
                 inline: 'nearest' 
             });
@@ -239,7 +239,7 @@ export function LyricsDisplay({
               {section.name}
             </h3>
             
-            <div className="px-4 pt-2 pb-1"> {/* Reduced pt from pt-16 to pt-2 */}
+            <div className="px-4 pt-2 pb-1">
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => {
                   const lineKey = `${section.id}_${lineIdx}`;
@@ -248,7 +248,7 @@ export function LyricsDisplay({
                     <div
                       key={`line-${section.id}-${lineIdx}`}
                       ref={el => lineItemRefs.current[lineKey] = el}
-                      className="mb-6" // Increased mb from 2 to 6
+                      className="mb-6"
                     >
                       <p className="flex flex-wrap items-baseline gap-x-1.5">
                         {line.map((word, wordIndex) => {
@@ -270,7 +270,7 @@ export function LyricsDisplay({
                           const currentLineIsOfficiallyActive = activeLineKeyForHighlight === lineKey;
 
                           if (isThisTheCurrentSingingWord) {
-                            wordTextStyle = 'text-accent font-bold bg-accent-lightBg rounded-sm px-0.5';
+                            wordTextStyle = 'text-accent underline bg-accent-lightBg rounded-sm px-0.5';
                           } else if (isWordPast) {
                             wordTextStyle = 'text-muted-foreground';
                           } else { // Upcoming word
