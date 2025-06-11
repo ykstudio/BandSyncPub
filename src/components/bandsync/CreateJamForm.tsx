@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { SONGS, sampleSong } from '@/lib/song-data'; // SONGS is SongEntry[]
+import { SONGS, detailedSongExamples } from '@/lib/song-data'; 
 import type { SongEntry } from '@/lib/types';
 import { PlusCircle, Trash2, Music2, Info, ChevronUp, ChevronDown } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -53,11 +53,11 @@ export function CreateJamForm() {
       const songToMove = newSelected[index];
 
       if (direction === 'up' && index > 0) {
-        newSelected.splice(index, 1); // Remove from current position
-        newSelected.splice(index - 1, 0, songToMove); // Insert at new position
+        newSelected.splice(index, 1); 
+        newSelected.splice(index - 1, 0, songToMove); 
       } else if (direction === 'down' && index < newSelected.length - 1) {
-        newSelected.splice(index, 1); // Remove from current position
-        newSelected.splice(index + 1, 0, songToMove); // Insert at new position
+        newSelected.splice(index, 1); 
+        newSelected.splice(index + 1, 0, songToMove); 
       }
       return newSelected;
     });
@@ -94,10 +94,12 @@ export function CreateJamForm() {
     }
   };
 
-  const filteredSongs = SONGS.filter(song => // SONGS is SongEntry[]
+  const filteredSongs = SONGS.filter(song => 
     song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     song.artistName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const exampleSongTitles = detailedSongExamples.join('", "');
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -123,8 +125,8 @@ export function CreateJamForm() {
             <Info className="h-4 w-4" />
             <AlertTitle>Playback Information</AlertTitle>
             <AlertDescription>
-              Only "{sampleSong.title}" by {sampleSong.author} has full interactive playback data (lyrics, chords, sections).
-              Other songs added to your Jam will have their metadata (title, artist) displayed and use placeholder playback content (basic chords, no lyrics).
+              Songs like "{exampleSongTitles}" have more detailed interactive playback data (lyrics, chords, sections).
+              Other songs added to your Jam will have their metadata (title, artist) displayed and use generic placeholder playback content.
             </AlertDescription>
           </Alert>
 

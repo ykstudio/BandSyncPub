@@ -12,8 +12,6 @@ const preProcessSongData = (data: Omit<SongData, 'totalDuration' | 'sections'> &
 
   const totalDuration = cumulativeTime;
 
-  // Ensure chord times do not exceed totalDuration if sections define a shorter song.
-  // This is a simple clamp, more sophisticated logic might be needed for real data.
   const processedChords = data.chords.map(chord => ({
     ...chord,
     startTime: Math.min(chord.startTime, totalDuration),
@@ -29,9 +27,9 @@ const preProcessSongData = (data: Omit<SongData, 'totalDuration' | 'sections'> &
   };
 };
 
-// --- Fully Detailed Song Data (Sample) ---
-export const sampleSongDataInstance: SongData = preProcessSongData({
-  id: "beatles-wmgw", // Unique ID for this song
+// --- Fully Detailed Song Data (Sample 1) ---
+export const whileMyGuitarGentlyWeepsData: SongData = preProcessSongData({
+  id: "beatles-wmgw",
   title: "While My Guitar Gently Weeps",
   author: "The Beatles",
   bpm: 116,
@@ -63,6 +61,7 @@ export const sampleSongDataInstance: SongData = preProcessSongData({
     [
       { text: "Still", startTime: 20.2, endTime: 20.8 }, { text: "my", startTime: 20.8, endTime: 21.0 }, { text: "guitar", startTime: 21.1, endTime: 21.8 }, { text: "gently", startTime: 22.0, endTime: 22.6 }, { text: "weeps", startTime: 22.8, endTime: 23.6 }
     ],
+    // Chorus 1 (Global time: 24s - 40s)
     [
       { text: "I", startTime: 24.0, endTime: 24.2 }, { text: "don't", startTime: 24.3, endTime: 24.7 }, { text: "know", startTime: 24.7, endTime: 25.0 }, { text: "why", startTime: 25.2, endTime: 25.8 },
       { text: "nobody", startTime: 26.2, endTime: 26.9 }, { text: "told", startTime: 27.0, endTime: 27.4 }, { text: "you", startTime: 27.4, endTime: 27.8 }
@@ -77,6 +76,7 @@ export const sampleSongDataInstance: SongData = preProcessSongData({
     [
       { text: "They", startTime: 36.0, endTime: 36.4 }, { text: "bought", startTime: 36.6, endTime: 37.2 }, { text: "and", startTime: 37.4, endTime: 37.8 }, { text: "sold", startTime: 38.2, endTime: 38.8 }, { text: "you", startTime: 38.8, endTime: 39.2 }
     ],
+    // Verse 2 (Global time: 40s - 56s)
     [
       { text: "I", startTime: 40.0, endTime: 40.2 }, { text: "look", startTime: 40.3, endTime: 40.6 }, { text: "at", startTime: 40.6, endTime: 40.8 }, { text: "the", startTime: 40.8, endTime: 41.0 }, { text: "world", startTime: 41.1, endTime: 41.6 },
       { text: "and", startTime: 41.7, endTime: 42.0 }, { text: "I", startTime: 42.0, endTime: 42.2 }, { text: "notice", startTime: 42.4, endTime: 43.0 }, { text: "it's", startTime: 43.0, endTime: 43.2 }, { text: "turning", startTime: 43.2, endTime: 43.9 }
@@ -91,6 +91,7 @@ export const sampleSongDataInstance: SongData = preProcessSongData({
     [
       { text: "Still", startTime: 52.4, endTime: 53.0 }, { text: "my", startTime: 53.0, endTime: 53.2 }, { text: "guitar", startTime: 53.3, endTime: 54.0 }, { text: "gently", startTime: 54.2, endTime: 54.8 }, { text: "weeps", startTime: 55.0, endTime: 55.8 }
     ],
+    // Chorus 2 (Global time: 56s - 72s)
     [
       { text: "I", startTime: 56.0, endTime: 56.2 }, { text: "don't", startTime: 56.3, endTime: 56.7 }, { text: "know", startTime: 56.7, endTime: 57.0 }, { text: "why", startTime: 57.2, endTime: 57.8 },
       { text: "nobody", startTime: 58.2, endTime: 58.9 }, { text: "told", startTime: 59.0, endTime: 59.4 }, { text: "you", startTime: 59.4, endTime: 59.8 }
@@ -105,7 +106,8 @@ export const sampleSongDataInstance: SongData = preProcessSongData({
     [
       { text: "They", startTime: 68.0, endTime: 68.4 }, { text: "bought", startTime: 68.6, endTime: 69.2 }, { text: "and", startTime: 69.4, endTime: 69.8 }, { text: "sold", startTime: 70.2, endTime: 70.8 }, { text: "you", startTime: 70.8, endTime: 71.2 }
     ],
-    [ // Guitar Solo starts at 72s, Verse 3 starts at 88s
+    // Verse 3 (Global time: 88s - 104s), after solo (72s-88s)
+    [
       { text: "I", startTime: 88.0, endTime: 88.2 }, { text: "look", startTime: 88.3, endTime: 88.6 }, { text: "at", startTime: 88.6, endTime: 88.8 }, { text: "you", startTime: 88.9, endTime: 89.2 }, { text: "all,", startTime: 89.3, endTime: 89.8 },
       { text: "see", startTime: 90.0, endTime: 90.3 }, { text: "the", startTime: 90.3, endTime: 90.5 }, { text: "love", startTime: 90.6, endTime: 91.0 }, { text: "there", startTime: 91.0, endTime: 91.3 }, { text: "that's", startTime: 91.3, endTime: 91.6 }, { text: "sleeping", startTime: 91.6, endTime: 92.3 }
     ],
@@ -115,9 +117,10 @@ export const sampleSongDataInstance: SongData = preProcessSongData({
     [
       { text: "Look", startTime: 96.0, endTime: 96.5 }, { text: "at", startTime: 96.5, endTime: 96.7 }, { text: "you", startTime: 96.8, endTime: 97.2 }, { text: "all...", startTime: 97.3, endTime: 98.0 }
     ],
-    [ // Chorus 3 starts at 104s
+    [
       { text: "Still", startTime: 100.2, endTime: 100.8 }, { text: "my", startTime: 100.8, endTime: 101.0 }, { text: "guitar", startTime: 101.1, endTime: 101.8 }, { text: "gently", startTime: 102.0, endTime: 102.6 }, { text: "weeps", startTime: 102.8, endTime: 103.6 }
     ],
+    // Chorus 3 (Global time: 104s - 120s)
     [
       { text: "I", startTime: 104.0, endTime: 104.2 }, { text: "don't", startTime: 104.3, endTime: 104.7 }, { text: "know", startTime: 104.7, endTime: 105.0 }, { text: "why", startTime: 105.2, endTime: 105.8 },
       { text: "nobody", startTime: 106.2, endTime: 106.9 }, { text: "told", startTime: 107.0, endTime: 107.4 }, { text: "you", startTime: 107.4, endTime: 107.8 }
@@ -154,8 +157,126 @@ export const sampleSongDataInstance: SongData = preProcessSongData({
     { chord: "Am", startTime: 136, endTime: 138 }, { chord: "G", startTime: 138, endTime: 140 }, { chord: "D/F#", startTime: 140, endTime: 142 }, { chord: "Fmaj7", startTime: 142, endTime: 144 },
   ],
 });
-// This is the single instance used when a song's specific data isn't the fully detailed sample.
-// The JamPlayer will overwrite the id, title, author, bpm, key from the SongEntry.
+
+// --- Fully Detailed Song Data (Sample 2) ---
+export const sultansOfSwingData: SongData = preProcessSongData({
+  id: "ds-sultans",
+  title: "Sultans of Swing",
+  author: "Dire Straits",
+  bpm: 148,
+  key: "Dm",
+  sections: [
+    { id: "intro", name: "Intro Solo", duration: 16 }, // ~16.2s
+    { id: "verse1", name: "Verse 1", duration: 16 }, // ~16.2s
+    { id: "verse2", name: "Verse 2", duration: 16 },
+    { id: "chorus1", name: "Chorus", duration: 8 }, // ~8.1s
+    { id: "verse3", name: "Verse 3", duration: 16 },
+    { id: "chorus2", name: "Chorus", duration: 8 },
+    { id: "solo1", name: "Guitar Solo 1", duration: 32 }, // ~32.4s
+    { id: "verse4", name: "Verse 4", duration: 16 },
+    { id: "chorus3", name: "Chorus", duration: 8 },
+    { id: "solo2", name: "Outro Solo", duration: 48 }, // ~48.6s, fades out
+  ],
+  lyrics: [
+    // Verse 1 (Starts after 16s intro)
+    [
+      { text: "You", startTime: 16.0, endTime: 16.3 }, { text: "get", startTime: 16.3, endTime: 16.6 }, { text: "a", startTime: 16.6, endTime: 16.7 }, { text: "shiver", startTime: 16.8, endTime: 17.4 }, { text: "in", startTime: 17.4, endTime: 17.6 }, { text: "the", startTime: 17.6, endTime: 17.8 }, { text: "dark", startTime: 17.9, endTime: 18.4 },
+    ],
+    [
+      { text: "It's", startTime: 18.6, endTime: 18.9 }, { text: "raining", startTime: 19.0, endTime: 19.5 }, { text: "in", startTime: 19.5, endTime: 19.7 }, { text: "the", startTime: 19.7, endTime: 19.9 }, { text: "park", startTime: 20.0, endTime: 20.5 }, { text: "but", startTime: 20.5, endTime: 20.8 }, { text: "meantime", startTime: 20.9, endTime: 21.8 },
+    ],
+    // Chorus 1 (Starts after Verse 2, ~32s + 16s = 48s from song start)
+    [
+      { text: "And", startTime: 48.0, endTime: 48.3 }, { text: "Harry", startTime: 48.4, endTime: 48.9 }, { text: "doesn't", startTime: 49.0, endTime: 49.5 }, { text: "mind", startTime: 49.6, endTime: 50.1 },
+    ],
+    [
+      { text: "If", startTime: 50.3, endTime: 50.6 }, { text: "he's", startTime: 50.6, endTime: 50.8 }, { text: "all", startTime: 50.9, endTime: 51.2 }, { text: "alone", startTime: 51.4, endTime: 52.0 }, { text: "he", startTime: 52.0, endTime: 52.2 }, { text: "plays", startTime: 52.3, endTime: 52.8 }, { text: "for", startTime: 52.8, endTime: 53.0 }, { text: "free", startTime: 53.1, endTime: 53.6 }
+    ],
+  ],
+  chords: [
+    // Intro / Solo
+    { chord: "Dm", startTime: 0, endTime: 4 }, { chord: "C", startTime: 4, endTime: 6 }, { chord: "Bb", startTime: 6, endTime: 8 }, { chord: "A", startTime: 8, endTime: 12 }, { chord: "Dm", startTime: 12, endTime: 16 },
+    // Verse
+    { chord: "Dm", startTime: 16, endTime: 20 }, { chord: "C", startTime: 20, endTime: 22 }, { chord: "Bb", startTime: 22, endTime: 24 }, { chord: "A", startTime: 24, endTime: 28 }, { chord: "Dm", startTime: 28, endTime: 32 },
+    // (Verse 2 similar)
+    { chord: "Dm", startTime: 32, endTime: 36 }, { chord: "C", startTime: 36, endTime: 38 }, { chord: "Bb", startTime: 38, endTime: 40 }, { chord: "A", startTime: 40, endTime: 44 }, { chord: "Dm", startTime: 44, endTime: 48 },
+    // Chorus
+    { chord: "F", startTime: 48, endTime: 50 }, { chord: "C", startTime: 50, endTime: 52 }, { chord: "Bb", startTime: 52, endTime: 54 }, { chord: "Dm", startTime: 54, endTime: 56 },
+    // And so on... this is a simplified progression
+    { chord: "Dm", startTime: 56, endTime: 60 }, { chord: "C", startTime: 60, endTime: 62 }, { chord: "Bb", startTime: 62, endTime: 64 }, { chord: "A", startTime: 64, endTime: 68 }, { chord: "Dm", startTime: 68, endTime: 72 },
+    { chord: "F", startTime: 72, endTime: 74 }, { chord: "C", startTime: 74, endTime: 76 }, { chord: "Bb", startTime: 76, endTime: 78 }, { chord: "Dm", startTime: 78, endTime: 80 },
+    // Solo 1
+    { chord: "Dm", startTime: 80, endTime: 84 }, { chord: "C", startTime: 84, endTime: 88 }, { chord: "Bb", startTime: 88, endTime: 92 }, { chord: "A", startTime: 92, endTime: 96 },
+    { chord: "Dm", startTime: 96, endTime: 100 }, { chord: "Gm", startTime: 100, endTime: 104 }, { chord: "A", startTime: 104, endTime: 108 }, { chord: "Dm", startTime: 108, endTime: 112 },
+     // Verse 4
+    { chord: "Dm", startTime: 112, endTime: 116 }, { chord: "C", startTime: 116, endTime: 118 }, { chord: "Bb", startTime: 118, endTime: 120 }, { chord: "A", startTime: 120, endTime: 124 }, { chord: "Dm", startTime: 124, endTime: 128 },
+    // Chorus 3
+    { chord: "F", startTime: 128, endTime: 130 }, { chord: "C", startTime: 130, endTime: 132 }, { chord: "Bb", startTime: 132, endTime: 134 }, { chord: "Dm", startTime: 134, endTime: 136 },
+    // Outro Solo
+    { chord: "Dm", startTime: 136, endTime: 140 }, { chord: "C", startTime: 140, endTime: 144 }, { chord: "Bb", startTime: 144, endTime: 148 }, { chord: "A", startTime: 148, endTime: 152 },
+    { chord: "Dm", startTime: 152, endTime: 184 }, // Extended for fade
+  ]
+});
+
+// --- Fully Detailed Song Data (Sample 3) ---
+export const stairwayToHeavenData: SongData = preProcessSongData({
+  id: "lz-stairway",
+  title: "Stairway to Heaven",
+  author: "Led Zeppelin",
+  bpm: 82, // Average, varies throughout
+  key: "Am",
+  sections: [
+    { id: "intro", name: "Intro (Acoustic)", duration: 32 }, // ~31.7s
+    { id: "verse1", name: "Verse 1 (Flute)", duration: 32 },
+    { id: "verse2", name: "Verse 2", duration: 32 },
+    { id: "bridge", name: "Bridge", duration: 16 }, // ~15.8s
+    { id: "soloBuild", name: "Solo Build-up", duration: 16 },
+    { id: "solo", name: "Guitar Solo", duration: 48 }, // ~47.3s
+    { id: "verse3", name: "Verse 3 (Faster)", duration: 32 },
+    { id: "outro", name: "Outro", duration: 24 }, // ~23.6s
+  ],
+  lyrics: [
+    // Verse 1 (Starts after 32s intro)
+    [
+      { text: "There's", startTime: 32.0, endTime: 32.5 }, { text: "a", startTime: 32.5, endTime: 32.6 }, { text: "lady", startTime: 32.7, endTime: 33.3 }, { text: "who's", startTime: 33.3, endTime: 33.6 }, { text: "sure", startTime: 33.7, endTime: 34.2 },
+    ],
+    [
+      { text: "All", startTime: 34.5, endTime: 34.8 }, { text: "that", startTime: 34.8, endTime: 35.1 }, { text: "glitters", startTime: 35.3, endTime: 36.0 }, { text: "is", startTime: 36.0, endTime: 36.2 }, { text: "gold", startTime: 36.3, endTime: 37.0 },
+    ],
+    [
+      { text: "And", startTime: 37.5, endTime: 37.8 }, { text: "she's", startTime: 37.8, endTime: 38.1 }, { text: "buying", startTime: 38.3, endTime: 39.0 }, { text: "a", startTime: 39.0, endTime: 39.1 }, { text: "stairway", startTime: 39.3, endTime: 40.3 }, { text: "to", startTime: 40.3, endTime: 40.5 }, { text: "heaven", startTime: 40.6, endTime: 41.5 },
+    ],
+    // Bridge ("Ooh, it makes me wonder", ~96s + 16s from song start)
+     [
+      { text: "Ooh,", startTime: 96.0, endTime: 97.0 }, { text: "it", startTime: 97.2, endTime: 97.5 }, { text: "makes", startTime: 97.6, endTime: 98.2 }, { text: "me", startTime: 98.2, endTime: 98.5 }, { text: "wonder", startTime: 98.8, endTime: 99.8 },
+    ],
+  ],
+  chords: [
+    // Intro
+    { chord: "Am", startTime: 0, endTime: 2 }, { chord: "G#+", startTime: 2, endTime: 4 }, { chord: "C/G", startTime: 4, endTime: 6 }, { chord: "D/F#", startTime: 6, endTime: 8 },
+    { chord: "Fmaj7", startTime: 8, endTime: 12 }, { chord: "G/B", startTime: 12, endTime: 14 }, { chord: "Am", startTime: 14, endTime: 16 },
+    { chord: "Am", startTime: 16, endTime: 18 }, { chord: "G#+", startTime: 18, endTime: 20 }, { chord: "C/G", startTime: 20, endTime: 22 }, { chord: "D/F#", startTime: 22, endTime: 24 },
+    { chord: "Fmaj7", startTime: 24, endTime: 28 }, { chord: "G/B", startTime: 28, endTime: 30 }, { chord: "Am", startTime: 30, endTime: 32 },
+    // Verse 1 & 2 (similar)
+    { chord: "Am", startTime: 32, endTime: 36 }, { chord: "G", startTime: 36, endTime: 40 }, { chord: "Fmaj7", startTime: 40, endTime: 44 }, { chord: "G", startTime: 44, endTime: 48 },
+    { chord: "Am", startTime: 48, endTime: 52 }, { chord: "G", startTime: 52, endTime: 56 }, { chord: "Fmaj7", startTime: 56, endTime: 60 }, { chord: "G", startTime: 60, endTime: 64 },
+    // ... (Simplified, actual song is more complex)
+    // Bridge
+    { chord: "C", startTime: 96, endTime: 98 }, { chord: "G/B", startTime: 98, endTime: 100 }, { chord: "Am", startTime: 100, endTime: 102 }, { chord: "F", startTime: 102, endTime: 104 },
+    { chord: "C", startTime: 104, endTime: 106 }, { chord: "G/B", startTime: 106, endTime: 108 }, { chord: "F", startTime: 108, endTime: 112 },
+    // Solo (Am, G, F typically)
+    { chord: "Am", startTime: 128, endTime: 136 }, { chord: "G", startTime: 136, endTime: 144 }, { chord: "F", startTime: 144, endTime: 152 },
+    { chord: "Am", startTime: 152, endTime: 160 }, { chord: "G", startTime: 160, endTime: 168 }, { chord: "F", startTime: 168, endTime: 176 },
+    // Verse 3 (Faster)
+    { chord: "Am", startTime: 176, endTime: 180 }, { chord: "G", startTime: 180, endTime: 184 }, { chord: "C", startTime: 184, endTime: 188 }, { chord: "F", startTime: 188, endTime: 192 },
+    { chord: "Am", startTime: 192, endTime: 196 }, { chord: "G", startTime: 196, endTime: 200 }, { chord: "F", startTime: 200, endTime: 208 },
+    // Outro
+    { chord: "Am", startTime: 208, endTime: 232 }, // Fades
+  ]
+});
+
+
+// This is the generic placeholder for songs without detailed data.
 export const placeholderPlayableSongData: SongData = preProcessSongData({
   id: "placeholder-song",
   title: "Placeholder Song",
@@ -163,14 +284,17 @@ export const placeholderPlayableSongData: SongData = preProcessSongData({
   bpm: 120,
   key: "C",
   sections: [
-    { id: "main", name: "Main Section", duration: 16 }
+    { id: "verse1", name: "Verse 1", duration: 8 },
+    { id: "chorus1", name: "Chorus 1", duration: 8 },
+    { id: "verse2", name: "Verse 2", duration: 8 },
+    { id: "chorus2", name: "Chorus 2", duration: 8 },
   ],
   lyrics: [], // Empty lyrics
-  chords: [ // Generic 4-chord progression
-    { chord: "C", startTime: 0, endTime: 4 },
-    { chord: "G", startTime: 4, endTime: 8 },
-    { chord: "Am", startTime: 8, endTime: 12 },
-    { chord: "F", startTime: 12, endTime: 16 },
+  chords: [ // Generic 4-chord progression repeated
+    { chord: "C", startTime: 0, endTime: 2 }, { chord: "G", startTime: 2, endTime: 4 }, { chord: "Am", startTime: 4, endTime: 6 }, { chord: "F", startTime: 6, endTime: 8 },
+    { chord: "C", startTime: 8, endTime: 10 }, { chord: "G", startTime: 10, endTime: 12 }, { chord: "Am", startTime: 12, endTime: 14 }, { chord: "F", startTime: 14, endTime: 16 },
+    { chord: "C", startTime: 16, endTime: 18 }, { chord: "G", startTime: 18, endTime: 20 }, { chord: "Am", startTime: 20, endTime: 22 }, { chord: "F", startTime: 22, endTime: 24 },
+    { chord: "C", startTime: 24, endTime: 26 }, { chord: "G", startTime: 26, endTime: 28 }, { chord: "Am", startTime: 28, endTime: 30 }, { chord: "F", startTime: 30, endTime: 32 },
   ],
 });
 
@@ -186,8 +310,6 @@ export const ARTISTS: Artist[] = [
   { id: "coldplay", name: "Coldplay" },
 ];
 
-// SongEntry is metadata, used for selection lists.
-// The actual playable SongData is now in FULL_SONG_DATA map.
 export const SONGS: SongEntry[] = [
   // The Beatles
   { id: "beatles-wmgw", title: "While My Guitar Gently Weeps", artistId: "beatles", artistName: "The Beatles", key: "Am / A", bpm: 116 },
@@ -214,23 +336,23 @@ export const SONGS: SongEntry[] = [
   { id: "ds-latesttrick", title: "Your Latest Trick", artistId: "direstraits", artistName: "Dire Straits", key: "F#m", bpm: 120 },
 
   // Led Zeppelin
-  { id: "lz-stairway", title: "Stairway to Heaven", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "Am", bpm: 82 }, // BPM varies
+  { id: "lz-stairway", title: "Stairway to Heaven", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "Am", bpm: 82 },
   { id: "lz-wholelotta", title: "Whole Lotta Love", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "E", bpm: 90 },
   { id: "lz-kashmir", title: "Kashmir", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "D", bpm: 80 },
-  { id: "lz-blackdog", title: "Black Dog", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "A", bpm: 82 }, // Complex rhythm
+  { id: "lz-blackdog", title: "Black Dog", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "A", bpm: 82 },
   { id: "lz-immigrant", title: "Immigrant Song", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "F#m", bpm: 112 },
   { id: "lz-rocknroll", title: "Rock and Roll", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "A", bpm: 170 },
   { id: "lz-rambleon", title: "Ramble On", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "G", bpm: 100 },
-  { id: "lz-dazed", title: "Dazed and Confused", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "E", bpm: 60 }, // Varies
+  { id: "lz-dazed", title: "Dazed and Confused", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "E", bpm: 60 },
   { id: "lz-heartbreaker", title: "Heartbreaker", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "A", bpm: 98 },
-  { id: "lz-sinceive", title: "Since I've Been Loving You", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "Cm", bpm: 50 }, // Varies
+  { id: "lz-sinceive", title: "Since I've Been Loving You", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "Cm", bpm: 50 },
 
   // Aerosmith
   { id: "as-dreamon", title: "Dream On", artistId: "aerosmith", artistName: "Aerosmith", key: "Fm", bpm: 80 },
   { id: "as-sweetemotion", title: "Sweet Emotion", artistId: "aerosmith", artistName: "Aerosmith", key: "A", bpm: 96 },
   { id: "as-walkthisway", title: "Walk This Way", artistId: "aerosmith", artistName: "Aerosmith", key: "C", bpm: 108 },
   { id: "as-idontwant", title: "I Don't Want to Miss a Thing", artistId: "aerosmith", artistName: "Aerosmith", key: "D", bpm: 121 },
-  { id: "as-crazy", title: "Crazy", artistId: "aerosmith", artistName: "Aerosmith", key: "A", bpm: 140 }, // Ballad, tempo might feel slower
+  { id: "as-crazy", title: "Crazy", artistId: "aerosmith", artistName: "Aerosmith", key: "A", bpm: 140 },
   { id: "as-janiesgotagun", title: "Janie's Got a Gun", artistId: "aerosmith", artistName: "Aerosmith", key: "D", bpm: 94 },
   { id: "as-cryin", title: "Cryin'", artistId: "aerosmith", artistName: "Aerosmith", key: "A", bpm: 134 },
   { id: "as-livinontheedge", title: "Livin' on the Edge", artistId: "aerosmith", artistName: "Aerosmith", key: "D", bpm: 98 },
@@ -252,13 +374,13 @@ export const SONGS: SongEntry[] = [
   // Radiohead
   { id: "rh-creep", title: "Creep", artistId: "radiohead", artistName: "Radiohead", key: "G", bpm: 92 },
   { id: "rh-karma", title: "Karma Police", artistId: "radiohead", artistName: "Radiohead", key: "Am", bpm: 76 },
-  { id: "rh-paranoid", title: "Paranoid Android", artistId: "radiohead", artistName: "Radiohead", key: "Gm", bpm: 82 }, // Multiple sections
+  { id: "rh-paranoid", title: "Paranoid Android", artistId: "radiohead", artistName: "Radiohead", key: "Gm", bpm: 82 },
   { id: "rh-nosurprises", title: "No Surprises", artistId: "radiohead", artistName: "Radiohead", key: "F", bpm: 77 },
   { id: "rh-highndry", title: "High and Dry", artistId: "radiohead", artistName: "Radiohead", key: "E", bpm: 86 },
   { id: "rh-fakeplastic", title: "Fake Plastic Trees", artistId: "radiohead", artistName: "Radiohead", key: "A", bpm: 70 },
   { id: "rh-streetspirit", title: "Street Spirit (Fade Out)", artistId: "radiohead", artistName: "Radiohead", key: "Am", bpm: 76 },
   { id: "rh-idioteque", title: "Idioteque", artistId: "radiohead", artistName: "Radiohead", key: "C", bpm: 150 },
-  { id: "rh-pyramid", title: "Pyramid Song", artistId: "radiohead", artistName: "Radiohead", key: "F#", bpm: 80 }, // Complex rhythm
+  { id: "rh-pyramid", title: "Pyramid Song", artistId: "radiohead", artistName: "Radiohead", key: "F#", bpm: 80 },
   { id: "rh-weirdfishes", title: "Weird Fishes/Arpeggi", artistId: "radiohead", artistName: "Radiohead", key: "Em", bpm: 152 },
 
   // Coldplay
@@ -279,37 +401,33 @@ export const SONGS: SongEntry[] = [
 export const FULL_SONG_DATA: Record<string, SongData> = {};
 
 SONGS.forEach(songEntry => {
-  if (songEntry.id === sampleSongDataInstance.id) {
-    FULL_SONG_DATA[songEntry.id] = sampleSongDataInstance;
+  if (songEntry.id === whileMyGuitarGentlyWeepsData.id) {
+    FULL_SONG_DATA[songEntry.id] = whileMyGuitarGentlyWeepsData;
+  } else if (songEntry.id === sultansOfSwingData.id) {
+    FULL_SONG_DATA[songEntry.id] = sultansOfSwingData;
+  } else if (songEntry.id === stairwayToHeavenData.id) {
+    FULL_SONG_DATA[songEntry.id] = stairwayToHeavenData;
   } else {
-    // Create placeholder SongData for other songs
-    const placeholderData: Omit<SongData, 'totalDuration' | 'sections'> & { sections: Omit<SongSection, 'startTime' | 'endTime'>[] } = {
-      id: songEntry.id,
-      title: songEntry.title,
-      author: songEntry.artistName,
-      bpm: songEntry.bpm,
-      key: songEntry.key,
-      sections: [
-        { id: "main", name: "Main Section", duration: 16 } // Duration of placeholder content
-      ],
-      lyrics: [], // Empty lyrics for placeholders
-      chords: [ // Generic 4-chord progression for placeholders
-        { chord: "C", startTime: 0, endTime: 4 },
-        { chord: "G", startTime: 4, endTime: 8 },
-        { chord: "Am", startTime: 8, endTime: 12 },
-        { chord: "F", startTime: 12, endTime: 16 },
-      ],
+    // Create placeholder SongData for other songs by copying and modifying placeholderPlayableSongData
+    const specificPlaceholder: SongData = {
+        ...placeholderPlayableSongData, // Spread the generic placeholder
+        id: songEntry.id, // Override with specific ID
+        title: songEntry.title, // Override with specific title
+        author: songEntry.artistName, // Override with specific author
+        bpm: songEntry.bpm, // Override with specific BPM
+        key: songEntry.key, // Override with specific key
+        // Sections, lyrics, chords, totalDuration will come from placeholderPlayableSongData
+        // but re-run preProcessSongData if sections need recalc based on new BPM (though placeholder is fixed duration)
     };
-    FULL_SONG_DATA[songEntry.id] = preProcessSongData(placeholderData);
+    // If placeholder durations are static, direct assignment is fine.
+    // If durations should adapt (e.g. if placeholder had sections based on measures and BPM changed),
+    // then it would need more complex regeneration or preProcessSongData for the specificPlaceholder.
+    // For now, assume placeholderPlayableSongData's structure is fixed & generic.
+    FULL_SONG_DATA[songEntry.id] = specificPlaceholder;
   }
 });
 
-// For convenience, export sampleSong as the detailed one, which is already in FULL_SONG_DATA
-export const sampleSong = sampleSongDataInstance;
+// sampleSong is used in forms for the info message.
+export const sampleSong = whileMyGuitarGentlyWeepsData; // Keep "WMGGW" as the main example for the info text
+export const detailedSongExamples = [whileMyGuitarGentlyWeepsData.title, sultansOfSwingData.title, stairwayToHeavenData.title];
 
-// Legacy export, ensure it points to the right data if other components still use it.
-// This is effectively the same as FULL_SONG_DATA['beatles-wmgw']
-// export const sampleSong = FULL_SONG_DATA[sampleSongDataInstance.id];
-// This might be confusing, it's better to reference sampleSongDataInstance or lookup from FULL_SONG_DATA.
-// For the purpose of CreateJamForm/EditJamForm using `sampleSong.title` etc, we can keep the direct export.
-// The `sampleSong` variable now directly refers to `sampleSongDataInstance`.

@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { SongData, SessionState, ChordChange, LyricWord, SongSection, SongDisplayInfo, JamSession, SongEntry } from '@/lib/types';
-import { sampleSong, FULL_SONG_DATA, placeholderPlayableSongData } from '@/lib/song-data'; // Import FULL_SONG_DATA
+import { FULL_SONG_DATA, placeholderPlayableSongData } from '@/lib/song-data';
 import { SongInfo } from './SongInfo';
 import { Metronome } from './Metronome';
 import { SectionProgressBar } from './SectionProgressBar';
@@ -36,13 +36,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   const { toast } = useToast();
 
   const [jamSession, setJamSession] = useState<JamSession | null>(null);
-  const [playlist, setPlaylist] = useState<SongEntry[]>([]); // Playlist stores SongEntry (metadata)
+  const [playlist, setPlaylist] = useState<SongEntry[]>([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   
-  // playableSongData now holds the full SongData for the current song
-  const [playableSongData, setPlayableSongData] = useState<SongData>(FULL_SONG_DATA[sampleSong.id] || placeholderPlayableSongData); 
-  // currentDisplaySongInfo holds metadata for display (title, artist, bpm, key)
-  const [currentDisplaySongInfo, setCurrentDisplaySongInfo] = useState<SongDisplayInfo>(sampleSong);
+  const [playableSongData, setPlayableSongData] = useState<SongData>(placeholderPlayableSongData); 
+  const [currentDisplaySongInfo, setCurrentDisplaySongInfo] = useState<SongDisplayInfo>(placeholderPlayableSongData);
 
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -79,27 +77,22 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         const jamData = docSnap.data() as Omit<JamSession, 'id'>;
         setJamSession({ id: docSnap.id, ...jamData });
         
-        // Assuming SONGS array (metadata) is available for lookup by id
-        // For now, Playlist is still SongEntry[]
         const jamPlaylist: SongEntry[] = jamData.songIds
           .map(songId => {
-            const songMeta = FULL_SONG_DATA[songId]; // Check if we have full data
+            const songMeta = FULL_SONG_DATA[songId]; 
             if (songMeta) {
-              return { // Construct SongEntry from SongData for playlist
+              return { 
                 id: songMeta.id,
                 title: songMeta.title,
-                artistId: "", // May need to add artistId to SongData or look up from SONGS
+                artistId: "", 
                 artistName: songMeta.author,
                 key: songMeta.key,
                 bpm: songMeta.bpm,
               };
             }
-            // Fallback if somehow a songId in a jam is not in FULL_SONG_DATA
-            // This requires that your main SONGS metadata list is also imported/available
-            // For simplicity, this part needs to be robust or ensure FULL_SONG_DATA is comprehensive
-            const fallbackEntry = placeholderPlayableSongData; // Or a generic entry
+            const fallbackEntry = placeholderPlayableSongData;
             return {
-                id: songId, // Use the ID from the jam
+                id: songId, 
                 title: "Unknown Song",
                 artistId: "",
                 artistName: "Unknown Artist",
@@ -124,9 +117,9 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
   useEffect(() => {
     if (playlist.length > 0 && currentSongIndex >= 0 && currentSongIndex < playlist.length) {
-      const currentSongEntry = playlist[currentSongIndex]; // This is SongEntry
+      const currentSongEntry = playlist[currentSongIndex];
       const songDataForPlayback = FULL_SONG_DATA[currentSongEntry.id] || {
-        ...placeholderPlayableSongData, // Use placeholder structure
+        ...placeholderPlayableSongData, 
         id: currentSongEntry.id,
         title: currentSongEntry.title,
         author: currentSongEntry.artistName,
@@ -143,7 +136,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         bpm: songDataForPlayback.bpm,
       });
 
-    } else if (playlist.length === 0 && jamSession) { // No songs in jam
+    } else if (playlist.length === 0 && jamSession) { 
       const defaultEmptySong = placeholderPlayableSongData;
       setCurrentDisplaySongInfo({id: 'empty', title: 'No songs in Jam', author:'', bpm: defaultEmptySong.bpm, key: defaultEmptySong.key});
       setPlayableSongData(defaultEmptySong);
@@ -406,7 +399,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       const lyricLinesInSection = playableSongData.lyrics.filter(line => {
         if (line.length === 0) return false;
         const firstWordTime = line[0].startTime;
-        // Ensure firstWordTime is valid and within section bounds
         return typeof firstWordTime === 'number' && firstWordTime >= section.startTime && firstWordTime < section.endTime;
       });
       for (let lineIndex = 0; lineIndex < lyricLinesInSection.length; lineIndex++) {

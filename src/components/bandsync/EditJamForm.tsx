@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { SONGS, sampleSong } from '@/lib/song-data'; // SONGS is SongEntry[]
+import { SONGS, detailedSongExamples } from '@/lib/song-data'; 
 import type { SongEntry, JamSession } from '@/lib/types';
 import { PlusCircle, Trash2, Music2, Info, ChevronUp, ChevronDown } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -32,9 +32,8 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Pre-select songs based on jamData.songIds and maintain their order
     const initialSelectedSongs = jamData.songIds
-      .map(songId => SONGS.find(s => s.id === songId)) // Use SONGS (SongEntry[]) for metadata
+      .map(songId => SONGS.find(s => s.id === songId)) 
       .filter(Boolean) as SongEntry[];
     setSelectedSongs(initialSelectedSongs);
   }, [jamData.songIds]);
@@ -65,11 +64,11 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
       const songToMove = newSelected[index];
 
       if (direction === 'up' && index > 0) {
-        newSelected.splice(index, 1); // Remove from current position
-        newSelected.splice(index - 1, 0, songToMove); // Insert at new position
+        newSelected.splice(index, 1); 
+        newSelected.splice(index - 1, 0, songToMove); 
       } else if (direction === 'down' && index < newSelected.length - 1) {
-        newSelected.splice(index, 1); // Remove from current position
-        newSelected.splice(index + 1, 0, songToMove); // Insert at new position
+        newSelected.splice(index, 1); 
+        newSelected.splice(index + 1, 0, songToMove); 
       }
       return newSelected;
     });
@@ -106,10 +105,12 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
     }
   };
 
-  const filteredSongs = SONGS.filter(song => // Use SONGS (SongEntry[]) for metadata
+  const filteredSongs = SONGS.filter(song => 
     song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     song.artistName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const exampleSongTitles = detailedSongExamples.join('", "');
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -135,8 +136,8 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
             <Info className="h-4 w-4" />
             <AlertTitle>Playback Information</AlertTitle>
             <AlertDescription>
-              Only "{sampleSong.title}" by {sampleSong.author} has full interactive playback data (lyrics, chords, sections).
-              Other songs added to your Jam will have their metadata (title, artist) displayed and use placeholder playback content (basic chords, no lyrics).
+              Songs like "{exampleSongTitles}" have more detailed interactive playback data (lyrics, chords, sections).
+              Other songs added to your Jam will have their metadata (title, artist) displayed and use generic placeholder playback content.
             </AlertDescription>
           </Alert>
 
