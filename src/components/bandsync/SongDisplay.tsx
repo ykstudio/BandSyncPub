@@ -341,6 +341,7 @@ export function SongDisplay() {
               lyrics={songData.lyrics} 
               chords={songData.chords}
               sections={songData.sections}
+              currentTime={currentTime}
               activeSongChord={activeSongChord}
               activeLyricWordInfo={activeLyricWordInfo}
             />

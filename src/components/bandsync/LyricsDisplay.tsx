@@ -9,6 +9,7 @@ interface LyricsDisplayProps {
   lyrics: LyricLine[];
   chords: ChordChange[];
   sections: SongSection[];
+  currentTime: number;
   activeSongChord: ChordChange | undefined;
   activeLyricWordInfo: {
     word: LyricWord;
@@ -21,13 +22,12 @@ const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChan
   return allChords.find(c => time >= c.startTime && time < c.endTime);
 };
 
-export function LyricsDisplay({ lyrics, chords, sections, activeSongChord, activeLyricWordInfo }: LyricsDisplayProps) {
+export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSongChord, activeLyricWordInfo }: LyricsDisplayProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lineItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Memoize the set to avoid re-computation if props haven't changed identity
-  const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo]);
-  renderedChordObjectsThisPass.clear(); // Clear for the current render pass
+  const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo, currentTime]);
+  renderedChordObjectsThisPass.clear(); 
 
   useEffect(() => {
     if (!scrollContainerRef.current || !activeLyricWordInfo?.word) return;
@@ -67,7 +67,7 @@ export function LyricsDisplay({ lyrics, chords, sections, activeSongChord, activ
               {section.name}
             </h3>
             
-            <div className="pt-5"> {/* Added padding here to fix chord cutoff */}
+            <div className="pt-5">
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => (
                   <div
@@ -86,10 +86,9 @@ export function LyricsDisplay({ lyrics, chords, sections, activeSongChord, activ
                           renderedChordObjectsThisPass.add(chordForThisWord);
                         }
 
-                        let highlightThisDisplayedChordSymbol = false;
-                        if (shouldDisplayChordSymbol && chordForThisWord && activeSongChord && chordForThisWord === activeSongChord) {
-                          highlightThisDisplayedChordSymbol = true;
-                        }
+                        const isChordSymbolActive = activeSongChord && chordForThisWord === activeSongChord;
+                        const isChordSymbolPast = !isChordSymbolActive && chordForThisWord && chordForThisWord.endTime < currentTime;
+
 
                         return (
                           <span
@@ -99,10 +98,12 @@ export function LyricsDisplay({ lyrics, chords, sections, activeSongChord, activ
                             {shouldDisplayChordSymbol && chordForThisWord && (
                               <span
                                 className={cn(
-                                  "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none p-1",
-                                  highlightThisDisplayedChordSymbol 
-                                    ? "bg-accent/20 text-accent font-bold rounded-md" 
-                                    : "text-primary"
+                                  "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none p-1 rounded-md",
+                                  isChordSymbolActive 
+                                    ? "bg-accent/20 text-accent font-bold" 
+                                    : isChordSymbolPast
+                                    ? "text-muted-foreground bg-muted/10"
+                                    : "text-primary bg-primary/10"
                                 )}
                               >
                                 {chordForThisWord.chord}
@@ -127,14 +128,17 @@ export function LyricsDisplay({ lyrics, chords, sections, activeSongChord, activ
                   {chords.map((chord, chordIdx) => {
                     if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
                       renderedChordObjectsThisPass.add(chord);
-                      const isChordActive = activeSongChord === chord;
+                      const isChordSymbolActive = activeSongChord === chord;
+                      const isChordSymbolPast = !isChordSymbolActive && chord.endTime < currentTime;
                       return (
                         <span
                           key={`section-chord-${section.id}-${chordIdx}`}
                           className={cn(
                             "text-sm font-semibold p-1 rounded-md",
-                            isChordActive 
+                            isChordSymbolActive 
                               ? "bg-accent/20 text-accent font-bold" 
+                              : isChordSymbolPast
+                              ? "text-muted-foreground bg-muted/10"
                               : "text-primary bg-primary/10"
                           )}
                         >
