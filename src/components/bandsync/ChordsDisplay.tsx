@@ -1,3 +1,4 @@
+
 import type { ChordChange } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +19,7 @@ export function ChordsDisplay({ chords, currentTime }: ChordsDisplayProps) {
       <div className="flex items-end justify-center space-x-4 md:space-x-6 lg:space-x-8 w-full">
         <div className="w-1/4 flex justify-end">
           {previousChord && (
-            <div className="text-xl sm:text-2xl md:text-4xl text-muted-foreground opacity-75 transform translate-y-1">
+            <div className="text-2xl sm:text-3xl md:text-5xl text-muted-foreground opacity-75 transform translate-y-1">
               {previousChord.chord}
             </div>
           )}
@@ -26,7 +27,7 @@ export function ChordsDisplay({ chords, currentTime }: ChordsDisplayProps) {
         
         <div className="w-1/2 flex justify-center">
           {currentChord ? (
-            <div className="text-5xl sm:text-6xl md:text-8xl font-bold text-accent animate-metronome-pulse" style={{ animationDuration: '1.5s'}}>
+            <div className="text-5xl sm:text-6xl md:text-8xl text-primary animate-metronome-pulse" style={{ animationDuration: '1.5s'}}>
               {currentChord.chord}
             </div>
           ) : (
@@ -38,7 +39,7 @@ export function ChordsDisplay({ chords, currentTime }: ChordsDisplayProps) {
 
         <div className="w-1/4 flex justify-start">
           {nextChord && (
-            <div className="text-2xl sm:text-3xl md:text-5xl text-primary opacity-90">
+            <div className="text-6xl sm:text-7xl md:text-9xl font-bold text-accent">
               {nextChord.chord}
             </div>
           )}
