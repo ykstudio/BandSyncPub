@@ -173,31 +173,28 @@ export function LyricsDisplay({
         const elementRect = elementToScrollTo.getBoundingClientRect();
         
         const elementTopRelativeToContainer = elementRect.top - containerRect.top;
-        const elementBottomRelativeToContainer = elementRect.bottom - containerRect.top;
+        // const elementBottomRelativeToContainer = elementRect.bottom - containerRect.top;
 
-        const isElementVisible = elementTopRelativeToContainer >= 0 && elementBottomRelativeToContainer <= containerRect.height;
+        // const isElementVisible = elementTopRelativeToContainer >= 0 && elementBottomRelativeToContainer <= containerRect.height;
         const isElementAbove = elementRect.top < containerRect.top;
-        const isElementBelow = elementRect.bottom > containerRect.bottom;
+        // const isElementBelow = elementRect.bottom > containerRect.bottom;
         
-        // Scroll if the element is not fully visible, or if it's a header and not at the top.
-        // More aggressive scroll for active line if it's slightly off-center.
         let shouldScroll = false;
-        if (scrollTargetIsSectionHeader && (isElementAbove || elementTopRelativeToContainer > 5)) { // Section headers always to top
+        if (scrollTargetIsSectionHeader && (isElementAbove || elementTopRelativeToContainer > 5)) { 
             shouldScroll = true;
-        } else if (!isElementVisible) {
-            shouldScroll = true;
-        } else if (lineItemRefs.current[activeLineKeyForHighlight!] === elementToScrollTo) { // Current active line
-             // If active line is more than 1/3 down or above the top, scroll it nearer to top.
+        } else if (lineItemRefs.current[activeLineKeyForHighlight!] === elementToScrollTo) { 
             if(elementTopRelativeToContainer < 0 || elementTopRelativeToContainer > containerRect.height / 3) {
                 shouldScroll = true;
             }
+        } else if (elementTopRelativeToContainer < 0 || elementTopRelativeToContainer > containerRect.height * 0.6) { // Target lines (not current, not headers)
+            shouldScroll = true;
         }
 
 
         if (shouldScroll || (!initialScrollDoneRef.current && songIsPlaying) ) {
              elementToScrollTo.scrollIntoView({ 
-                behavior: (initialScrollDoneRef.current && songIsPlaying) ? 'auto' : 'auto',
-                block: (scrollTargetIsSectionHeader || lineItemRefs.current[activeLineKeyForHighlight!] === elementToScrollTo) ? 'start' : 'nearest', // active line & headers to top
+                behavior: 'auto',
+                block: (scrollTargetIsSectionHeader || lineItemRefs.current[activeLineKeyForHighlight!] === elementToScrollTo) ? 'start' : 'nearest', 
                 inline: 'nearest' 
             });
             if (!initialScrollDoneRef.current && songIsPlaying) initialScrollDoneRef.current = true;
@@ -270,7 +267,7 @@ export function LyricsDisplay({
                           const currentLineIsOfficiallyActive = activeLineKeyForHighlight === lineKey;
 
                           if (isThisTheCurrentSingingWord) {
-                            wordTextStyle = 'text-accent underline bg-accent-lightBg rounded-sm px-0.5';
+                            wordTextStyle = 'text-accent bg-accent-lightBg rounded-sm';
                           } else if (isWordPast) {
                             wordTextStyle = 'text-muted-foreground';
                           } else { // Upcoming word
@@ -318,7 +315,7 @@ export function LyricsDisplay({
                               )}
                               <span
                                 className={cn(
-                                  'leading-snug',
+                                  'leading-snug', // Removed transition-colors duration-100
                                   wordTextStyle
                                 )}
                               >
@@ -374,3 +371,4 @@ export function LyricsDisplay({
     </div>
   );
 }
+
