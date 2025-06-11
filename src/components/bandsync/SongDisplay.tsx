@@ -215,8 +215,6 @@ export function SongDisplay() {
 
   const handleSectionSelect = useCallback((newTime: number) => {
     setCurrentTime(newTime);
-    // isPlayingRef.current holds the latest isPlaying state.
-    // We send this current playback state along with the new time.
     if (isSyncEnabled && firebaseInitialized) {
       updateFirestoreSession({ currentTime: newTime, isPlaying: isPlayingRef.current });
     }
@@ -263,12 +261,11 @@ export function SongDisplay() {
 
   const activeLyricWordInfo = useMemo(() => {
     if (!songData.lyrics) return null;
-    for (let lineIndex = 0; lineIndex < songData.lyrics.length; lineIndex++) {
-      const line = songData.lyrics[lineIndex];
-      for (let wordIndex = 0; wordIndex < line.length; wordIndex++) {
-        const word = line[wordIndex];
+    // Iterate through all words in all lines to find the active one
+    for (const line of songData.lyrics) {
+      for (const word of line) {
         if (currentTime >= word.startTime && currentTime < word.endTime) {
-          return { lineIndex, wordIndex, word };
+          return { word }; // Return the word object directly
         }
       }
     }
@@ -333,6 +330,7 @@ export function SongDisplay() {
             <LyricsDisplay 
               lyrics={songData.lyrics} 
               chords={songData.chords}
+              sections={songData.sections}
               activeSongChord={activeSongChord}
               activeLyricWordInfo={activeLyricWordInfo}
             />
@@ -343,6 +341,3 @@ export function SongDisplay() {
     </div>
   );
 }
-
-  
-
