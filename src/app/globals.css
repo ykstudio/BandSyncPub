@@ -113,13 +113,17 @@ body {
   animation-iteration-count: infinite;
 }
 
-@keyframes chord-visual-entry {
-  0% {
-    opacity: 0.3;
-    transform: scale(0.85) translateY(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0px);
-  }
+@keyframes nextChordEnter {
+  0% { opacity: 0; transform: translateX(150%) scale(0.8); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes currentChordEnter {
+  0% { opacity: 0; transform: translateX(100%) scale(0.9); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes previousChordEnter {
+  0% { opacity: 0; transform: translateX(100%) scale(0.9); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
 }
