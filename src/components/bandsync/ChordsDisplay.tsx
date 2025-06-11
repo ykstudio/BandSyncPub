@@ -101,7 +101,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
           if (isVisuallyPrevious) {
             chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-px text-4xl sm:text-5xl md:text-7xl leading-none';
           } else if (isVisuallyCurrent) {
-            chordSpecificClasses = 'font-bold text-accent text-6xl sm:text-8xl md:text-[10rem] leading-none bg-accent/20 px-4 py-2 rounded-xl';
+            chordSpecificClasses = 'font-bold text-accent text-6xl sm:text-8xl md:text-[10rem] leading-none bg-accent-lightBg px-4 py-2 rounded-xl';
             if (songBpm > 0) {
               animationStyle = {
                 animationName: 'metronome-pulse',

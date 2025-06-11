@@ -68,7 +68,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
               className={cn(
                 "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-border mr-4",
                 isActiveSection 
-                  ? "text-accent font-bold bg-accent/20" 
+                  ? "text-accent font-bold bg-accent-lightBg" 
                   : "text-primary bg-card"
               )}
               id={`section-header-${section.id}`}
@@ -108,7 +108,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                                 className={cn(
                                   "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none p-1 rounded-md",
                                   isChordSymbolActive 
-                                    ? "bg-accent/20 text-accent font-bold" 
+                                    ? "bg-accent-lightBg text-accent font-bold" 
                                     : isChordSymbolPast
                                     ? "text-muted-foreground bg-muted/10"
                                     : "text-primary"
@@ -144,7 +144,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                           className={cn(
                             "text-sm font-semibold p-1 rounded-md",
                             isChordSymbolActive 
-                              ? "bg-accent/20 text-accent font-bold" 
+                              ? "bg-accent-lightBg text-accent font-bold" 
                               : isChordSymbolPast
                               ? "text-muted-foreground bg-muted/10"
                               : "text-primary"
@@ -170,4 +170,3 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
     </div>
   );
 }
-
