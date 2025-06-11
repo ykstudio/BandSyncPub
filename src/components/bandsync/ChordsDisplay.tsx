@@ -27,7 +27,9 @@ export function ChordsDisplay({ chords, currentTime }: ChordsDisplayProps) {
         
         <div className="w-1/2 flex justify-center">
           {currentChord ? (
-            <div className="text-5xl sm:text-6xl md:text-8xl text-primary animate-metronome-pulse" style={{ animationDuration: '1.5s'}}>
+            <div className={cn(
+              "text-5xl sm:text-6xl md:text-8xl font-bold text-accent animate-metronome-pulse"
+            )} style={{ animationDuration: '1.5s'}}>
               {currentChord.chord}
             </div>
           ) : (
@@ -39,7 +41,7 @@ export function ChordsDisplay({ chords, currentTime }: ChordsDisplayProps) {
 
         <div className="w-1/4 flex justify-start">
           {nextChord && (
-            <div className="text-6xl sm:text-7xl md:text-9xl font-bold text-accent">
+            <div className="text-6xl sm:text-7xl md:text-9xl text-primary">
               {nextChord.chord}
             </div>
           )}
