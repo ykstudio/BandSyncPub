@@ -3,7 +3,7 @@
 
 import type { ChordChange, LyricLine, LyricWord } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 
 interface LyricsDisplayProps {
   lyrics: LyricLine[];
@@ -18,6 +18,14 @@ const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChan
 
 export function LyricsDisplay({ lyrics, chords, activeSongChord, activeLyricWordInfo }: LyricsDisplayProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Memoize the set to avoid re-computation on every render if lyrics/chords don't change
+  // This set will track which ChordChange objects have had their symbol rendered in this pass.
+  const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords]);
+  // We must clear this set on each render pass if lyrics/chords could change props and cause a re-render
+  // For this component's lifecycle, it's simpler to re-initialize on each render:
+  renderedChordObjectsThisPass.clear();
+
 
   useEffect(() => {
     if (!scrollContainerRef.current || !activeLyricWordInfo) return;
@@ -38,8 +46,6 @@ export function LyricsDisplay({ lyrics, chords, activeSongChord, activeLyricWord
       className="p-4 space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto"
     >
       {lyrics.map((line, lineIndex) => {
-        let lastShownChordObjectOnLine: ChordChange | null | undefined = undefined; // undefined: nothing shown yet, null: last was silence
-
         return (
           <div key={lineIndex} className="mb-6">
             <p className="flex flex-wrap items-baseline gap-x-1.5">
@@ -49,17 +55,13 @@ export function LyricsDisplay({ lyrics, chords, activeSongChord, activeLyricWord
                 const chordForThisWord = getChordActiveAtTime(word.startTime, chords);
                 let shouldDisplayChordSymbol = false;
 
-                if (chordForThisWord) {
-                  if (lastShownChordObjectOnLine === undefined || chordForThisWord !== lastShownChordObjectOnLine) {
-                    shouldDisplayChordSymbol = true;
-                    lastShownChordObjectOnLine = chordForThisWord;
-                  }
-                } else {
-                  // If current word is in silence, reset for next potential chord
-                  lastShownChordObjectOnLine = null;
+                if (chordForThisWord && !renderedChordObjectsThisPass.has(chordForThisWord)) {
+                  shouldDisplayChordSymbol = true;
+                  renderedChordObjectsThisPass.add(chordForThisWord);
                 }
                 
                 let highlightThisDisplayedChordSymbol = false;
+                // Highlight only if we ARE displaying it AND it's the activeSongChord
                 if (shouldDisplayChordSymbol && chordForThisWord && activeSongChord && chordForThisWord === activeSongChord) {
                   highlightThisDisplayedChordSymbol = true;
                 }

@@ -149,13 +149,13 @@ export const sampleSong: SongData = preProcessSongData({
     ],
     [
       { text: "All", startTime: 59.5, endTime: 59.9 },
-      { text: "around,", startTime: 59.9, endTime: 60.5 },
+      { text: "around,", startTime: 59.9, endTime: 60.5 }, // Word "around" ends at 60.5, C[60-62] starts here
       { text: "no", startTime: 60.5, endTime: 60.8 },
       { text: "one's", startTime: 60.8, endTime: 61.2 },
-      { text: "bound!", startTime: 61.2, endTime: 62.0 },
+      { text: "bound!", startTime: 61.2, endTime: 62.0 }, // Word "bound!" ends at 62.0, C[60-62] ends, C[62-64] starts here
     ],
     [
-      { text: "Groove", startTime: 63, endTime: 63.5 },
+      { text: "Groove", startTime: 63, endTime: 63.5 }, // Word "Groove" starts at 63, under C[62-64]
       { text: "is", startTime: 63.5, endTime: 63.8 },
       { text: "strong,", startTime: 63.8, endTime: 64.4 },
       { text: "music's", startTime: 64.4, endTime: 65.0 },
@@ -273,7 +273,8 @@ export const sampleSong: SongData = preProcessSongData({
     { chord: "G", startTime: 52, endTime: 56 },
     // Chorus 2 (similar to Chorus 1)
     { chord: "F", startTime: 56, endTime: 60 },
-    { chord: "C", startTime: 60, endTime: 64 },
+    { chord: "C", startTime: 60, endTime: 62 }, // First C object for testing
+    { chord: "C", startTime: 62, endTime: 64 }, // Second C object for testing
     { chord: "G", startTime: 64, endTime: 68 },
     { chord: "Am", startTime: 68, endTime: 72 },
     // Bridge
@@ -293,3 +294,4 @@ export const sampleSong: SongData = preProcessSongData({
     { chord: "C", startTime: 112, endTime: 120 },
   ],
 });
+
