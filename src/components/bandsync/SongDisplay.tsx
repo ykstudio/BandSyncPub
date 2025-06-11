@@ -10,19 +10,19 @@ import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Play, Pause, SkipBack, Settings2, Wifi, WifiOff } from 'lucide-react';
 import { db } from '@/lib/firebase'; // Firebase Firestore instance
-import { doc, onSnapshot, setDoc, serverTimestamp, Timestamp, getDoc } from 'firebase/firestore'; // Added getDoc
+import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore'; 
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 
 
-const SESSION_ID = 'global-bandsync-session'; // All users share this one session
-const TIME_DRIFT_THRESHOLD = 1.0; // Seconds. If remote is AHEAD by more than this, local catches up.
-const FIRESTORE_UPDATE_INTERVAL = 2000; // Milliseconds (2 seconds)
-const SONG_DOCUMENT_ID = 'bandsync-jam-v1'; // Static ID for our sample song
+const SESSION_ID = 'global-bandsync-session'; 
+const TIME_DRIFT_THRESHOLD = 1.0; 
+const FIRESTORE_UPDATE_INTERVAL = 2000; 
+const SONG_DOCUMENT_ID = 'bandsync-jam-v1'; 
 
 export function SongDisplay() {
   const songData: SongData = sampleSong;
@@ -48,14 +48,13 @@ export function SongDisplay() {
       setFirebaseInitialized(false);
       setIsLoadingSession(false);
     }
-  }, [isSyncEnabled]);
+  }, [isSyncEnabled, db]);
 
 
   // Effect to save song data to Firestore if it doesn't exist
   useEffect(() => {
     const saveSongToFirestoreIfNeeded = async () => {
       if (!isSyncEnabled || !db || !firebaseInitialized) {
-        // Don't try to save if sync is off or Firebase isn't ready
         return;
       }
 
@@ -64,14 +63,13 @@ export function SongDisplay() {
       try {
         const docSnap = await getDoc(songDocRef);
         if (!docSnap.exists()) {
-          await setDoc(songDocRef, songData); // songData is the imported sampleSong
+          await setDoc(songDocRef, songData); 
           toast({
             title: "Song Data Saved",
             description: `"${songData.title}" has been saved to Firestore with ID: ${SONG_DOCUMENT_ID}.`,
           });
         } else {
-          // Song already exists, no need to re-save or notify unless for debugging.
-          // console.log(`Song data for "${songData.title}" already exists in Firestore.`);
+          // Song already exists
         }
       } catch (error) {
         console.error("Error saving/checking song data in Firestore:", error);
@@ -84,7 +82,7 @@ export function SongDisplay() {
     };
 
     saveSongToFirestoreIfNeeded();
-  }, [isSyncEnabled, db, firebaseInitialized, songData, toast]); // Dependencies
+  }, [isSyncEnabled, db, firebaseInitialized, songData, toast]); 
 
 
   const updateFirestoreSession = useCallback(async (newState: Partial<SessionState>) => {
@@ -105,7 +103,7 @@ export function SongDisplay() {
         variant: "destructive",
       });
     }
-  }, [isSyncEnabled, firebaseInitialized, toast]);
+  }, [isSyncEnabled, firebaseInitialized, toast, db]);
 
   // Effect for Firestore listener
   useEffect(() => {
@@ -179,7 +177,7 @@ export function SongDisplay() {
     return () => {
       unsubscribe();
     };
-  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, toast, songData.totalDuration, isPlaying]);
+  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, toast, songData.totalDuration, isPlaying, db]);
 
 
   // Effect for local timer and periodic Firestore updates
@@ -280,13 +278,13 @@ export function SongDisplay() {
              setIsLoadingSession(true); 
           }
         }}
-        disabled={!firebaseInitialized}
+        disabled={!firebaseInitialized && !db} // Also disable if db is null
       />
       <Label htmlFor="sync-toggle" className="text-sm flex items-center gap-1">
-        {isSyncEnabled && firebaseInitialized ? <Wifi className="w-4 h-4 text-green-500" /> : <WifiOff className="w-4 h-4 text-red-500" />}
+        {isSyncEnabled && firebaseInitialized && db ? <Wifi className="w-4 h-4 text-green-500" /> : <WifiOff className="w-4 h-4 text-red-500" />}
         Real-time Sync
       </Label>
-      {!firebaseInitialized && (
+      {(!firebaseInitialized || !db) && ( // Show if not initialized OR db is null
         <p className="text-xs text-destructive"> (Firebase not configured)</p>
       )}
     </div>
@@ -333,7 +331,7 @@ export function SongDisplay() {
   }, [currentTime, songData.sections, activeLyricWordInfo, activeSongChord]);
 
 
-  if (isSyncEnabled && isLoadingSession && firebaseInitialized) {
+  if (isSyncEnabled && isLoadingSession && firebaseInitialized && db) {
     return (
       <div className="container mx-auto p-4 flex flex-col justify-center items-center min-h-[400px] space-y-4">
         <div className="flex items-center space-x-2">
