@@ -21,264 +21,146 @@ const preProcessSongData = (data: Omit<SongData, 'totalDuration' | 'sections'> &
 
 
 export const sampleSong: SongData = preProcessSongData({
-  title: "BandSync Jam",
-  author: "The Devs",
-  bpm: 120,
+  title: "While My Guitar Gently Weeps",
+  author: "The Beatles",
+  bpm: 116,
   sections: [
     { id: "intro", name: "Intro", duration: 8 },
     { id: "verse1", name: "Verse 1", duration: 16 },
     { id: "chorus1", name: "Chorus", duration: 16 },
     { id: "verse2", name: "Verse 2", duration: 16 },
     { id: "chorus2", name: "Chorus", duration: 16 },
-    { id: "bridge", name: "Bridge", duration: 8 },
-    { id: "solo", name: "Solo", duration: 16 },
+    { id: "solo1", name: "Guitar Solo", duration: 16 },
+    { id: "verse3", name: "Verse 3", duration: 16 },
     { id: "chorus3", name: "Chorus", duration: 16 },
-    { id: "outro", name: "Outro", duration: 8 },
+    { id: "outro", name: "Outro Solo", duration: 24 },
   ],
   lyrics: [
-    // Verse 1 - Original lyrics (8-15.5s)
+    // Verse 1 (Global time: 8s - 24s)
     [
-      { text: "Welcome", startTime: 8, endTime: 8.8 },
-      { text: "to", startTime: 8.8, endTime: 9.1 },
-      { text: "the", startTime: 9.1, endTime: 9.3 },
-      { text: "jam,", startTime: 9.3, endTime: 9.8 },
-      { text: "let's", startTime: 9.8, endTime: 10.2 },
-      { text: "all", startTime: 10.2, endTime: 10.5 },
-      { text: "sync", startTime: 10.5, endTime: 11.0 },
-      { text: "up.", startTime: 11.0, endTime: 11.5 },
+      { text: "I", startTime: 8.0, endTime: 8.2 }, { text: "look", startTime: 8.3, endTime: 8.6 }, { text: "at", startTime: 8.6, endTime: 8.8 }, { text: "you", startTime: 8.9, endTime: 9.2 }, { text: "all,", startTime: 9.3, endTime: 9.8 },
+      { text: "see", startTime: 10.0, endTime: 10.3 }, { text: "the", startTime: 10.3, endTime: 10.5 }, { text: "love", startTime: 10.6, endTime: 11.0 }, { text: "there", startTime: 11.0, endTime: 11.3 }, { text: "that's", startTime: 11.3, endTime: 11.6 }, { text: "sleeping", startTime: 11.6, endTime: 12.3 }
     ],
     [
-      { text: "Music's", startTime: 12, endTime: 12.8 },
-      { text: "loud,", startTime: 12.8, endTime: 13.3 },
-      { text: "feel", startTime: 13.3, endTime: 13.7 },
-      { text: "the", startTime: 13.7, endTime: 14.0 },
-      { text: "groove,", startTime: 14.0, endTime: 14.5 },
-      { text: "don't", startTime: 14.5, endTime: 14.9 },
-      { text: "stop.", startTime: 14.9, endTime: 15.5 },
-    ],
-    // Verse 1 - Added lyrics (16-22s)
-    [
-      { text: "Every", startTime: 16, endTime: 16.5 },
-      { text: "note", startTime: 16.5, endTime: 17.0 },
-      { text: "is", startTime: 17.0, endTime: 17.3 },
-      { text: "clear,", startTime: 17.3, endTime: 17.8 },
-      { text: "no", startTime: 17.8, endTime: 18.1 },
-      { text: "delay.", startTime: 18.1, endTime: 18.7 },
+      { text: "While", startTime: 12.5, endTime: 13.0 }, { text: "my", startTime: 13.0, endTime: 13.2 }, { text: "guitar", startTime: 13.3, endTime: 14.0 }, { text: "gently", startTime: 14.2, endTime: 14.8 }, { text: "weeps", startTime: 15.0, endTime: 15.8 }
     ],
     [
-      { text: "Share", startTime: 19.5, endTime: 20.0 },
-      { text: "the", startTime: 20.0, endTime: 20.3 },
-      { text: "sound,", startTime: 20.3, endTime: 20.8 },
-      { text: "come", startTime: 20.8, endTime: 21.2 },
-      { text: "what", startTime: 21.2, endTime: 21.5 },
-      { text: "may.", startTime: 21.5, endTime: 22.0 },
+      { text: "I", startTime: 16.0, endTime: 16.2 }, { text: "look", startTime: 16.3, endTime: 16.6 }, { text: "at", startTime: 16.6, endTime: 16.8 }, { text: "the", startTime: 16.8, endTime: 17.0 }, { text: "floor", startTime: 17.1, endTime: 17.6 },
+      { text: "and", startTime: 17.7, endTime: 18.0 }, { text: "I", startTime: 18.0, endTime: 18.2 }, { text: "see", startTime: 18.3, endTime: 18.6 }, { text: "it", startTime: 18.6, endTime: 18.8 }, { text: "needs", startTime: 18.9, endTime: 19.3 }, { text: "sweeping", startTime: 19.3, endTime: 20.0 }
+    ],
+    [
+      { text: "Still", startTime: 20.2, endTime: 20.8 }, { text: "my", startTime: 20.8, endTime: 21.0 }, { text: "guitar", startTime: 21.1, endTime: 21.8 }, { text: "gently", startTime: 22.0, endTime: 22.6 }, { text: "weeps", startTime: 22.8, endTime: 23.6 }
     ],
 
-    // Chorus 1 - Original lyrics (24-30s)
+    // Chorus 1 (Global time: 24s - 40s)
     [
-      { text: "Oh,", startTime: 24, endTime: 24.5 },
-      { text: "BandSync,", startTime: 24.5, endTime: 25.5 },
-      { text: "play", startTime: 25.5, endTime: 26.0 },
-      { text: "it", startTime: 26.0, endTime: 26.3 },
-      { text: "loud!", startTime: 26.3, endTime: 27.0 },
+      { text: "I", startTime: 24.0, endTime: 24.2 }, { text: "don't", startTime: 24.3, endTime: 24.7 }, { text: "know", startTime: 24.7, endTime: 25.0 }, { text: "why", startTime: 25.2, endTime: 25.8 },
+      { text: "nobody", startTime: 26.2, endTime: 26.9 }, { text: "told", startTime: 27.0, endTime: 27.4 }, { text: "you", startTime: 27.4, endTime: 27.8 }
     ],
     [
-      { text: "Together", startTime: 27.5, endTime: 28.3 },
-      { text: "now,", startTime: 28.3, endTime: 28.8 },
-      { text: "in", startTime: 28.8, endTime: 29.0 },
-      { text: "the", startTime: 29.0, endTime: 29.2 },
-      { text: "cloud!", startTime: 29.2, endTime: 30.0 },
-    ],
-    // Chorus 1 - Added lyrics (31-37.2s)
-    [
-      { text: "Hear", startTime: 31, endTime: 31.5 },
-      { text: "the", startTime: 31.5, endTime: 31.8 },
-      { text: "beat,", startTime: 31.8, endTime: 32.3 },
-      { text: "feel", startTime: 32.3, endTime: 32.7 },
-      { text: "the", startTime: 32.7, endTime: 33.0 },
-      { text: "fire.", startTime: 33.0, endTime: 33.6 },
+      { text: "How", startTime: 28.0, endTime: 28.4 }, { text: "to", startTime: 28.4, endTime: 28.6 }, { text: "unfold", startTime: 29.0, endTime: 29.8 }, { text: "your", startTime: 30.2, endTime: 30.6 }, { text: "love", startTime: 30.8, endTime: 31.5 }
     ],
     [
-      { text: "Lift", startTime: 34.5, endTime: 35.0 },
-      { text: "us", startTime: 35.0, endTime: 35.3 },
-      { text: "up,", startTime: 35.3, endTime: 35.8 },
-      { text: "take", startTime: 35.8, endTime: 36.2 },
-      { text: "us", startTime: 36.2, endTime: 36.5 },
-      { text: "higher!", startTime: 36.5, endTime: 37.2 },
+      { text: "I", startTime: 32.0, endTime: 32.2 }, { text: "don't", startTime: 32.3, endTime: 32.7 }, { text: "know", startTime: 32.7, endTime: 33.0 }, { text: "how", startTime: 33.2, endTime: 33.8 },
+      { text: "someone", startTime: 34.2, endTime: 34.9 }, { text: "controlled", startTime: 35.0, endTime: 35.6 }, { text: "you", startTime: 35.6, endTime: 35.9 }
+    ],
+    [
+      { text: "They", startTime: 36.0, endTime: 36.4 }, { text: "bought", startTime: 36.6, endTime: 37.2 }, { text: "and", startTime: 37.4, endTime: 37.8 }, { text: "sold", startTime: 38.2, endTime: 38.8 }, { text: "you", startTime: 38.8, endTime: 39.2 }
     ],
 
-    // Verse 2 - New lyrics (40-54.5s)
+    // Verse 2 (Global time: 40s - 56s)
     [
-      { text: "From", startTime: 40, endTime: 40.5 },
-      { text: "guitar", startTime: 40.5, endTime: 41.2 },
-      { text: "licks", startTime: 41.2, endTime: 41.7 },
-      { text: "to", startTime: 41.7, endTime: 42.0 },
-      { text: "drummer's", startTime: 42.0, endTime: 42.8 },
-      { text: "kick,", startTime: 42.8, endTime: 43.3 },
+      { text: "I", startTime: 40.0, endTime: 40.2 }, { text: "look", startTime: 40.3, endTime: 40.6 }, { text: "at", startTime: 40.6, endTime: 40.8 }, { text: "the", startTime: 40.8, endTime: 41.0 }, { text: "world", startTime: 41.1, endTime: 41.6 },
+      { text: "and", startTime: 41.7, endTime: 42.0 }, { text: "I", startTime: 42.0, endTime: 42.2 }, { text: "notice", startTime: 42.4, endTime: 43.0 }, { text: "it's", startTime: 43.0, endTime: 43.2 }, { text: "turning", startTime: 43.2, endTime: 43.9 }
     ],
     [
-      { text: "Every", startTime: 44, endTime: 44.5 },
-      { text: "member", startTime: 44.5, endTime: 45.2 },
-      { text: "does", startTime: 45.2, endTime: 45.6 },
-      { text: "the", startTime: 45.6, endTime: 45.9 },
-      { text: "trick.", startTime: 45.9, endTime: 46.5 },
+      { text: "While", startTime: 44.0, endTime: 44.5 }, { text: "my", startTime: 44.5, endTime: 44.7 }, { text: "guitar", startTime: 44.8, endTime: 45.5 }, { text: "gently", startTime: 45.7, endTime: 46.3 }, { text: "weeps", startTime: 46.5, endTime: 47.3 }
     ],
     [
-      { text: "Keyboards", startTime: 48, endTime: 48.8 },
-      { text: "sing,", startTime: 48.8, endTime: 49.4 },
-      { text: "bass", startTime: 49.4, endTime: 49.9 },
-      { text: "lines", startTime: 49.9, endTime: 50.4 },
-      { text: "walk,", startTime: 50.4, endTime: 50.9 },
+      { text: "With", startTime: 48.0, endTime: 48.4 }, { text: "every", startTime: 48.5, endTime: 49.0 }, { text: "mistake", startTime: 49.2, endTime: 49.9 }, { text: "we", startTime: 50.0, endTime: 50.2 },
+      { text: "must", startTime: 50.3, endTime: 50.7 }, { text: "surely", startTime: 50.8, endTime: 51.3 }, { text: "be", startTime: 51.3, endTime: 51.5 }, { text: "learning", startTime: 51.5, endTime: 52.2 }
     ],
     [
-      { text: "As", startTime: 52, endTime: 52.4 },
-      { text: "we", startTime: 52.4, endTime: 52.7 },
-      { text: "all", startTime: 52.7, endTime: 53.1 },
-      { text: "begin", startTime: 53.1, endTime: 53.6 },
-      { text: "to", startTime: 53.6, endTime: 53.9 },
-      { text: "talk.", startTime: 53.9, endTime: 54.5 },
+      { text: "Still", startTime: 52.4, endTime: 53.0 }, { text: "my", startTime: 53.0, endTime: 53.2 }, { text: "guitar", startTime: 53.3, endTime: 54.0 }, { text: "gently", startTime: 54.2, endTime: 54.8 }, { text: "weeps", startTime: 55.0, endTime: 55.8 }
     ],
 
-    // Chorus 2 - New lyrics, similar to Chorus 1 (56-69s)
+    // Chorus 2 (Global time: 56s - 72s)
     [
-      { text: "Yeah,", startTime: 56, endTime: 56.5 },
-      { text: "BandSync,", startTime: 56.5, endTime: 57.5 },
-      { text: "feel", startTime: 57.5, endTime: 58.0 },
-      { text: "the", startTime: 58.0, endTime: 58.3 },
-      { text: "sound!", startTime: 58.3, endTime: 59.0 },
+      { text: "I", startTime: 56.0, endTime: 56.2 }, { text: "don't", startTime: 56.3, endTime: 56.7 }, { text: "know", startTime: 56.7, endTime: 57.0 }, { text: "why", startTime: 57.2, endTime: 57.8 },
+      { text: "nobody", startTime: 58.2, endTime: 58.9 }, { text: "told", startTime: 59.0, endTime: 59.4 }, { text: "you", startTime: 59.4, endTime: 59.8 }
     ],
     [
-      { text: "All", startTime: 59.5, endTime: 59.9 },
-      { text: "around,", startTime: 59.9, endTime: 60.5 }, // Word "around" ends at 60.5, C[60-62] starts here
-      { text: "no", startTime: 60.5, endTime: 60.8 },
-      { text: "one's", startTime: 60.8, endTime: 61.2 },
-      { text: "bound!", startTime: 61.2, endTime: 62.0 }, // Word "bound!" ends at 62.0, C[60-62] ends, C[62-64] starts here
+      { text: "How", startTime: 60.0, endTime: 60.4 }, { text: "to", startTime: 60.4, endTime: 60.6 }, { text: "unfold", startTime: 61.0, endTime: 61.8 }, { text: "your", startTime: 62.2, endTime: 62.6 }, { text: "love", startTime: 62.8, endTime: 63.5 }
     ],
     [
-      { text: "Groove", startTime: 63, endTime: 63.5 }, // Word "Groove" starts at 63, under C[62-64]
-      { text: "is", startTime: 63.5, endTime: 63.8 },
-      { text: "strong,", startTime: 63.8, endTime: 64.4 },
-      { text: "music's", startTime: 64.4, endTime: 65.0 },
-      { text: "free,", startTime: 65.0, endTime: 65.5 },
+      { text: "I", startTime: 64.0, endTime: 64.2 }, { text: "don't", startTime: 64.3, endTime: 64.7 }, { text: "know", startTime: 64.7, endTime: 65.0 }, { text: "how", startTime: 65.2, endTime: 65.8 },
+      { text: "someone", startTime: 66.2, endTime: 66.9 }, { text: "controlled", startTime: 67.0, endTime: 67.6 }, { text: "you", startTime: 67.6, endTime: 67.9 }
     ],
     [
-      { text: "Perfect", startTime: 66.5, endTime: 67.1 },
-      { text: "time,", startTime: 67.1, endTime: 67.6 },
-      { text: "for", startTime: 67.6, endTime: 67.9 },
-      { text: "you", startTime: 67.9, endTime: 68.2 },
-      { text: "and", startTime: 68.2, endTime: 68.5 },
-      { text: "me!", startTime: 68.5, endTime: 69.0 },
+      { text: "They", startTime: 68.0, endTime: 68.4 }, { text: "bought", startTime: 68.6, endTime: 69.2 }, { text: "and", startTime: 69.4, endTime: 69.8 }, { text: "sold", startTime: 70.2, endTime: 70.8 }, { text: "you", startTime: 70.8, endTime: 71.2 }
+    ],
+    
+    // Solo 1 is from 72s to 88s - No lyrics
+
+    // Verse 3 (Global time: 88s - 104s)
+    [
+      { text: "I", startTime: 88.0, endTime: 88.2 }, { text: "look", startTime: 88.3, endTime: 88.6 }, { text: "at", startTime: 88.6, endTime: 88.8 }, { text: "you", startTime: 88.9, endTime: 89.2 }, { text: "all,", startTime: 89.3, endTime: 89.8 },
+      { text: "see", startTime: 90.0, endTime: 90.3 }, { text: "the", startTime: 90.3, endTime: 90.5 }, { text: "love", startTime: 90.6, endTime: 91.0 }, { text: "there", startTime: 91.0, endTime: 91.3 }, { text: "that's", startTime: 91.3, endTime: 91.6 }, { text: "sleeping", startTime: 91.6, endTime: 92.3 }
+    ],
+    [
+      { text: "While", startTime: 92.5, endTime: 93.0 }, { text: "my", startTime: 93.0, endTime: 93.2 }, { text: "guitar", startTime: 93.3, endTime: 94.0 }, { text: "gently", startTime: 94.2, endTime: 94.8 }, { text: "weeps", startTime: 95.0, endTime: 95.8 }
+    ],
+    [
+      { text: "Look", startTime: 96.0, endTime: 96.5 }, { text: "at", startTime: 96.5, endTime: 96.7 }, { text: "you", startTime: 96.8, endTime: 97.2 }, { text: "all...", startTime: 97.3, endTime: 98.0 }
+    ],
+    [
+      { text: "Still", startTime: 100.2, endTime: 100.8 }, { text: "my", startTime: 100.8, endTime: 101.0 }, { text: "guitar", startTime: 101.1, endTime: 101.8 }, { text: "gently", startTime: 102.0, endTime: 102.6 }, { text: "weeps", startTime: 102.8, endTime: 103.6 }
     ],
 
-    // Bridge - New lyrics (72-78.8s)
+    // Chorus 3 (Global time: 104s - 120s)
     [
-      { text: "Through", startTime: 72, endTime: 72.5 },
-      { text: "the", startTime: 72.5, endTime: 72.8 },
-      { text: "wires,", startTime: 72.8, endTime: 73.5 },
-      { text: "data", startTime: 73.5, endTime: 74.0 },
-      { text: "streams,", startTime: 74.0, endTime: 74.6 },
+      { text: "I", startTime: 104.0, endTime: 104.2 }, { text: "don't", startTime: 104.3, endTime: 104.7 }, { text: "know", startTime: 104.7, endTime: 105.0 }, { text: "why", startTime: 105.2, endTime: 105.8 },
+      { text: "nobody", startTime: 106.2, endTime: 106.9 }, { text: "told", startTime: 107.0, endTime: 107.4 }, { text: "you", startTime: 107.4, endTime: 107.8 }
     ],
     [
-      { text: "Living", startTime: 76, endTime: 76.6 },
-      { text: "out", startTime: 76.6, endTime: 77.0 },
-      { text: "our", startTime: 77.0, endTime: 77.4 },
-      { text: "musical", startTime: 77.4, endTime: 78.2 },
-      { text: "dreams.", startTime: 78.2, endTime: 78.8 },
-    ],
-
-    // Solo section (80s-96s) - No lyrics
-
-    // Chorus 3 - Reuse Chorus 1 lyrics (96-109.2s)
-    [
-      { text: "Oh,", startTime: 96, endTime: 96.5 },
-      { text: "BandSync,", startTime: 96.5, endTime: 97.5 },
-      { text: "play", startTime: 97.5, endTime: 98.0 },
-      { text: "it", startTime: 98.0, endTime: 98.3 },
-      { text: "loud!", startTime: 98.3, endTime: 99.0 },
+      { text: "How", startTime: 108.0, endTime: 108.4 }, { text: "to", startTime: 108.4, endTime: 108.6 }, { text: "unfold", startTime: 109.0, endTime: 109.8 }, { text: "your", startTime: 110.2, endTime: 110.6 }, { text: "love", startTime: 110.8, endTime: 111.5 }
     ],
     [
-      { text: "Together", startTime: 99.5, endTime: 100.3 },
-      { text: "now,", startTime: 100.3, endTime: 100.8 },
-      { text: "in", startTime: 100.8, endTime: 101.0 },
-      { text: "the", startTime: 101.0, endTime: 101.2 },
-      { text: "cloud!", startTime: 101.2, endTime: 102.0 },
+      { text: "I", startTime: 112.0, endTime: 112.2 }, { text: "don't", startTime: 112.3, endTime: 112.7 }, { text: "know", startTime: 112.7, endTime: 113.0 }, { text: "how", startTime: 113.2, endTime: 113.8 },
+      { text: "someone", startTime: 114.2, endTime: 114.9 }, { text: "controlled", startTime: 115.0, endTime: 115.6 }, { text: "you", startTime: 115.6, endTime: 115.9 }
     ],
     [
-      { text: "Hear", startTime: 103, endTime: 103.5 },
-      { text: "the", startTime: 103.5, endTime: 103.8 },
-      { text: "beat,", startTime: 103.8, endTime: 104.3 },
-      { text: "feel", startTime: 104.3, endTime: 104.7 },
-      { text: "the", startTime: 104.7, endTime: 105.0 },
-      { text: "fire.", startTime: 105.0, endTime: 105.6 },
+      { text: "They", startTime: 116.0, endTime: 116.4 }, { text: "bought", startTime: 116.6, endTime: 117.2 }, { text: "and", startTime: 117.4, endTime: 117.8 }, { text: "sold", startTime: 118.2, endTime: 118.8 }, { text: "you", startTime: 118.8, endTime: 119.2 }
     ],
-    [
-      { text: "Lift", startTime: 106.5, endTime: 107.0 },
-      { text: "us", startTime: 107.0, endTime: 107.3 },
-      { text: "up,", startTime: 107.3, endTime: 107.8 },
-      { text: "take", startTime: 107.8, endTime: 108.2 },
-      { text: "us", startTime: 108.2, endTime: 108.5 },
-      { text: "higher!", startTime: 108.5, endTime: 109.2 },
-    ],
-
-    // Outro - New lyrics (112-119.5s)
-    [
-      { text: "BandSync", startTime: 112, endTime: 113.0 },
-      { text: "fades...", startTime: 113.0, endTime: 114.0 },
-      { text: "yeah...", startTime: 114.0, endTime: 115.0 },
-    ],
-    [
-      { text: "Until", startTime: 116, endTime: 116.8 },
-      { text: "next", startTime: 116.8, endTime: 117.4 },
-      { text: "time...", startTime: 117.4, endTime: 118.5 },
-      { text: "sync", startTime: 118.5, endTime: 119.0 },
-      { text: "out.", startTime: 119.0, endTime: 119.5 },
-    ],
+    // Outro Solo is from 120s to 144s - No lyrics
   ],
   chords: [
-    // Intro
-    { chord: "Am", startTime: 0, endTime: 2 },
-    { chord: "Am", startTime: 2, endTime: 4 },
-    { chord: "G", startTime: 4, endTime: 6 },
-    { chord: "G", startTime: 6, endTime: 8 },
-    // Verse 1
-    { chord: "C", startTime: 8, endTime: 10 },
-    { chord: "C", startTime: 10, endTime: 12 },
-    { chord: "F", startTime: 12, endTime: 14 },
-    { chord: "F", startTime: 14, endTime: 16 },
-    { chord: "Am", startTime: 16, endTime: 18 },
-    { chord: "Am", startTime: 18, endTime: 20 },
-    { chord: "G", startTime: 20, endTime: 24 }, // Kept as 4s for variety
-    // Chorus 1
-    { chord: "F", startTime: 24, endTime: 28 },
-    { chord: "C", startTime: 28, endTime: 32 },
-    { chord: "G", startTime: 32, endTime: 36 },
-    { chord: "Am", startTime: 36, endTime: 40 },
-    // Verse 2
-    { chord: "C", startTime: 40, endTime: 44 },
-    { chord: "F", startTime: 44, endTime: 48 },
-    { chord: "Am", startTime: 48, endTime: 52 },
-    { chord: "G", startTime: 52, endTime: 56 },
-    // Chorus 2
-    { chord: "F", startTime: 56, endTime: 60 },
-    { chord: "C", startTime: 60, endTime: 62 }, // Existing split
-    { chord: "C", startTime: 62, endTime: 64 }, // Existing split
-    { chord: "G", startTime: 64, endTime: 68 },
-    { chord: "Am", startTime: 68, endTime: 72 },
-    // Bridge
-    { chord: "Dm", startTime: 72, endTime: 76 },
-    { chord: "G", startTime: 76, endTime: 80 },
-    // Solo
-    { chord: "C", startTime: 80, endTime: 84 },
-    { chord: "F", startTime: 84, endTime: 88 },
-    { chord: "Am", startTime: 88, endTime: 92 },
-    { chord: "G", startTime: 92, endTime: 96 },
-    // Chorus 3
-    { chord: "F", startTime: 96, endTime: 100 },
-    { chord: "C", startTime: 100, endTime: 104 },
-    { chord: "G", startTime: 104, endTime: 108 },
-    { chord: "Am", startTime: 108, endTime: 112 },
-    // Outro
-    { chord: "C", startTime: 112, endTime: 120 },
+    // Intro (0-8s)
+    { chord: "Am", startTime: 0, endTime: 2 }, { chord: "G", startTime: 2, endTime: 4 }, { chord: "D/F#", startTime: 4, endTime: 6 }, { chord: "Fmaj7", startTime: 6, endTime: 8 },
+    // Verse 1 (8-24s)
+    { chord: "Am", startTime: 8, endTime: 10 }, { chord: "G", startTime: 10, endTime: 12 }, { chord: "D/F#", startTime: 12, endTime: 14 }, { chord: "Fmaj7", startTime: 14, endTime: 16 },
+    { chord: "Am", startTime: 16, endTime: 18 }, { chord: "G", startTime: 18, endTime: 20 }, { chord: "C", startTime: 20, endTime: 22 }, { chord: "E", startTime: 22, endTime: 24 },
+    // Chorus 1 (24-40s)
+    { chord: "A", startTime: 24, endTime: 26 }, { chord: "C#m", startTime: 26, endTime: 28 }, { chord: "F#m", startTime: 28, endTime: 30 }, { chord: "C#m", startTime: 30, endTime: 32 },
+    { chord: "Bm", startTime: 32, endTime: 34 }, { chord: "E7", startTime: 34, endTime: 36 }, { chord: "A", startTime: 36, endTime: 38 }, { chord: "E", startTime: 38, endTime: 40 },
+    // Verse 2 (40-56s)
+    { chord: "Am", startTime: 40, endTime: 42 }, { chord: "G", startTime: 42, endTime: 44 }, { chord: "D/F#", startTime: 44, endTime: 46 }, { chord: "Fmaj7", startTime: 46, endTime: 48 },
+    { chord: "Am", startTime: 48, endTime: 50 }, { chord: "G", startTime: 50, endTime: 52 }, { chord: "C", startTime: 52, endTime: 54 }, { chord: "E", startTime: 54, endTime: 56 },
+    // Chorus 2 (56-72s)
+    { chord: "A", startTime: 56, endTime: 58 }, { chord: "C#m", startTime: 58, endTime: 60 }, { chord: "F#m", startTime: 60, endTime: 62 }, { chord: "C#m", startTime: 62, endTime: 64 },
+    { chord: "Bm", startTime: 64, endTime: 66 }, { chord: "E7", startTime: 66, endTime: 68 }, { chord: "A", startTime: 68, endTime: 70 }, { chord: "E", startTime: 70, endTime: 72 },
+    // Solo 1 (72-88s)
+    { chord: "Am", startTime: 72, endTime: 74 }, { chord: "G", startTime: 74, endTime: 76 }, { chord: "D/F#", startTime: 76, endTime: 78 }, { chord: "Fmaj7", startTime: 78, endTime: 80 },
+    { chord: "Am", startTime: 80, endTime: 82 }, { chord: "G", startTime: 82, endTime: 84 }, { chord: "C", startTime: 84, endTime: 86 }, { chord: "E", startTime: 86, endTime: 88 },
+    // Verse 3 (88-104s)
+    { chord: "Am", startTime: 88, endTime: 90 }, { chord: "G", startTime: 90, endTime: 92 }, { chord: "D/F#", startTime: 92, endTime: 94 }, { chord: "Fmaj7", startTime: 94, endTime: 96 },
+    { chord: "Am", startTime: 96, endTime: 98 }, { chord: "G", startTime: 98, endTime: 100 }, { chord: "C", startTime: 100, endTime: 102 }, { chord: "E", startTime: 102, endTime: 104 },
+    // Chorus 3 (104-120s)
+    { chord: "A", startTime: 104, endTime: 106 }, { chord: "C#m", startTime: 106, endTime: 108 }, { chord: "F#m", startTime: 108, endTime: 110 }, { chord: "C#m", startTime: 110, endTime: 112 },
+    { chord: "Bm", startTime: 112, endTime: 114 }, { chord: "E7", startTime: 114, endTime: 116 }, { chord: "A", startTime: 116, endTime: 118 }, { chord: "E", startTime: 118, endTime: 120 },
+    // Outro Solo (120-144s)
+    { chord: "Am", startTime: 120, endTime: 122 }, { chord: "G", startTime: 122, endTime: 124 }, { chord: "D/F#", startTime: 124, endTime: 126 }, { chord: "Fmaj7", startTime: 126, endTime: 128 },
+    { chord: "Am", startTime: 128, endTime: 130 }, { chord: "G", startTime: 130, endTime: 132 }, { chord: "D/F#", startTime: 132, endTime: 134 }, { chord: "Fmaj7", startTime: 134, endTime: 136 },
+    { chord: "Am", startTime: 136, endTime: 138 }, { chord: "G", startTime: 138, endTime: 140 }, { chord: "D/F#", startTime: 140, endTime: 142 }, { chord: "Fmaj7", startTime: 142, endTime: 144 },
   ],
 });
-
