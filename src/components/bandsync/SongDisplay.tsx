@@ -8,7 +8,6 @@ import { SongInfo } from './SongInfo';
 import { Metronome } from './Metronome';
 import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
-import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Play, Pause, SkipBack, Settings2, Wifi, WifiOff } from 'lucide-react';
@@ -283,8 +282,20 @@ export function SongDisplay() {
 
 
   const currentSectionId = useMemo(() => {
+    // First, check if activeLyricWordInfo can determine the section
+    if (activeLyricWordInfo?.sectionId) {
+      return activeLyricWordInfo.sectionId;
+    }
+    // If no active lyric, try to find section based on activeSongChord
+    if (activeSongChord) {
+      const sectionForChord = songData.sections.find(s => activeSongChord.startTime >= s.startTime && activeSongChord.startTime < s.endTime);
+      if (sectionForChord) {
+        return sectionForChord.id;
+      }
+    }
+    // Fallback to currentTime if no active lyric or chord provides a section
     return songData.sections.find(s => currentTime >= s.startTime && currentTime < s.endTime)?.id || null;
-  }, [currentTime, songData.sections]);
+  }, [currentTime, songData.sections, activeLyricWordInfo, activeSongChord]);
 
 
   if (isSyncEnabled && isLoadingSession && firebaseInitialized) {
@@ -344,6 +355,7 @@ export function SongDisplay() {
               currentTime={currentTime}
               activeSongChord={activeSongChord}
               activeLyricWordInfo={activeLyricWordInfo}
+              currentSectionId={currentSectionId}
             />
             <ChordsDisplay chords={songData.chords} currentTime={currentTime} songBpm={songData.bpm} />
           </div>
@@ -352,3 +364,4 @@ export function SongDisplay() {
     </div>
   );
 }
+

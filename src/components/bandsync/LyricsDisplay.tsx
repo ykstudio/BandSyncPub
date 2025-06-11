@@ -16,17 +16,18 @@ interface LyricsDisplayProps {
     sectionId: string;
     lineIndexWithinSection: number;
   } | null;
+  currentSectionId: string | null;
 }
 
 const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChange | undefined => {
   return allChords.find(c => time >= c.startTime && time < c.endTime);
 };
 
-export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSongChord, activeLyricWordInfo }: LyricsDisplayProps) {
+export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSongChord, activeLyricWordInfo, currentSectionId }: LyricsDisplayProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lineItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo, currentTime]);
+  const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo, currentTime, currentSectionId]);
   renderedChordObjectsThisPass.clear();
 
 
@@ -59,22 +60,29 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
           return firstWordTime >= section.startTime && firstWordTime < section.endTime;
         });
 
+        const isActiveSection = section.id === currentSectionId;
+
         return (
           <div key={`section-${section.id}-${sectionIndex}`} className="mb-3">
             <h3
-              className="text-base sm:text-lg font-semibold text-primary sticky top-0 bg-card py-2 z-10 border-b border-border"
+              className={cn(
+                "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-border mr-4",
+                isActiveSection 
+                  ? "text-accent font-bold bg-accent/20" 
+                  : "text-primary bg-card"
+              )}
               id={`section-header-${section.id}`}
             >
               {section.name}
             </h3>
             
-            <div className="pt-16"> {/* Increased padding significantly */}
+            <div className="pt-16">
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => (
                   <div
                     key={`line-${section.id}-${lineIdx}`}
                     ref={el => lineItemRefs.current[`${section.id}_${lineIdx}`] = el}
-                    className="mb-6 px-4" // Added px-4 here for side padding of lines
+                    className="mb-6 px-4"
                   >
                     <p className="flex flex-wrap items-baseline gap-x-1.5">
                       {line.map((word, wordIndex) => {
@@ -124,7 +132,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                   </div>
                 ))
               ) : (
-                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-4"> {/* Added px-4 here */}
+                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-4">
                   {chords.map((chord, chordIdx) => {
                     if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
                       renderedChordObjectsThisPass.add(chord);
@@ -155,10 +163,11 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         );
       })}
       {sections.length === 0 && lyrics.length === 0 && (
-        <p className="text-muted-foreground px-4 pb-4"> {/* Added px-4 pb-4 here */}
+        <p className="text-muted-foreground px-4 pb-4">
           No lyrics or sections available for this song.
         </p>
       )}
     </div>
   );
 }
+
