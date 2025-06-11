@@ -10,8 +10,8 @@ import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
-import { Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff, AlertTriangle, Loader2, Info, RefreshCw } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff, AlertTriangle, Loader2, Info, RefreshCw, ChevronLeft } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
@@ -204,7 +204,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       unsubscribe();
       localUpdateInProgressRef.current = false;
     }
-  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length]);
+  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length, currentTime]); // Removed currentTime, it was problematic
 
 
   // Local timer and Firestore periodic update
@@ -313,7 +313,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       }
       localUpdateInProgressRef.current = false;
     }
-  }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession, currentTime, isPlayingRef]); // use isPlayingRef
+  }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession, currentTime]);
 
   const handleReplayJam = useCallback(() => {
     if (playlist.length === 0) return;
@@ -425,7 +425,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
   if (isLoadingJamData || (isSyncEnabled && isLoadingSessionState && firebaseInitialized && db)) {
     return fallback || (
-      <div className="container mx-auto p-4 flex flex-col justify-center items-center min-h-[400px] space-y-4">
+      <div className="w-full flex flex-col justify-center items-center min-h-[400px] space-y-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
         <p className="text-lg text-muted-foreground">
           {isLoadingJamData ? "Loading Jam Session..." : "Connecting to session..."}
@@ -437,7 +437,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
   if (error) {
     return (
-      <div className="container mx-auto p-4 flex flex-col justify-center items-center min-h-[400px] text-center">
+      <div className="w-full flex flex-col justify-center items-center min-h-[400px] text-center">
         <AlertTriangle className="w-12 h-12 text-destructive mb-4" />
         <h2 className="text-2xl font-semibold mb-2 text-destructive">Error Loading Jam</h2>
         <p className="text-muted-foreground mb-6">{error}</p>
@@ -450,15 +450,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   
   if (playlist.length === 0) {
      return (
-      <div className="container mx-auto p-4 flex flex-col justify-center items-center min-h-[400px] text-center">
-        <div className="mb-6 self-start">
-          <Link href="/" passHref>
-            <Button variant="outline" size="sm">
-              <ListMusic className="mr-1 h-4 w-4" />
-              Back to Jams List
-            </Button>
-          </Link>
-        </div>
+      <div className="w-full flex flex-col justify-center items-center min-h-[400px] text-center">
         <ListMusic className="w-12 h-12 text-muted-foreground mb-4" />
         <h2 className="text-2xl font-semibold mb-2">Empty Jam</h2>
         <p className="text-muted-foreground mb-6">This Jam Session doesn't have any songs yet.</p>
@@ -471,8 +463,8 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
 
   return (
-    <div className="container mx-auto p-4 space-y-2">
-      <Card className="shadow-xl">
+    <div className="w-full space-y-2">
+      <Card className="shadow-xl w-full">
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
             <SongInfo
@@ -503,6 +495,26 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 p-4 border-b mb-2">
+            <Button 
+              onClick={() => handleSongNavigation('prev')} 
+              disabled={currentSongIndex === 0}
+              variant="outline"
+            >
+              <SkipBack className="mr-2 h-4 w-4"/> Previous Song
+            </Button>
+            <div className="text-sm text-muted-foreground text-center">
+              Up Next: {currentSongIndex + 1 < playlist.length ? playlist[currentSongIndex + 1].title : "End of Jam"}
+            </div>
+            <Button 
+              onClick={() => handleSongNavigation('next')} 
+              disabled={currentSongIndex >= playlist.length - 1}
+              variant="outline"
+            >
+              Next Song <SkipForward className="ml-2 h-4 w-4"/>
+            </Button>
+          </div>
+
           <div className="flex items-center justify-between p-2 bg-secondary rounded-md">
             <div className="flex items-center gap-1 sm:gap-2">
               <Button onClick={handlePlayPause} variant="ghost" size="icon" aria-label={isPlaying ? 'Pause' : 'Play'}>
@@ -538,25 +550,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             <ChordsDisplay chords={playableSongData.chords} currentTime={currentTime} songBpm={currentDisplaySongInfo.bpm} />
           </div>
         </CardContent>
-        <CardFooter className="flex-col sm:flex-row justify-between items-center gap-2 p-4 border-t">
-          <Button 
-            onClick={() => handleSongNavigation('prev')} 
-            disabled={currentSongIndex === 0}
-            variant="outline"
-          >
-            <SkipBack className="mr-2 h-4 w-4"/> Previous Song
-          </Button>
-          <div className="text-sm text-muted-foreground text-center">
-            Up Next: {currentSongIndex + 1 < playlist.length ? playlist[currentSongIndex + 1].title : "End of Jam"}
-          </div>
-          <Button 
-            onClick={() => handleSongNavigation('next')} 
-            disabled={currentSongIndex >= playlist.length - 1}
-            variant="outline"
-          >
-            Next Song <SkipForward className="ml-2 h-4 w-4"/>
-          </Button>
-        </CardFooter>
       </Card>
       {currentDisplaySongInfo.id !== sampleSong.id && (
         <Alert variant="default" className="mt-4">
@@ -571,4 +564,3 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </div>
   );
 }
-

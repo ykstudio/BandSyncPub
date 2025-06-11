@@ -50,7 +50,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="container mx-auto min-h-screen p-4 sm:p-8">
+    <main className="min-h-screen p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
         <div className="text-center sm:text-left">
           <h1 className="text-4xl font-bold text-primary font-headline">BandSync Jams</h1>

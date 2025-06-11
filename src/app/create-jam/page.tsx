@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 
 export default function CreateJamPage() {
   return (
-    <main className="container mx-auto min-h-screen p-4 sm:p-8">
+    <main className="min-h-screen p-4 sm:p-8">
       <div className="mb-6">
         <Link href="/" passHref>
           <Button variant="outline" size="sm">
