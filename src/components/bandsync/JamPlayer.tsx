@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { SongData, SessionState, ChordChange, LyricWord, SongSection, SongDisplayInfo, JamSession, SongEntry } from '@/lib/types';
-import { sampleSong, ARTISTS, SONGS } from '@/lib/song-data';
+import { sampleSong, FULL_SONG_DATA, placeholderPlayableSongData } from '@/lib/song-data'; // Import FULL_SONG_DATA
 import { SongInfo } from './SongInfo';
 import { Metronome } from './Metronome';
 import { SectionProgressBar } from './SectionProgressBar';
@@ -13,16 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff,
-  AlertTriangle, Loader2, Info, RefreshCw, ChevronLeft,
+  AlertTriangle, Loader2, RefreshCw,
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 
 const TIME_DRIFT_THRESHOLD = 1.0;
 const FIRESTORE_UPDATE_INTERVAL = 2000;
@@ -38,10 +36,12 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   const { toast } = useToast();
 
   const [jamSession, setJamSession] = useState<JamSession | null>(null);
-  const [playlist, setPlaylist] = useState<SongEntry[]>([]);
+  const [playlist, setPlaylist] = useState<SongEntry[]>([]); // Playlist stores SongEntry (metadata)
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   
-  const [playableSongData, setPlayableSongData] = useState<SongData>(sampleSong);
+  // playableSongData now holds the full SongData for the current song
+  const [playableSongData, setPlayableSongData] = useState<SongData>(FULL_SONG_DATA[sampleSong.id] || placeholderPlayableSongData); 
+  // currentDisplaySongInfo holds metadata for display (title, artist, bpm, key)
   const [currentDisplaySongInfo, setCurrentDisplaySongInfo] = useState<SongDisplayInfo>(sampleSong);
 
   const [currentTime, setCurrentTime] = useState(0);
@@ -55,7 +55,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   const isPlayingRef = useRef(isPlaying);
   const currentSongIndexRef = useRef(currentSongIndex);
   const localUpdateInProgressRef = useRef(false);
-  const latestCurrentTimeRef = useRef(currentTime); // Ref to hold the latest current time for intervals
+  const latestCurrentTimeRef = useRef(currentTime); 
 
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
   useEffect(() => { currentSongIndexRef.current = currentSongIndex; }, [currentSongIndex]);
@@ -79,8 +79,34 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         const jamData = docSnap.data() as Omit<JamSession, 'id'>;
         setJamSession({ id: docSnap.id, ...jamData });
         
+        // Assuming SONGS array (metadata) is available for lookup by id
+        // For now, Playlist is still SongEntry[]
         const jamPlaylist: SongEntry[] = jamData.songIds
-          .map(songId => SONGS.find(s => s.id === songId))
+          .map(songId => {
+            const songMeta = FULL_SONG_DATA[songId]; // Check if we have full data
+            if (songMeta) {
+              return { // Construct SongEntry from SongData for playlist
+                id: songMeta.id,
+                title: songMeta.title,
+                artistId: "", // May need to add artistId to SongData or look up from SONGS
+                artistName: songMeta.author,
+                key: songMeta.key,
+                bpm: songMeta.bpm,
+              };
+            }
+            // Fallback if somehow a songId in a jam is not in FULL_SONG_DATA
+            // This requires that your main SONGS metadata list is also imported/available
+            // For simplicity, this part needs to be robust or ensure FULL_SONG_DATA is comprehensive
+            const fallbackEntry = placeholderPlayableSongData; // Or a generic entry
+            return {
+                id: songId, // Use the ID from the jam
+                title: "Unknown Song",
+                artistId: "",
+                artistName: "Unknown Artist",
+                key: fallbackEntry.key,
+                bpm: fallbackEntry.bpm,
+            };
+          })
           .filter(Boolean) as SongEntry[];
         
         setPlaylist(jamPlaylist);
@@ -93,36 +119,34 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     }).catch(err => {
       console.error("Error fetching Jam:", err);
       setError("Could not load Jam Session data.");
-    }).finally(() => {
-      // Loading state primarily controlled by session sync now
     });
   }, [jamId]);
 
   useEffect(() => {
     if (playlist.length > 0 && currentSongIndex >= 0 && currentSongIndex < playlist.length) {
-      const currentSongEntry = playlist[currentSongIndex];
-      setCurrentDisplaySongInfo({
+      const currentSongEntry = playlist[currentSongIndex]; // This is SongEntry
+      const songDataForPlayback = FULL_SONG_DATA[currentSongEntry.id] || {
+        ...placeholderPlayableSongData, // Use placeholder structure
         id: currentSongEntry.id,
         title: currentSongEntry.title,
         author: currentSongEntry.artistName,
-        key: currentSongEntry.key,
         bpm: currentSongEntry.bpm,
+        key: currentSongEntry.key,
+      };
+      
+      setPlayableSongData(songDataForPlayback);
+      setCurrentDisplaySongInfo({
+        id: songDataForPlayback.id,
+        title: songDataForPlayback.title,
+        author: songDataForPlayback.author,
+        key: songDataForPlayback.key,
+        bpm: songDataForPlayback.bpm,
       });
-      if (currentSongEntry.id === sampleSong.id) {
-        setPlayableSongData(sampleSong);
-      } else {
-        setPlayableSongData({
-          ...sampleSong,
-          id: currentSongEntry.id,
-          title: currentSongEntry.title,
-          author: currentSongEntry.artistName,
-          bpm: currentSongEntry.bpm,
-          key: currentSongEntry.key,
-        });
-      }
-    } else if (playlist.length === 0 && jamSession) {
-      setCurrentDisplaySongInfo({id: 'empty', title: 'No songs in Jam', author:'', bpm: 120});
-      setPlayableSongData(sampleSong);
+
+    } else if (playlist.length === 0 && jamSession) { // No songs in jam
+      const defaultEmptySong = placeholderPlayableSongData;
+      setCurrentDisplaySongInfo({id: 'empty', title: 'No songs in Jam', author:'', bpm: defaultEmptySong.bpm, key: defaultEmptySong.key});
+      setPlayableSongData(defaultEmptySong);
     }
   }, [currentSongIndex, playlist, jamSession]);
 
@@ -204,7 +228,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     let localTimerIntervalId: NodeJS.Timeout | undefined = undefined;
     let firestoreUpdateIntervalId: NodeJS.Timeout | undefined = undefined;
 
-    if (isPlayingRef.current && playlist.length > 0) {
+    if (isPlayingRef.current && playlist.length > 0 && playableSongData.totalDuration > 0) {
       localTimerIntervalId = setInterval(() => {
         setCurrentTime((prevTime) => {
           const nextTime = prevTime + 0.1;
@@ -220,8 +244,8 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                 updateFirestoreSession({ isPlaying: true, currentTime: 0, currentSongIndexInJam: nextSongIndex });
               }
               localUpdateInProgressRef.current = false;
-              return 0; // Time for the new song
-            } else { // Playlist ended
+              return 0; 
+            } else { 
               if (isSyncEnabled && firebaseInitialized) {
                  localUpdateInProgressRef.current = true;
                  updateFirestoreSession({ isPlaying: false, currentTime: playableSongData.totalDuration, currentSongIndexInJam: currentSongIndexRef.current });
@@ -252,7 +276,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
 
   const handlePlayPause = useCallback(() => {
-    if (playlist.length === 0) return;
+    if (playlist.length === 0 || playableSongData.totalDuration === 0) return;
     const newIsPlayingState = !isPlayingRef.current;
     let newCurrentTimeState = latestCurrentTimeRef.current;
     if (newCurrentTimeState >= playableSongData.totalDuration && newIsPlayingState) {
@@ -313,14 +337,14 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
 
   const handleSectionSelect = useCallback((newTime: number) => {
-    if (playlist.length === 0) return;
+    if (playlist.length === 0 || playableSongData.totalDuration === 0) return;
     localUpdateInProgressRef.current = true;
     setCurrentTime(newTime);
     if (isSyncEnabled && firebaseInitialized) {
       updateFirestoreSession({ currentTime: newTime, isPlaying: isPlayingRef.current, currentSongIndexInJam: currentSongIndexRef.current });
     }
     localUpdateInProgressRef.current = false;
-  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, playlist.length]);
+  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, playlist.length, playableSongData.totalDuration]);
 
 
   const formatTime = (timeInSeconds: number) => {
@@ -376,14 +400,14 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     return playableSongData.chords.find(c => currentTime >= c.startTime && currentTime < c.endTime);
   }, [currentTime, playableSongData.chords]);
 
-  // activeLyricWordInfo is crucial for highlighting the current word AND the active line.
   const activeLyricWordInfo = useMemo(() => {
     if (!playableSongData.lyrics || !playableSongData.sections) return null;
     for (const section of playableSongData.sections) {
       const lyricLinesInSection = playableSongData.lyrics.filter(line => {
         if (line.length === 0) return false;
         const firstWordTime = line[0].startTime;
-        return firstWordTime >= section.startTime && firstWordTime < section.endTime;
+        // Ensure firstWordTime is valid and within section bounds
+        return typeof firstWordTime === 'number' && firstWordTime >= section.startTime && firstWordTime < section.endTime;
       });
       for (let lineIndex = 0; lineIndex < lyricLinesInSection.length; lineIndex++) {
         const line = lyricLinesInSection[lineIndex];
@@ -397,7 +421,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     return null;
   }, [currentTime, playableSongData.lyrics, playableSongData.sections]);
   
-  // activeLineKeyForHighlight is derived for LyricsDisplay
   const activeLineKeyForHighlight = useMemo(() => {
     if (activeLyricWordInfo) {
       return `${activeLyricWordInfo.sectionId}_${activeLyricWordInfo.lineIndexWithinSection}`;
@@ -411,15 +434,12 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       const sectionForChord = playableSongData.sections.find(s => activeSongChord.startTime >= s.startTime && activeSongChord.startTime < s.endTime);
       if (sectionForChord) return sectionForChord.id;
     }
-    // Fallback: find section by current time if no active lyric/chord gives a section
     const sectionByTime = playableSongData.sections.find(s => currentTime >= s.startTime && currentTime < s.endTime);
     if (sectionByTime) return sectionByTime.id;
     
-    // If before the first section, return the first section's ID
     if (playableSongData.sections.length > 0 && currentTime < playableSongData.sections[0].startTime) {
         return playableSongData.sections[0].id;
     }
-    // If after the last section, return the last section's ID
     if (playableSongData.sections.length > 0 && currentTime >= playableSongData.sections[playableSongData.sections.length -1].endTime) {
         return playableSongData.sections[playableSongData.sections.length -1].id;
     }
@@ -483,7 +503,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             <div className="flex flex-col items-center md:items-end gap-2">
               <Metronome bpm={currentDisplaySongInfo.bpm} isPlaying={isPlaying} />
               <SyncToggle />
-              {(!firebaseInitialized || !db) && (<p className="text-xs text-destructive mt-1"> (Firebase not configured - Sync disabled)</p>)}
+              {(!firebaseInitialized || !db) && (<p className="text-xs text-destructive mt-1 text-right"> (Firebase not configured,<br />Sync disabled)</p>)}
             </div>
           </div>
           <div className="mt-4 text-center md:text-left">

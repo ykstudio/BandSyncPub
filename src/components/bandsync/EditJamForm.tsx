@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
-import { ARTISTS, SONGS, sampleSong } from '@/lib/song-data';
+import { SONGS, sampleSong } from '@/lib/song-data'; // SONGS is SongEntry[]
 import type { SongEntry, JamSession } from '@/lib/types';
 import { PlusCircle, Trash2, Music2, Info, ChevronUp, ChevronDown } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -34,7 +34,7 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
   useEffect(() => {
     // Pre-select songs based on jamData.songIds and maintain their order
     const initialSelectedSongs = jamData.songIds
-      .map(songId => SONGS.find(s => s.id === songId))
+      .map(songId => SONGS.find(s => s.id === songId)) // Use SONGS (SongEntry[]) for metadata
       .filter(Boolean) as SongEntry[];
     setSelectedSongs(initialSelectedSongs);
   }, [jamData.songIds]);
@@ -96,10 +96,9 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
       await updateDoc(jamDocRef, {
         name: jamName,
         songIds: selectedSongs.map(s => s.id),
-        // createdAt is not updated here, it remains from original creation
       });
       toast({ title: 'Jam Updated!', description: `"${jamName}" has been successfully updated.` });
-      router.push(`/jam/${jamData.id}`); // Or router.push('/');
+      router.push(`/jam/${jamData.id}`);
     } catch (error) {
       console.error('Error updating Jam:', error);
       toast({ title: 'Error Updating Jam', description: 'Could not update your Jam Session. Please try again.', variant: 'destructive' });
@@ -107,7 +106,7 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
     }
   };
 
-  const filteredSongs = SONGS.filter(song =>
+  const filteredSongs = SONGS.filter(song => // Use SONGS (SongEntry[]) for metadata
     song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     song.artistName.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -136,8 +135,8 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
             <Info className="h-4 w-4" />
             <AlertTitle>Playback Information</AlertTitle>
             <AlertDescription>
-              Currently, only "{sampleSong.title}" by {sampleSong.author} has full interactive playback data (lyrics, chords, sections).
-              If you add other songs to your Jam, their metadata (title, artist) will be displayed, but the actual playback content will use "{sampleSong.title}".
+              Only "{sampleSong.title}" by {sampleSong.author} has full interactive playback data (lyrics, chords, sections).
+              Other songs added to your Jam will have their metadata (title, artist) displayed and use placeholder playback content (basic chords, no lyrics).
             </AlertDescription>
           </Alert>
 

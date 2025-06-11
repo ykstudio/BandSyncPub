@@ -12,15 +12,25 @@ const preProcessSongData = (data: Omit<SongData, 'totalDuration' | 'sections'> &
 
   const totalDuration = cumulativeTime;
 
+  // Ensure chord times do not exceed totalDuration if sections define a shorter song.
+  // This is a simple clamp, more sophisticated logic might be needed for real data.
+  const processedChords = data.chords.map(chord => ({
+    ...chord,
+    startTime: Math.min(chord.startTime, totalDuration),
+    endTime: Math.min(chord.endTime, totalDuration),
+  })).filter(chord => chord.startTime < totalDuration);
+
+
   return {
     ...data,
     sections: processedSections,
+    chords: processedChords,
     totalDuration,
   };
 };
 
 // --- Fully Detailed Song Data (Sample) ---
-export const sampleSong: SongData = preProcessSongData({
+export const sampleSongDataInstance: SongData = preProcessSongData({
   id: "beatles-wmgw", // Unique ID for this song
   title: "While My Guitar Gently Weeps",
   author: "The Beatles",
@@ -95,7 +105,7 @@ export const sampleSong: SongData = preProcessSongData({
     [
       { text: "They", startTime: 68.0, endTime: 68.4 }, { text: "bought", startTime: 68.6, endTime: 69.2 }, { text: "and", startTime: 69.4, endTime: 69.8 }, { text: "sold", startTime: 70.2, endTime: 70.8 }, { text: "you", startTime: 70.8, endTime: 71.2 }
     ],
-    [
+    [ // Guitar Solo starts at 72s, Verse 3 starts at 88s
       { text: "I", startTime: 88.0, endTime: 88.2 }, { text: "look", startTime: 88.3, endTime: 88.6 }, { text: "at", startTime: 88.6, endTime: 88.8 }, { text: "you", startTime: 88.9, endTime: 89.2 }, { text: "all,", startTime: 89.3, endTime: 89.8 },
       { text: "see", startTime: 90.0, endTime: 90.3 }, { text: "the", startTime: 90.3, endTime: 90.5 }, { text: "love", startTime: 90.6, endTime: 91.0 }, { text: "there", startTime: 91.0, endTime: 91.3 }, { text: "that's", startTime: 91.3, endTime: 91.6 }, { text: "sleeping", startTime: 91.6, endTime: 92.3 }
     ],
@@ -105,7 +115,7 @@ export const sampleSong: SongData = preProcessSongData({
     [
       { text: "Look", startTime: 96.0, endTime: 96.5 }, { text: "at", startTime: 96.5, endTime: 96.7 }, { text: "you", startTime: 96.8, endTime: 97.2 }, { text: "all...", startTime: 97.3, endTime: 98.0 }
     ],
-    [
+    [ // Chorus 3 starts at 104s
       { text: "Still", startTime: 100.2, endTime: 100.8 }, { text: "my", startTime: 100.8, endTime: 101.0 }, { text: "guitar", startTime: 101.1, endTime: 101.8 }, { text: "gently", startTime: 102.0, endTime: 102.6 }, { text: "weeps", startTime: 102.8, endTime: 103.6 }
     ],
     [
@@ -144,8 +154,28 @@ export const sampleSong: SongData = preProcessSongData({
     { chord: "Am", startTime: 136, endTime: 138 }, { chord: "G", startTime: 138, endTime: 140 }, { chord: "D/F#", startTime: 140, endTime: 142 }, { chord: "Fmaj7", startTime: 142, endTime: 144 },
   ],
 });
+// This is the single instance used when a song's specific data isn't the fully detailed sample.
+// The JamPlayer will overwrite the id, title, author, bpm, key from the SongEntry.
+export const placeholderPlayableSongData: SongData = preProcessSongData({
+  id: "placeholder-song",
+  title: "Placeholder Song",
+  author: "Placeholder Artist",
+  bpm: 120,
+  key: "C",
+  sections: [
+    { id: "main", name: "Main Section", duration: 16 }
+  ],
+  lyrics: [], // Empty lyrics
+  chords: [ // Generic 4-chord progression
+    { chord: "C", startTime: 0, endTime: 4 },
+    { chord: "G", startTime: 4, endTime: 8 },
+    { chord: "Am", startTime: 8, endTime: 12 },
+    { chord: "F", startTime: 12, endTime: 16 },
+  ],
+});
 
-// --- Song Catalog ---
+
+// --- Song Catalog Metadata (used for selection lists) ---
 export const ARTISTS: Artist[] = [
   { id: "beatles", name: "The Beatles" },
   { id: "direstraits", name: "Dire Straits" },
@@ -156,6 +186,8 @@ export const ARTISTS: Artist[] = [
   { id: "coldplay", name: "Coldplay" },
 ];
 
+// SongEntry is metadata, used for selection lists.
+// The actual playable SongData is now in FULL_SONG_DATA map.
 export const SONGS: SongEntry[] = [
   // The Beatles
   { id: "beatles-wmgw", title: "While My Guitar Gently Weeps", artistId: "beatles", artistName: "The Beatles", key: "Am / A", bpm: 116 },
@@ -241,3 +273,43 @@ export const SONGS: SongEntry[] = [
   { id: "cp-sparks", title: "Sparks", artistId: "coldplay", artistName: "Coldplay", key: "D", bpm: 70 },
   { id: "cp-trouble", title: "Trouble", artistId: "coldplay", artistName: "Coldplay", key: "Gm", bpm: 70 },
 ];
+
+// --- Full Song Data Map ---
+// This map holds the complete SongData for every song.
+export const FULL_SONG_DATA: Record<string, SongData> = {};
+
+SONGS.forEach(songEntry => {
+  if (songEntry.id === sampleSongDataInstance.id) {
+    FULL_SONG_DATA[songEntry.id] = sampleSongDataInstance;
+  } else {
+    // Create placeholder SongData for other songs
+    const placeholderData: Omit<SongData, 'totalDuration' | 'sections'> & { sections: Omit<SongSection, 'startTime' | 'endTime'>[] } = {
+      id: songEntry.id,
+      title: songEntry.title,
+      author: songEntry.artistName,
+      bpm: songEntry.bpm,
+      key: songEntry.key,
+      sections: [
+        { id: "main", name: "Main Section", duration: 16 } // Duration of placeholder content
+      ],
+      lyrics: [], // Empty lyrics for placeholders
+      chords: [ // Generic 4-chord progression for placeholders
+        { chord: "C", startTime: 0, endTime: 4 },
+        { chord: "G", startTime: 4, endTime: 8 },
+        { chord: "Am", startTime: 8, endTime: 12 },
+        { chord: "F", startTime: 12, endTime: 16 },
+      ],
+    };
+    FULL_SONG_DATA[songEntry.id] = preProcessSongData(placeholderData);
+  }
+});
+
+// For convenience, export sampleSong as the detailed one, which is already in FULL_SONG_DATA
+export const sampleSong = sampleSongDataInstance;
+
+// Legacy export, ensure it points to the right data if other components still use it.
+// This is effectively the same as FULL_SONG_DATA['beatles-wmgw']
+// export const sampleSong = FULL_SONG_DATA[sampleSongDataInstance.id];
+// This might be confusing, it's better to reference sampleSongDataInstance or lookup from FULL_SONG_DATA.
+// For the purpose of CreateJamForm/EditJamForm using `sampleSong.title` etc, we can keep the direct export.
+// The `sampleSong` variable now directly refers to `sampleSongDataInstance`.

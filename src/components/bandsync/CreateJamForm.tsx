@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ARTISTS, SONGS, sampleSong } from '@/lib/song-data';
+import { SONGS, sampleSong } from '@/lib/song-data'; // SONGS is SongEntry[]
 import type { SongEntry } from '@/lib/types';
 import { PlusCircle, Trash2, Music2, Info, ChevronUp, ChevronDown } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -94,7 +94,7 @@ export function CreateJamForm() {
     }
   };
 
-  const filteredSongs = SONGS.filter(song =>
+  const filteredSongs = SONGS.filter(song => // SONGS is SongEntry[]
     song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     song.artistName.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -123,8 +123,8 @@ export function CreateJamForm() {
             <Info className="h-4 w-4" />
             <AlertTitle>Playback Information</AlertTitle>
             <AlertDescription>
-              Currently, only "{sampleSong.title}" by {sampleSong.author} has full interactive playback data (lyrics, chords, sections).
-              If you add other songs to your Jam, their metadata (title, artist) will be displayed, but the actual playback content will use "{sampleSong.title}".
+              Only "{sampleSong.title}" by {sampleSong.author} has full interactive playback data (lyrics, chords, sections).
+              Other songs added to your Jam will have their metadata (title, artist) displayed and use placeholder playback content (basic chords, no lyrics).
             </AlertDescription>
           </Alert>
 
