@@ -1,46 +1,28 @@
 
 'use client';
 
-import type { ChordChange, LyricLine } from '@/lib/types';
+import type { ChordChange, LyricLine, LyricWord } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
 
 interface LyricsDisplayProps {
   lyrics: LyricLine[];
-  currentTime: number;
   chords: ChordChange[];
+  activeSongChord: ChordChange | undefined; // The single chord active in the song right now
+  activeLyricWordInfo: { lineIndex: number; wordIndex: number; word: LyricWord } | null;
 }
 
 const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChange | undefined => {
   return allChords.find(c => time >= c.startTime && time < c.endTime);
 };
 
-export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProps) {
+export function LyricsDisplay({ lyrics, chords, activeSongChord, activeLyricWordInfo }: LyricsDisplayProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const overallCurrentChord = getChordActiveAtTime(currentTime, chords); // This can be ChordChange | undefined
-
-  let activeWordLineIndex = -1;
-  let activeWordIndexInLine = -1;
-
-  // Determine the currently active word's indices
-  if (lyrics && lyrics.length > 0) {
-    for (let lIdx = 0; lIdx < lyrics.length; lIdx++) {
-      for (let wIdx = 0; wIdx < lyrics[lIdx].length; wIdx++) {
-        const word = lyrics[lIdx][wIdx];
-        if (currentTime >= word.startTime && currentTime < word.endTime) {
-          activeWordLineIndex = lIdx;
-          activeWordIndexInLine = wIdx;
-          break;
-        }
-      }
-      if (activeWordLineIndex !== -1) break;
-    }
-  }
 
   useEffect(() => {
-    if (!scrollContainerRef.current || activeWordLineIndex === -1 || activeWordIndexInLine === -1) return;
+    if (!scrollContainerRef.current || !activeLyricWordInfo) return;
 
-    const activeWordElement = document.getElementById(`word-${activeWordLineIndex}-${activeWordIndexInLine}`);
+    const activeWordElement = document.getElementById(`word-${activeLyricWordInfo.lineIndex}-${activeLyricWordInfo.wordIndex}`);
 
     if (activeWordElement) {
       activeWordElement.scrollIntoView({
@@ -48,7 +30,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
         block: 'center',
       });
     }
-  }, [currentTime, lyrics, activeWordLineIndex, activeWordIndexInLine]);
+  }, [activeLyricWordInfo]);
 
   return (
     <div
@@ -62,7 +44,8 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
           <div key={lineIndex} className="mb-6">
             <p className="flex flex-wrap items-baseline gap-x-1.5">
               {line.map((word, wordIndex) => {
-                const isThisTheCurrentActiveWord = lineIndex === activeWordLineIndex && wordIndex === activeWordIndexInLine;
+                const isThisTheCurrentActiveWord = activeLyricWordInfo?.lineIndex === lineIndex && activeLyricWordInfo?.wordIndex === wordIndex;
+                
                 const chordAssociatedWithWord = getChordActiveAtTime(word.startTime, chords);
                 let chordToDisplayAboveWord: ChordChange | null = null;
 
@@ -76,11 +59,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                 }
                 
                 let highlightThisDisplayedChord = false;
-                // A chord symbol is highlighted IF AND ONLY IF:
-                // 1. There is an overallCurrentChord active in the song.
-                // 2. We are about to display a chord symbol for the current word (chordToDisplayAboveWord is not null).
-                // 3. The chord we are about to display IS the overallCurrentChord (strict object equality).
-                if (overallCurrentChord && chordToDisplayAboveWord === overallCurrentChord) {
+                if (activeSongChord && chordToDisplayAboveWord === activeSongChord) {
                   highlightThisDisplayedChord = true;
                 }
 
@@ -123,3 +102,4 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
     </div>
   );
 }
+

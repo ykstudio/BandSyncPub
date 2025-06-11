@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import type { SongData, SessionState, ChordChange } from '@/lib/types';
+import type { SongData, SessionState, ChordChange, LyricWord } from '@/lib/types';
 import { sampleSong } from '@/lib/song-data';
 import { SongInfo } from './SongInfo';
 import { Metronome } from './Metronome';
@@ -94,36 +94,29 @@ export function SongDisplay() {
             const remoteTime = remoteState.currentTime;
             const localWantsToPlay = isPlayingRef.current;
 
-            // Scenario A: Local client has definitively finished the song.
-            // Its state (paused at end) should be resilient against stale updates.
             if (!localWantsToPlay && currentLocalTime >= songData.totalDuration) {
-                // If remote is trying to play something *before* the end, ignore it. Stay finished.
                 if (remoteIsPlaying && remoteTime < songData.totalDuration) {
-                    if (isPlaying) setIsPlaying(false); // Ensure React state `isPlaying` is also false if it wasn't.
-                    return songData.totalDuration; // Stay at the end.
+                    if (isPlaying) setIsPlaying(false); 
+                    return songData.totalDuration; 
                 }
-                // If remote is also paused, but at an earlier time (and not a reset to 0), stay finished.
                 if (!remoteIsPlaying && remoteTime < songData.totalDuration && remoteTime > 0.1) {
-                    return songData.totalDuration; // Stay at the end.
+                    return songData.totalDuration; 
                 }
-                // Fall through for other cases (e.g., remote resets to 0, or remote is also at/past end).
             }
 
-            // Scenario B: General state mismatch (play/pause status)
             if (localWantsToPlay !== remoteIsPlaying) {
                 setIsPlaying(remoteIsPlaying);
                 return remoteTime;
             }
 
-            // Scenario C: Both agree on play/pause status
-            if (localWantsToPlay) { // Both are playing
+            if (localWantsToPlay) { 
                 const timeDifference = remoteTime - currentLocalTime;
-                if (timeDifference > TIME_DRIFT_THRESHOLD) { // Remote is significantly ahead
+                if (timeDifference > TIME_DRIFT_THRESHOLD) { 
                     return remoteTime;
                 }
-                return currentLocalTime; // Local is ahead or close enough
-            } else { // Both are paused
-                if (Math.abs(currentLocalTime - remoteTime) > 0.05) { // Times differ significantly
+                return currentLocalTime; 
+            } else { 
+                if (Math.abs(currentLocalTime - remoteTime) > 0.05) { 
                     return remoteTime;
                 }
                 return currentLocalTime;
@@ -162,13 +155,13 @@ export function SongDisplay() {
         setCurrentTime((prevTime) => {
           const nextTime = prevTime + 0.1;
           if (nextTime >= songData.totalDuration) {
-            const thisClientWasPlaying = isPlayingRef.current; // Capture before setIsPlaying call
-            setIsPlaying(false); // Stop local playback behavior, this will trigger cleanup of intervals via its own useEffect
+            const thisClientWasPlaying = isPlayingRef.current; 
+            setIsPlaying(false); 
 
             if (thisClientWasPlaying && isSyncEnabled && firebaseInitialized) {
               updateFirestoreSession({ isPlaying: false, currentTime: songData.totalDuration });
             }
-            return songData.totalDuration; // Update React state to totalDuration
+            return songData.totalDuration; 
           }
           return nextTime;
         });
@@ -254,6 +247,29 @@ export function SongDisplay() {
       )}
     </div>
   );
+  
+  const activeSongChord = useMemo(() => {
+    return songData.chords.find(c => currentTime >= c.startTime && currentTime < c.endTime);
+  }, [currentTime, songData.chords]);
+
+  const activeLyricWordInfo = useMemo(() => {
+    if (!songData.lyrics) return null;
+    for (let lineIndex = 0; lineIndex < songData.lyrics.length; lineIndex++) {
+      const line = songData.lyrics[lineIndex];
+      for (let wordIndex = 0; wordIndex < line.length; wordIndex++) {
+        const word = line[wordIndex];
+        if (currentTime >= word.startTime && currentTime < word.endTime) {
+          return { lineIndex, wordIndex, word };
+        }
+      }
+    }
+    return null;
+  }, [currentTime, songData.lyrics]);
+
+  const currentSectionId = useMemo(() => {
+    return songData.sections.find(s => currentTime >= s.startTime && currentTime < s.endTime)?.id || null;
+  }, [currentTime, songData.sections]);
+
 
   if (isSyncEnabled && isLoadingSession && firebaseInitialized) {
     return (
@@ -299,12 +315,17 @@ export function SongDisplay() {
 
           <SectionProgressBar
             sections={songData.sections}
-            currentSectionId={songData.sections.find(s => currentTime >= s.startTime && currentTime < s.endTime)?.id || null}
+            currentSectionId={currentSectionId}
             currentTime={currentTime}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <LyricsDisplay lyrics={songData.lyrics} currentTime={currentTime} chords={songData.chords} />
+            <LyricsDisplay 
+              lyrics={songData.lyrics} 
+              chords={songData.chords}
+              activeSongChord={activeSongChord}
+              activeLyricWordInfo={activeLyricWordInfo}
+            />
             <ChordsDisplay chords={songData.chords} currentTime={currentTime} songBpm={songData.bpm} />
           </div>
         </CardContent>
