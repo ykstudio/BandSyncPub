@@ -8,12 +8,12 @@ import { SongInfo } from './SongInfo';
 import { Metronome } from './Metronome';
 import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
-import { ChordsDisplay } from './ChordsDisplay'; // Added import
+import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Play, Pause, SkipBack, Settings2, Wifi, WifiOff } from 'lucide-react';
 import { db } from '@/lib/firebase'; // Firebase Firestore instance
-import { doc, onSnapshot, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, serverTimestamp, Timestamp, getDoc } from 'firebase/firestore'; // Added getDoc
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 const SESSION_ID = 'global-bandsync-session'; // All users share this one session
 const TIME_DRIFT_THRESHOLD = 1.0; // Seconds. If remote is AHEAD by more than this, local catches up.
 const FIRESTORE_UPDATE_INTERVAL = 2000; // Milliseconds (2 seconds)
+const SONG_DOCUMENT_ID = 'bandsync-jam-v1'; // Static ID for our sample song
 
 export function SongDisplay() {
   const songData: SongData = sampleSong;
@@ -48,6 +49,42 @@ export function SongDisplay() {
       setIsLoadingSession(false);
     }
   }, [isSyncEnabled]);
+
+
+  // Effect to save song data to Firestore if it doesn't exist
+  useEffect(() => {
+    const saveSongToFirestoreIfNeeded = async () => {
+      if (!isSyncEnabled || !db || !firebaseInitialized) {
+        // Don't try to save if sync is off or Firebase isn't ready
+        return;
+      }
+
+      const songDocRef = doc(db, 'songs', SONG_DOCUMENT_ID);
+
+      try {
+        const docSnap = await getDoc(songDocRef);
+        if (!docSnap.exists()) {
+          await setDoc(songDocRef, songData); // songData is the imported sampleSong
+          toast({
+            title: "Song Data Saved",
+            description: `"${songData.title}" has been saved to Firestore with ID: ${SONG_DOCUMENT_ID}.`,
+          });
+        } else {
+          // Song already exists, no need to re-save or notify unless for debugging.
+          // console.log(`Song data for "${songData.title}" already exists in Firestore.`);
+        }
+      } catch (error) {
+        console.error("Error saving/checking song data in Firestore:", error);
+        toast({
+          title: "Firestore Error",
+          description: "Could not save or check song data.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    saveSongToFirestoreIfNeeded();
+  }, [isSyncEnabled, db, firebaseInitialized, songData, toast]); // Dependencies
 
 
   const updateFirestoreSession = useCallback(async (newState: Partial<SessionState>) => {
@@ -362,4 +399,3 @@ export function SongDisplay() {
     </div>
   );
 }
-
