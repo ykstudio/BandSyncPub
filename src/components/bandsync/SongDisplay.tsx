@@ -13,16 +13,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Play, Pause, SkipBack, Settings2, Wifi, WifiOff } from 'lucide-react';
 import { db } from '@/lib/firebase'; // Firebase Firestore instance
-import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore'; 
+import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 
 
-const SESSION_ID = 'global-bandsync-session'; 
-const TIME_DRIFT_THRESHOLD = 1.0; 
-const FIRESTORE_UPDATE_INTERVAL = 2000; 
-const SONG_DOCUMENT_ID = 'bandsync-jam-v1'; 
+const SESSION_ID = 'global-bandsync-session';
+const TIME_DRIFT_THRESHOLD = 1.0;
+const FIRESTORE_UPDATE_INTERVAL = 2000;
 
 export function SongDisplay() {
   const songData: SongData = sampleSong;
@@ -49,40 +48,6 @@ export function SongDisplay() {
       setIsLoadingSession(false);
     }
   }, [isSyncEnabled, db]);
-
-
-  // Effect to save song data to Firestore if it doesn't exist
-  useEffect(() => {
-    const saveSongToFirestoreIfNeeded = async () => {
-      if (!isSyncEnabled || !db || !firebaseInitialized) {
-        return;
-      }
-
-      const songDocRef = doc(db, 'songs', SONG_DOCUMENT_ID);
-
-      try {
-        const docSnap = await getDoc(songDocRef);
-        if (!docSnap.exists()) {
-          await setDoc(songDocRef, songData); 
-          toast({
-            title: "Song Data Saved",
-            description: `"${songData.title}" has been saved to Firestore with ID: ${SONG_DOCUMENT_ID}.`,
-          });
-        } else {
-          // Song already exists
-        }
-      } catch (error) {
-        console.error("Error saving/checking song data in Firestore:", error);
-        toast({
-          title: "Firestore Error",
-          description: "Could not save or check song data.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    saveSongToFirestoreIfNeeded();
-  }, [isSyncEnabled, db, firebaseInitialized, songData, toast]); 
 
 
   const updateFirestoreSession = useCallback(async (newState: Partial<SessionState>) => {
@@ -131,11 +96,11 @@ export function SongDisplay() {
 
             if (!localWantsToPlay && currentLocalTime >= songData.totalDuration) {
                 if (remoteIsPlaying && remoteTime < songData.totalDuration) {
-                    if (isPlaying) setIsPlaying(false); 
-                    return songData.totalDuration; 
+                    if (isPlaying) setIsPlaying(false);
+                    return songData.totalDuration;
                 }
                 if (!remoteIsPlaying && remoteTime < songData.totalDuration && remoteTime > 0.1) {
-                    return songData.totalDuration; 
+                    return songData.totalDuration;
                 }
             }
 
@@ -144,14 +109,14 @@ export function SongDisplay() {
                 return remoteTime;
             }
 
-            if (localWantsToPlay) { 
+            if (localWantsToPlay) {
                 const timeDifference = remoteTime - currentLocalTime;
-                if (timeDifference > TIME_DRIFT_THRESHOLD) { 
+                if (timeDifference > TIME_DRIFT_THRESHOLD) {
                     return remoteTime;
                 }
-                return currentLocalTime; 
-            } else { 
-                if (Math.abs(currentLocalTime - remoteTime) > 0.05) { 
+                return currentLocalTime;
+            } else {
+                if (Math.abs(currentLocalTime - remoteTime) > 0.05) {
                     return remoteTime;
                 }
                 return currentLocalTime;
@@ -177,7 +142,7 @@ export function SongDisplay() {
     return () => {
       unsubscribe();
     };
-  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, toast, songData.totalDuration, isPlaying, db]);
+  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, songData.totalDuration, isPlaying]);
 
 
   // Effect for local timer and periodic Firestore updates
@@ -190,13 +155,13 @@ export function SongDisplay() {
         setCurrentTime((prevTime) => {
           const nextTime = prevTime + 0.1;
           if (nextTime >= songData.totalDuration) {
-            const thisClientWasPlaying = isPlayingRef.current; 
-            setIsPlaying(false); 
+            const thisClientWasPlaying = isPlayingRef.current;
+            setIsPlaying(false);
 
             if (thisClientWasPlaying && isSyncEnabled && firebaseInitialized) {
               updateFirestoreSession({ isPlaying: false, currentTime: songData.totalDuration });
             }
-            return songData.totalDuration; 
+            return songData.totalDuration;
           }
           return nextTime;
         });
@@ -204,10 +169,10 @@ export function SongDisplay() {
 
       if (isSyncEnabled && firebaseInitialized) {
         firestoreUpdateIntervalId = setInterval(() => {
-          if (isPlayingRef.current) { 
-             setCurrentTime(latestCurrentTime => { 
+          if (isPlayingRef.current) {
+             setCurrentTime(latestCurrentTime => {
                 updateFirestoreSession({ currentTime: latestCurrentTime, isPlaying: true });
-                return latestCurrentTime; 
+                return latestCurrentTime;
              });
           }
         }, FIRESTORE_UPDATE_INTERVAL);
@@ -225,15 +190,15 @@ export function SongDisplay() {
 
 
   const handlePlayPause = useCallback(() => {
-    const newIsPlayingState = !isPlayingRef.current; 
+    const newIsPlayingState = !isPlayingRef.current;
     let newCurrentTimeState = currentTime;
 
     if (newCurrentTimeState >= songData.totalDuration && newIsPlayingState) {
-      newCurrentTimeState = 0; 
+      newCurrentTimeState = 0;
     }
     
-    setIsPlaying(newIsPlayingState); 
-    setCurrentTime(newCurrentTimeState); 
+    setIsPlaying(newIsPlayingState);
+    setCurrentTime(newCurrentTimeState);
 
     if (isSyncEnabled && firebaseInitialized) {
         updateFirestoreSession({ isPlaying: newIsPlayingState, currentTime: newCurrentTimeState });
@@ -241,8 +206,8 @@ export function SongDisplay() {
   }, [currentTime, isSyncEnabled, firebaseInitialized, updateFirestoreSession, songData.totalDuration]);
 
   const handleReset = useCallback(() => {
-    setIsPlaying(false); 
-    setCurrentTime(0);   
+    setIsPlaying(false);
+    setCurrentTime(0);
     if (isSyncEnabled && firebaseInitialized) {
         updateFirestoreSession({ isPlaying: false, currentTime: 0 });
     }
@@ -270,21 +235,21 @@ export function SongDisplay() {
           setIsSyncEnabled(checked);
           if (!checked) {
             toast({ title: "Sync Disabled", description: "Playback is now local." });
-          } else if (!firebaseInitialized) {
+          } else if (!firebaseInitialized || !db) { // Added !db check
              toast({ title: "Sync Failed", description: "Firebase not configured. Sync remains off.", variant: "destructive" });
              setIsSyncEnabled(false);
           } else {
              toast({ title: "Sync Enabled", description: "Attempting to connect to shared session." });
-             setIsLoadingSession(true); 
+             setIsLoadingSession(true);
           }
         }}
-        disabled={!firebaseInitialized && !db} // Also disable if db is null
+        disabled={!firebaseInitialized && !db}
       />
       <Label htmlFor="sync-toggle" className="text-sm flex items-center gap-1">
         {isSyncEnabled && firebaseInitialized && db ? <Wifi className="w-4 h-4 text-green-500" /> : <WifiOff className="w-4 h-4 text-red-500" />}
         Real-time Sync
       </Label>
-      {(!firebaseInitialized || !db) && ( // Show if not initialized OR db is null
+      {(!firebaseInitialized || !db) && (
         <p className="text-xs text-destructive"> (Firebase not configured)</p>
       )}
     </div>
