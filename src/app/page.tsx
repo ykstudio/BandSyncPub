@@ -8,7 +8,7 @@ import { db } from '@/lib/firebase';
 import type { JamSession } from '@/lib/types';
 import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { ListMusic, PlusCircle } from 'lucide-react';
+import { ListMusic, PlusCircle, Pencil } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function HomePage() {
@@ -85,7 +85,10 @@ export default function HomePage() {
               <CardContent className="space-y-2">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-2/3" />
-                <Skeleton className="h-10 w-1/3 mt-2" />
+                <div className="flex gap-2 mt-3">
+                  <Skeleton className="h-10 w-1/3" />
+                  <Skeleton className="h-10 w-1/3" />
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -119,10 +122,15 @@ export default function HomePage() {
                   )}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-wrap gap-2">
                 <Link href={`/jam/${jam.id}`} passHref>
-                  <Button className="w-full sm:w-auto">
+                  <Button className="flex-grow sm:flex-grow-0">
                     <ListMusic className="mr-2 h-4 w-4" /> Open Jam
+                  </Button>
+                </Link>
+                <Link href={`/edit-jam/${jam.id}`} passHref>
+                  <Button variant="outline" className="flex-grow sm:flex-grow-0">
+                    <Pencil className="mr-2 h-4 w-4" /> Edit Jam
                   </Button>
                 </Link>
               </CardContent>
