@@ -13,7 +13,7 @@ interface ChordsDisplayProps {
 
 export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayProps) {
   const pulseDuration = songBpm > 0 ? 60 / songBpm : 0.5;
-  const anticipationLeadTime = pulseDuration; 
+  const anticipationLeadTime = pulseDuration;
   const targetDisplayTime = currentTime + anticipationLeadTime;
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -40,6 +40,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
   if (visuallyCurrentChordIndex !== -1 && visuallyCurrentChordIndex < chords.length - 1) {
     visuallyNextChord = chords[visuallyCurrentChordIndex + 1];
   } else if (visuallyCurrentChordIndex === -1 && chords.length > 0 && targetDisplayTime < chords[0].startTime) {
+    // If before the first chord, the "next" is the first chord
     visuallyNextChord = chords[0];
   }
 
@@ -53,7 +54,6 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
       if (visuallyCurrentChordIndex !== -1) {
         elementToScrollToIndex = visuallyCurrentChordIndex;
       } else if (visuallyNextChord) { 
-        // If no current, but there's a "next" (e.g., start of song), target the "next" for scrolling.
         const nextChordGlobalIndex = chords.findIndex(c => c.startTime === visuallyNextChord!.startTime && c.chord === visuallyNextChord!.chord);
         if (nextChordGlobalIndex !== -1) {
           elementToScrollToIndex = nextChordGlobalIndex;
@@ -82,10 +82,10 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
       <div 
         ref={scrollContainerRef} 
         className={cn(
-          "flex overflow-x-auto overflow-y-hidden h-full items-center",
+          "flex overflow-x-auto overflow-y-hidden h-full items-center", // Changed from items-end
           "space-x-4 md:space-x-6", 
           "py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent scroll-smooth",
-          "scroll-pr-32 md:scroll-pr-64" // Responsive scroll padding
+          "scroll-pr-32 md:scroll-pr-64" 
         )}
       >
         {chords.map((chord, index) => {
@@ -95,12 +95,14 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
 
           let chordSpecificClasses = '';
           let animationStyle: React.CSSProperties = {};
+          
+          const baseKey = `${chord.chord}-${chord.startTime}-${index}`;
 
           if (isVisuallyPrevious) {
             chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-px text-4xl sm:text-5xl md:text-7xl leading-none';
           } else if (isVisuallyCurrent) {
-            chordSpecificClasses = 'font-bold text-accent text-6xl sm:text-8xl md:text-[10rem] leading-none';
-            if (songBpm > 0) { // Only apply pulse if BPM is valid
+            chordSpecificClasses = 'font-bold text-accent text-6xl sm:text-8xl md:text-[10rem] leading-none border-l-2 border-r-2 border-accent';
+            if (songBpm > 0) {
               animationStyle = {
                 animationName: 'metronome-pulse',
                 animationDuration: `${currentChordPulseDurationStr}s`,
@@ -116,10 +118,10 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
 
           return (
             <div
-              key={`${chord.chord}-${chord.startTime}-${index}`} // Ensure unique key
+              key={baseKey}
               ref={el => chordItemRefs.current[index] = el}
               className={cn(
-                'flex-shrink-0 p-1',
+                'flex-shrink-0 p-1', // Ensure some padding so border isn't flush with text
                 chordSpecificClasses
               )}
               style={animationStyle}
@@ -132,3 +134,4 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
     </div>
   );
 }
+
