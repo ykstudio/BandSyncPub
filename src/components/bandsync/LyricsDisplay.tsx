@@ -27,7 +27,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
   const lineItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo, currentTime]);
-  renderedChordObjectsThisPass.clear(); 
+  renderedChordObjectsThisPass.clear();
 
   useEffect(() => {
     if (!scrollContainerRef.current || !activeLyricWordInfo?.word) return;
@@ -78,16 +78,16 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                     <p className="flex flex-wrap items-baseline gap-x-1.5">
                       {line.map((word, wordIndex) => {
                         const isThisTheCurrentActiveWord = activeLyricWordInfo?.word === word;
-                        const chordForThisWord = getChordActiveAtTime(word.startTime, chords);
+                        const chordToDisplay = getChordActiveAtTime(word.startTime, chords);
                         let shouldDisplayChordSymbol = false;
 
-                        if (chordForThisWord && !renderedChordObjectsThisPass.has(chordForThisWord)) {
+                        if (chordToDisplay && !renderedChordObjectsThisPass.has(chordToDisplay)) {
                           shouldDisplayChordSymbol = true;
-                          renderedChordObjectsThisPass.add(chordForThisWord);
+                          renderedChordObjectsThisPass.add(chordToDisplay);
                         }
 
-                        const isChordSymbolActive = activeSongChord && chordForThisWord === activeSongChord;
-                        const isChordSymbolPast = !isChordSymbolActive && chordForThisWord && chordForThisWord.endTime < currentTime;
+                        const isChordSymbolActive = activeSongChord && chordToDisplay === activeSongChord;
+                        const isChordSymbolPast = !isChordSymbolActive && chordToDisplay && chordToDisplay.endTime < currentTime;
 
 
                         return (
@@ -95,7 +95,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                             key={`word-${section.id}-${lineIdx}-${wordIndex}`}
                             className="relative inline-block pt-px"
                           >
-                            {shouldDisplayChordSymbol && chordForThisWord && (
+                            {shouldDisplayChordSymbol && chordToDisplay && (
                               <span
                                 className={cn(
                                   "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none p-1 rounded-md",
@@ -103,10 +103,10 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                                     ? "bg-accent/20 text-accent font-bold" 
                                     : isChordSymbolPast
                                     ? "text-muted-foreground bg-muted/10"
-                                    : "text-primary bg-primary/10"
+                                    : "text-primary" // Upcoming chords are now just blue text
                                 )}
                               >
-                                {chordForThisWord.chord}
+                                {chordToDisplay.chord}
                               </span>
                             )}
                             <span
@@ -139,7 +139,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                               ? "bg-accent/20 text-accent font-bold" 
                               : isChordSymbolPast
                               ? "text-muted-foreground bg-muted/10"
-                              : "text-primary bg-primary/10"
+                              : "text-primary" // Upcoming chords are now just blue text
                           )}
                         >
                           {chord.chord}
