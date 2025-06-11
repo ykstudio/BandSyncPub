@@ -54,71 +54,56 @@ export function LyricsDisplay({
   const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, currentTime, activeSongChord, activeLyricWordInfo, currentSectionId, activeLineKeyForHighlight]);
   renderedChordObjectsThisPass.clear();
 
-
-  useEffect(() => {
-    if (!scrollContainerRef.current) return;
+useEffect(() => {
+    if (!scrollContainerRef.current || !lyrics.length) return;
 
     const container = scrollContainerRef.current;
     const containerRect = container.getBoundingClientRect();
 
-    let scrollTargetElement: HTMLElement | null = null;
-    let scrollOptions: ScrollIntoViewOptions = { behavior: 'auto', inline: 'nearest', block: 'start' }; // Default to 'start'
+    let elementToScroll: HTMLElement | null = null;
+    let isLyricTarget = false;
 
     if (activeLineKeyForHighlight && lineItemRefs.current[activeLineKeyForHighlight]) {
-        scrollTargetElement = lineItemRefs.current[activeLineKeyForHighlight];
+        elementToScroll = lineItemRefs.current[activeLineKeyForHighlight];
+        isLyricTarget = true;
     } else if (currentSectionId && sectionHeaderRefs.current[currentSectionId]) {
-        scrollTargetElement = sectionHeaderRefs.current[currentSectionId];
+        elementToScroll = sectionHeaderRefs.current[currentSectionId];
+        isLyricTarget = false;
     }
+
+    if (!elementToScroll) return;
 
     // Initial scroll logic: if playback just started and we haven't done an initial scroll.
-    if (!initialScrollDoneRef.current && songIsPlaying && !scrollTargetElement) {
-        if (sections.length > 0) {
-            const firstSectionId = sections[0].id;
-            const firstLineKey = `${firstSectionId}_0`; // Try to target the first lyric line
-            if (lineItemRefs.current[firstLineKey]) {
-                scrollTargetElement = lineItemRefs.current[firstLineKey];
-            } else if (sectionHeaderRefs.current[firstSectionId]) { // Fallback to first section header
-                scrollTargetElement = sectionHeaderRefs.current[firstSectionId];
-            }
-        }
+    if (!initialScrollDoneRef.current && songIsPlaying) {
+        elementToScroll.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
+        initialScrollDoneRef.current = true;
+        return; // Prevent further processing in this effect run
     }
     
-    if (scrollTargetElement) {
-        const elementRect = scrollTargetElement.getBoundingClientRect();
-        const topOffset = elementRect.top - containerRect.top;
-        const isTargetActiveLine = activeLineKeyForHighlight && scrollTargetElement === lineItemRefs.current[activeLineKeyForHighlight];
+    if (songIsPlaying && elementToScroll) {
+        const elementRect = elementToScroll.getBoundingClientRect();
+        const topOffset = elementRect.top - containerRect.top; // Relative to container's visible top
 
-        let shouldScroll = false;
-
-        if (isTargetActiveLine) {
-            // If the active line is not roughly in the top 0-30% of the viewport, scroll it.
-            if (topOffset < 0 || topOffset > containerRect.height * 0.3) {
-                shouldScroll = true;
+        if (isLyricTarget) {
+            // If lyric line is cut off at the top (topOffset < 0 means top of element is above container's top)
+            // OR if its top is visible but too far down (e.g. > 15% of container height from the top)
+            if (topOffset < 0 || topOffset > containerRect.height * 0.15) { 
+                 elementToScroll.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
             }
-        } else if (scrollTargetElement.id.startsWith('section-header-')) { // Is a section header
-             // If section header isn't very close to the top, scroll it.
-            if (Math.abs(topOffset) > 5) { // 5px tolerance
-                shouldScroll = true;
-            }
-        } else if (!initialScrollDoneRef.current && songIsPlaying) { // For initial scroll
-            shouldScroll = true;
-        }
-
-
-        if (shouldScroll) {
-            scrollTargetElement.scrollIntoView(scrollOptions);
-            if (!initialScrollDoneRef.current && songIsPlaying && scrollTargetElement) {
-                initialScrollDoneRef.current = true;
+        } else { // Is a section header target
+            // If header not at the very top (with tolerance for sub-pixel rendering issues)
+            if (Math.abs(topOffset) > 5) { 
+                 elementToScroll.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
             }
         }
     }
-}, [activeLineKeyForHighlight, currentSectionId, songIsPlaying, sections, lyrics, initialScrollDoneRef]); // Simplified dependencies
+}, [activeLineKeyForHighlight, currentSectionId, songIsPlaying, lyrics, sections, initialScrollDoneRef]);
 
 
   return (
     <div
       ref={scrollContainerRef}
-      className="space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-scroll border border-border"
+      className="space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-scroll border border-border scroll-pt-10" // Added scroll-pt-10
     >
       {sections.map((section, sectionIndex) => {
         const lyricLinesInSection = lyrics.filter(line => {
@@ -139,7 +124,7 @@ export function LyricsDisplay({
                   ? "text-accent font-bold bg-accent-lightBg" 
                   : "text-primary bg-card"
               )}
-              id={`section-header-${section.id}`} // Added ID for easier targeting if needed
+              id={`section-header-${section.id}`}
             >
               {section.name}
             </h3>
@@ -151,6 +136,7 @@ export function LyricsDisplay({
                   
                   const isThisLineCurrentlySinging = activeLineKeyForHighlight === lineKey;
                   const wasThisLineLastSinging = lastTrackedActiveLineKey === lineKey;
+                  
                   const isLineActiveForStyling = isThisLineCurrentlySinging || 
                                                 (activeLineKeyForHighlight === null && 
                                                  wasThisLineLastSinging && 
@@ -162,6 +148,7 @@ export function LyricsDisplay({
                       key={lineKey}
                       ref={el => lineItemRefs.current[lineKey] = el}
                       className="mb-6" 
+                      id={`line-item-${lineKey}`}
                     >
                       <p className="flex flex-wrap items-baseline gap-x-1.5">
                         {line.map((word, wordIndex) => {
@@ -197,12 +184,11 @@ export function LyricsDisplay({
                             wordTextStyle = 'text-primary';
                           }
 
-
                           return (
                             <span
                               key={`word-${section.id}-${lineIdxInSection}-${wordIndex}`}
                               className={cn(
-                                "relative inline-block leading-snug", // Removed pt-px, removed transition-colors
+                                "relative inline-block leading-snug",
                                 wordTextStyle
                               )}
                             >
@@ -276,4 +262,3 @@ export function LyricsDisplay({
     </div>
   );
 }
-
