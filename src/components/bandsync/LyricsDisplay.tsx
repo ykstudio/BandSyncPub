@@ -27,6 +27,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lineItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const sectionHeaderRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const prevCurrentSectionIdRef = useRef<string | null>(null);
 
   const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo, currentTime, currentSectionId]);
   renderedChordObjectsThisPass.clear();
@@ -35,25 +36,51 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
   useEffect(() => {
     if (!scrollContainerRef.current) return;
 
-    let targetElement: HTMLElement | null = null;
-    let scrollBlockOption: ScrollLogicalPosition = 'nearest'; // Default for lyrics
+    const isNewSectionJustActivated = currentSectionId !== null && prevCurrentSectionIdRef.current !== currentSectionId;
 
-    if (activeLyricWordInfo?.word) {
+    if (isNewSectionJustActivated) {
+      const sectionHeaderElement = sectionHeaderRefs.current[currentSectionId!];
+      if (sectionHeaderElement) {
+        sectionHeaderElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest',
+        });
+      }
+    } else if (activeLyricWordInfo?.word) {
+      // Not a new section, but an active lyric word exists
       const { sectionId, lineIndexWithinSection } = activeLyricWordInfo;
       const targetKey = `${sectionId}_${lineIndexWithinSection}`;
-      targetElement = lineItemRefs.current[targetKey];
-      scrollBlockOption = 'nearest'; // Use 'nearest' for lyric lines
-    } else if (currentSectionId) {
-      targetElement = sectionHeaderRefs.current[currentSectionId];
-      scrollBlockOption = 'start'; // Use 'start' for section headers when no lyrics are active
+      const lyricLineElement = lineItemRefs.current[targetKey];
+      if (lyricLineElement) {
+        lyricLineElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'nearest',
+        });
+      }
+    } else if (currentSectionId && !activeLyricWordInfo?.word && !isNewSectionJustActivated) {
+      // Current section is active (e.g., instrumental part), no active lyrics, and it's not a brand new section activation.
+      // The header should have been scrolled to 'start' when the section was new.
+      // We could re-scroll to 'start' here if needed, but it might cause jitter if the user scrolled manually.
+      // For now, primary scroll happens on new section activation or lyric change.
+      // If solo section header is still not showing, this `else if` might need to be more assertive like the `isNewSectionJustActivated` block.
+      const sectionHeaderElement = sectionHeaderRefs.current[currentSectionId!];
+      if (sectionHeaderElement) {
+         // Check if the element is already mostly visible at the top.
+         // This is a heuristic to prevent jitter if it's already well-positioned.
+        const containerRect = scrollContainerRef.current.getBoundingClientRect();
+        const elementRect = sectionHeaderElement.getBoundingClientRect();
+        // If the top of the element is significantly below the top of the container, scroll it up.
+        if (elementRect.top > containerRect.top + 20) { // 20px tolerance
+            sectionHeaderElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        }
+      }
     }
-    
-    if (targetElement) {
-      targetElement.scrollIntoView({
-        behavior: 'smooth',
-        block: scrollBlockOption, 
-        inline: 'nearest', // Keep inline as 'nearest'
-      });
+
+    // Update the previous section ID *after* all logic for the current render.
+    if (currentSectionId !== prevCurrentSectionIdRef.current) {
+      prevCurrentSectionIdRef.current = currentSectionId;
     }
   }, [activeLyricWordInfo, currentSectionId]);
 
@@ -87,13 +114,13 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
               {section.name}
             </h3>
             
-            <div className="pt-16 px-4"> {/* Maintain horizontal padding here */}
+            <div className="pt-16 px-4">
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => (
                   <div
                     key={`line-${section.id}-${lineIdx}`}
                     ref={el => lineItemRefs.current[`${section.id}_${lineIdx}`] = el}
-                    className="mb-6" // Removed px-4 from here, parent has it
+                    className="mb-6"
                   >
                     <p className="flex flex-wrap items-baseline gap-x-1.5">
                       {line.map((word, wordIndex) => {
@@ -124,9 +151,9 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                                     ? "bg-accent-lightBg text-accent font-bold" 
                                     : isChordSymbolPast
                                     ? "text-muted-foreground bg-muted/10"
-                                    : isChordSymbolUpcoming // This will be true for upcoming chords
-                                    ? "text-primary" // No background for upcoming
-                                    : "text-primary" // Default to primary if none of the above (should not happen)
+                                    : isChordSymbolUpcoming
+                                    ? "text-primary"
+                                    : "text-primary"
                                 )}
                               >
                                 {chordForThisWord.chord}
@@ -149,7 +176,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                   </div>
                 ))
               ) : (
-                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2"> {/* Removed px-4 from here, parent has it */}
+                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2">
                   {chords.map((chord, chordIdx) => {
                     if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
                       renderedChordObjectsThisPass.add(chord);
@@ -167,8 +194,8 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                               : isChordSymbolPast
                               ? "text-muted-foreground bg-muted/10"
                               : isChordSymbolUpcoming
-                              ? "text-primary" // No background for upcoming
-                              : "text-primary" // Default
+                              ? "text-primary"
+                              : "text-primary"
                           )}
                         >
                           {chord.chord}
@@ -184,11 +211,10 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         );
       })}
       {sections.length === 0 && lyrics.length === 0 && (
-        <p className="text-muted-foreground px-4 pb-4"> {/* Maintain horizontal padding here */}
+        <p className="text-muted-foreground px-4 pb-4">
           No lyrics or sections available for this song.
         </p>
       )}
     </div>
   );
 }
-
