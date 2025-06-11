@@ -26,26 +26,33 @@ const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChan
 export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSongChord, activeLyricWordInfo, currentSectionId }: LyricsDisplayProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lineItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const sectionHeaderRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo, currentTime, currentSectionId]);
   renderedChordObjectsThisPass.clear();
 
 
   useEffect(() => {
-    if (!scrollContainerRef.current || !activeLyricWordInfo?.word) return;
+    if (!scrollContainerRef.current) return;
 
-    const { sectionId, lineIndexWithinSection } = activeLyricWordInfo;
-    const targetKey = `${sectionId}_${lineIndexWithinSection}`;
-    const targetElement = lineItemRefs.current[targetKey];
+    let targetElement: HTMLElement | null = null;
+
+    if (activeLyricWordInfo?.word) {
+      const { sectionId, lineIndexWithinSection } = activeLyricWordInfo;
+      const targetKey = `${sectionId}_${lineIndexWithinSection}`;
+      targetElement = lineItemRefs.current[targetKey];
+    } else if (currentSectionId) {
+      targetElement = sectionHeaderRefs.current[currentSectionId];
+    }
     
     if (targetElement) {
       targetElement.scrollIntoView({
         behavior: 'smooth',
-        block: 'center',
+        block: 'center', 
         inline: 'nearest',
       });
     }
-  }, [activeLyricWordInfo]);
+  }, [activeLyricWordInfo, currentSectionId]);
 
 
   return (
@@ -65,6 +72,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         return (
           <div key={`section-${section.id}-${sectionIndex}`} className="mb-3">
             <h3
+              ref={el => sectionHeaderRefs.current[section.id] = el}
               className={cn(
                 "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-border pl-4",
                 isActiveSection 
