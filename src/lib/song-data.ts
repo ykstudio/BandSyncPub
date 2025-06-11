@@ -24,6 +24,7 @@ export const sampleSong: SongData = preProcessSongData({
   title: "While My Guitar Gently Weeps",
   author: "The Beatles",
   bpm: 116,
+  key: "Am / A", // Added song key
   sections: [
     { id: "intro", name: "Intro", duration: 8 },
     { id: "verse1", name: "Verse 1", duration: 16 },

@@ -3,9 +3,10 @@ import type { SongData } from '@/lib/types';
 interface SongInfoProps {
   title: SongData['title'];
   author: SongData['author'];
+  songKey?: SongData['key'];
 }
 
-export function SongInfo({ title, author }: SongInfoProps) {
+export function SongInfo({ title, author, songKey }: SongInfoProps) {
   let mainTitle = title;
   let subTitlePart: string | null = null;
 
@@ -28,6 +29,9 @@ export function SongInfo({ title, author }: SongInfoProps) {
         <h2 className="text-2xl font-bold font-headline text-primary -mt-2">{subTitlePart}</h2>
       )}
       <p className="text-lg text-muted-foreground mt-1">by {author}</p>
+      {songKey && (
+        <p className="text-sm text-muted-foreground">Key: {songKey}</p>
+      )}
     </div>
   );
 }

@@ -24,6 +24,7 @@ export interface SongData {
   title: string;
   author: string;
   bpm: number;
+  key?: string; // Added song key
   sections: SongSection[];
   lyrics: LyricLine[];
   chords: ChordChange[];
