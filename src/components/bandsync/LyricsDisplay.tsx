@@ -50,7 +50,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
   return (
     <div
       ref={scrollContainerRef}
-      className="p-4 space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto scroll-smooth"
+      className="space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto scroll-smooth border border-border"
     >
       {sections.map((section, sectionIndex) => {
         const lyricLinesInSection = lyrics.filter(line => {
@@ -74,7 +74,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                   <div
                     key={`line-${section.id}-${lineIdx}`}
                     ref={el => lineItemRefs.current[`${section.id}_${lineIdx}`] = el}
-                    className="mb-6"
+                    className="mb-6 px-4" // Added px-4 here for side padding of lines
                   >
                     <p className="flex flex-wrap items-baseline gap-x-1.5">
                       {line.map((word, wordIndex) => {
@@ -124,7 +124,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                   </div>
                 ))
               ) : (
-                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-1">
+                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-4"> {/* Added px-4 here */}
                   {chords.map((chord, chordIdx) => {
                     if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
                       renderedChordObjectsThisPass.add(chord);
@@ -155,7 +155,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         );
       })}
       {sections.length === 0 && lyrics.length === 0 && (
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground px-4 pb-4"> {/* Added px-4 pb-4 here */}
           No lyrics or sections available for this song.
         </p>
       )}
