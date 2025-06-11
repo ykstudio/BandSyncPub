@@ -106,7 +106,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
     if (isNewSectionJustActivated && currentSectionId) {
       const sectionHeaderElement = sectionHeaderRefs.current[currentSectionId];
       if (sectionHeaderElement) {
-        sectionHeaderElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        sectionHeaderElement.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
         scrolledThisUpdate = true;
       }
     } 
@@ -114,7 +114,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
     if (!scrolledThisUpdate && scrollTargetLineKey) {
       const targetLineElement = lineItemRefs.current[scrollTargetLineKey];
       if (targetLineElement) {
-        targetLineElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        targetLineElement.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
         scrolledThisUpdate = true;
       }
     }
@@ -125,8 +125,8 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         const containerRect = scrollContainerRef.current.getBoundingClientRect();
         const elementRect = activeLineElement.getBoundingClientRect();
         if (elementRect.bottom > containerRect.bottom - 20 || elementRect.top < containerRect.top + 20) {
-            activeLineElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-            scrolledThisUpdate = true; // Ensure only one scroll action if this one is taken
+            activeLineElement.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+            scrolledThisUpdate = true; 
         }
       }
     }
@@ -136,10 +136,8 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
       if (sectionHeaderElement) {
         const containerRect = scrollContainerRef.current.getBoundingClientRect();
         const elementRect = sectionHeaderElement.getBoundingClientRect();
-        // Only scroll to section header if it's not already mostly visible or at the top
-        if (elementRect.top > containerRect.top + 20) { // if it's further down
-            sectionHeaderElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-            // scrolledThisUpdate = true; // Not strictly needed here as it's the last check
+        if (elementRect.top > containerRect.top + 20) { 
+            sectionHeaderElement.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
         }
       }
     }

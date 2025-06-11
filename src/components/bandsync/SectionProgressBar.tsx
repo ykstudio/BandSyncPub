@@ -29,7 +29,7 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
         const activeElement = sectionItemRefs.current[activeSectionIndex];
         if (activeElement) {
           activeElement.scrollIntoView({
-            behavior: 'smooth',
+            behavior: 'auto', // Changed from 'smooth'
             inline: 'center',
             block: 'nearest',
           });
@@ -51,7 +51,7 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
     <div className="w-full p-2 my-4 rounded-lg shadow-md bg-card">
       <div
         ref={scrollContainerRef}
-        className="flex w-full h-12 rounded overflow-x-auto"
+        className="flex w-full h-12 rounded overflow-x-auto" // Removed scroll-smooth from here as well if it was present
       >
         {sections.map((section, index) => {
           const itemRef = (el: HTMLDivElement | null) => sectionItemRefs.current[index] = el;
@@ -101,4 +101,3 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
     </div>
   );
 }
-

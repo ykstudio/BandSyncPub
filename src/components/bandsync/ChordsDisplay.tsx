@@ -66,7 +66,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
       
       if (activeElement) {
         activeElement.scrollIntoView({
-          behavior: 'smooth',
+          behavior: 'auto', // Changed from 'smooth'
           inline: 'center', 
           block: 'nearest', 
         });
@@ -84,8 +84,8 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
         className={cn(
           "flex overflow-x-auto overflow-y-hidden h-full items-center",
           "space-x-4 md:space-x-6", 
-          "py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent scroll-smooth",
-          "scroll-pl-32 md:scroll-pl-64 scroll-pr-32 md:scroll-pr-64" // Added scroll-pl-*
+          "py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent", // Removed scroll-smooth
+          "scroll-pl-32 md:scroll-pl-64 scroll-pr-32 md:scroll-pr-64" 
         )}
       >
         {chords.map((chord, index) => {
@@ -99,10 +99,8 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
           const baseKey = `${chord.chord}-${chord.startTime}-${index}`;
 
           if (isVisuallyPrevious) {
-            // Previous: text-3xl sm:text-5xl md:text-6xl
             chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-px text-3xl sm:text-5xl md:text-6xl leading-none';
           } else if (isVisuallyCurrent) {
-            // Current: text-5xl sm:text-7xl md:text-9xl
             chordSpecificClasses = 'font-bold text-accent text-5xl sm:text-7xl md:text-9xl leading-none bg-accent-lightBg px-4 py-2 rounded-xl';
             if (songBpm > 0) {
               animationStyle = {
@@ -113,10 +111,8 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
               };
             }
           } else if (isVisuallyNext) {
-             // Next: text-6xl sm:text-8xl md:text-[10rem]
             chordSpecificClasses = 'text-primary text-6xl sm:text-8xl md:text-[10rem] leading-none';
           } else {
-            // Other: text-2xl sm:text-3xl md:text-5xl
             chordSpecificClasses = 'text-muted-foreground text-2xl sm:text-3xl md:text-5xl opacity-60 leading-none';
           }
 
