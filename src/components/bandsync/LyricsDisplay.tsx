@@ -120,7 +120,9 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                             <span
                               className={cn(
                                 'transition-colors duration-100 leading-snug',
-                                isThisTheCurrentActiveWord ? 'text-accent font-bold' : 'text-foreground'
+                                isThisTheCurrentActiveWord 
+                                  ? 'text-accent font-bold bg-accent-lightBg px-1 rounded-sm' 
+                                  : 'text-foreground'
                               )}
                             >
                               {word.text}
