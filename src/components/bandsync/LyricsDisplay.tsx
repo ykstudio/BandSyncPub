@@ -48,7 +48,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
     if (targetElement) {
       targetElement.scrollIntoView({
         behavior: 'smooth',
-        block: 'center', 
+        block: 'nearest', 
         inline: 'nearest',
       });
     }
@@ -84,13 +84,13 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
               {section.name}
             </h3>
             
-            <div className="pt-16">
+            <div className="pt-16"> {/* Increased padding to avoid chord overlap with sticky header */}
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => (
                   <div
                     key={`line-${section.id}-${lineIdx}`}
                     ref={el => lineItemRefs.current[`${section.id}_${lineIdx}`] = el}
-                    className="mb-6 px-4"
+                    className="mb-6 px-4" 
                   >
                     <p className="flex flex-wrap items-baseline gap-x-1.5">
                       {line.map((word, wordIndex) => {
@@ -142,7 +142,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                   </div>
                 ))
               ) : (
-                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-4">
+                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-4"> {/* Added px-4 for consistency */}
                   {chords.map((chord, chordIdx) => {
                     if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
                       renderedChordObjectsThisPass.add(chord);
@@ -173,7 +173,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         );
       })}
       {sections.length === 0 && lyrics.length === 0 && (
-        <p className="text-muted-foreground px-4 pb-4">
+        <p className="text-muted-foreground px-4 pb-4"> {/* Added px-4 for consistency */}
           No lyrics or sections available for this song.
         </p>
       )}
