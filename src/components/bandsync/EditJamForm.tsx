@@ -14,7 +14,7 @@ import { db } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ARTISTS, SONGS, sampleSong } from '@/lib/song-data';
 import type { SongEntry, JamSession } from '@/lib/types';
-import { PlusCircle, Trash2, Music2, Info } from 'lucide-react';
+import { PlusCircle, Trash2, Music2, Info, ChevronUp, ChevronDown } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const MAX_SONGS_IN_JAM = 10;
@@ -32,7 +32,7 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Pre-select songs based on jamData.songIds
+    // Pre-select songs based on jamData.songIds and maintain their order
     const initialSelectedSongs = jamData.songIds
       .map(songId => SONGS.find(s => s.id === songId))
       .filter(Boolean) as SongEntry[];
@@ -56,6 +56,22 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
           return prevSelected;
         }
       }
+    });
+  };
+
+  const handleMoveSong = (index: number, direction: 'up' | 'down') => {
+    setSelectedSongs(prevSelected => {
+      const newSelected = [...prevSelected];
+      const songToMove = newSelected[index];
+
+      if (direction === 'up' && index > 0) {
+        newSelected.splice(index, 1); // Remove from current position
+        newSelected.splice(index - 1, 0, songToMove); // Insert at new position
+      } else if (direction === 'down' && index < newSelected.length - 1) {
+        newSelected.splice(index, 1); // Remove from current position
+        newSelected.splice(index + 1, 0, songToMove); // Insert at new position
+      }
+      return newSelected;
     });
   };
 
@@ -177,19 +193,43 @@ export function EditJamForm({ jamData }: EditJamFormProps) {
                 {selectedSongs.length > 0 ? (
                   selectedSongs.map((song, index) => (
                     <div key={`${song.id}-${index}`} className="flex items-center justify-between p-2 mb-2 rounded-md bg-card shadow-sm">
-                      <div>
+                      <div className="flex-grow">
                         <p className="font-medium">{index + 1}. {song.title}</p>
                         <p className="text-sm text-muted-foreground">{song.artistName}</p>
                       </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleSongToggle(song)}
-                        aria-label="Remove song"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <div className="flex items-center">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleMoveSong(index, 'up')}
+                          disabled={index === 0}
+                          aria-label="Move song up"
+                          className="mr-1"
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleMoveSong(index, 'down')}
+                          disabled={index === selectedSongs.length - 1}
+                          aria-label="Move song down"
+                          className="mr-1"
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleSongToggle(song)}
+                          aria-label="Remove song"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
                   ))
                 ) : (
