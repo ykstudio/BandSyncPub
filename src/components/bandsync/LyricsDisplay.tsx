@@ -136,7 +136,9 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
       if (sectionHeaderElement) {
         const containerRect = scrollContainerRef.current.getBoundingClientRect();
         const elementRect = sectionHeaderElement.getBoundingClientRect();
-        if (elementRect.top > containerRect.top + 20) { 
+        // Only scroll section header if it's not mostly visible or if we are scrolling down to it.
+        // This might reduce some jitter if it was scrolling unnecessarily.
+        if (elementRect.top < containerRect.top || elementRect.top > containerRect.top + containerRect.height / 3) { 
             sectionHeaderElement.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
         }
       }
@@ -181,6 +183,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => {
                   const lineKey = `${section.id}_${lineIdx}`;
+                  // isCurrentLineActive determines if this line contains the currently singing word.
                   const isCurrentLineActive = activeLineKeyForHighlight === lineKey;
                   
                   return (
@@ -189,10 +192,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                       ref={el => lineItemRefs.current[lineKey] = el}
                       className="mb-6"
                     >
-                      <p className={cn(
-                        "flex flex-wrap items-baseline gap-x-1.5",
-                        isCurrentLineActive ? "text-primary" : "text-foreground"
-                      )}>
+                      <p className="flex flex-wrap items-baseline gap-x-1.5">
                         {line.map((word, wordIndex) => {
                           const isThisTheCurrentSingingWord = activeLyricWordInfo?.word === word;
                           const chordForThisWord = getChordActiveAtTime(word.startTime, chords);
@@ -206,6 +206,17 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                           const isChordSymbolActive = activeSongChord && chordForThisWord === activeSongChord;
                           const isChordSymbolPast = !isChordSymbolActive && chordForThisWord && chordForThisWord.endTime < currentTime;
                           const isChordSymbolUpcoming = !isChordSymbolActive && !isChordSymbolPast && chordForThisWord;
+
+                          let wordTextStyle = '';
+                          if (isThisTheCurrentSingingWord) {
+                            wordTextStyle = 'text-accent font-bold bg-accent-lightBg rounded-sm';
+                          } else if (currentTime > word.endTime) { // Word is in the past
+                            wordTextStyle = 'text-muted-foreground';
+                          } else if (isCurrentLineActive) { // Word is upcoming in the active line
+                            wordTextStyle = 'text-primary';
+                          } else { // Word is upcoming in an inactive line
+                            wordTextStyle = 'text-foreground';
+                          }
 
                           return (
                             <span
@@ -231,13 +242,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                               <span
                                 className={cn(
                                   'transition-colors duration-100 leading-snug',
-                                  isThisTheCurrentSingingWord
-                                    ? 'text-accent font-bold bg-accent-lightBg rounded-sm' // Current singing word is purple
-                                    : isCurrentLineActive
-                                      ? '' // Word in active line (played or upcoming) inherits blue from parent <p>
-                                      : currentTime > word.endTime // Word in INACTIVE line and is PLAYED
-                                        ? 'text-muted-foreground' // Gray
-                                        : '' // Word in INACTIVE line and is UPCOMING inherits dark from parent <p>
+                                  wordTextStyle
                                 )}
                               >
                                 {word.text}
@@ -292,3 +297,4 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
     </div>
   );
 }
+
