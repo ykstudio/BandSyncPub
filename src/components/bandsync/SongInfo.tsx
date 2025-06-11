@@ -1,24 +1,20 @@
-import type { SongData } from '@/lib/types';
 
 interface SongInfoProps {
-  title: SongData['title'];
-  author: SongData['author'];
-  songKey?: SongData['key'];
+  title: string;
+  author: string;
+  songKey?: string;
 }
 
 export function SongInfo({ title, author, songKey }: SongInfoProps) {
   let mainTitle = title;
   let subTitlePart: string | null = null;
 
-  // Specifically look for "BandSync Jam" to split
-  if (title === "BandSync Jam") {
-    mainTitle = "BandSync";
-    subTitlePart = "Jam";
-  }
-  // Fallback for other potential titles starting with "BandSync "
-  else if (title.startsWith("BandSync ") && title.length > "BandSync ".length) {
+  if (title && title.startsWith("BandSync ") && title.length > "BandSync ".length) {
     mainTitle = "BandSync";
     subTitlePart = title.substring("BandSync ".length);
+  } else if (title === "BandSync Jam") { // Specific case
+     mainTitle = "BandSync";
+     subTitlePart = "Jam";
   }
 
 

@@ -1,3 +1,4 @@
+
 export interface SongSection {
   id: string;
   name: string;
@@ -21,10 +22,11 @@ export interface ChordChange {
 }
 
 export interface SongData {
+  id: string; // Unique ID for the song
   title: string;
   author: string;
   bpm: number;
-  key?: string; // Added song key
+  key?: string;
   sections: SongSection[];
   lyrics: LyricLine[];
   chords: ChordChange[];
@@ -36,4 +38,28 @@ export interface SessionState {
   currentTime: number;
   lastUpdated: any; // Firestore Timestamp (or ServerTimestamp sentinel)
   // songId?: string; // Future: if multiple songs are supported
+}
+
+// New types for song catalog
+export interface Artist {
+  id: string;
+  name: string;
+}
+
+export interface SongEntry {
+  id: string;
+  title: string;
+  artistId: string;
+  artistName: string; // Denormalized for easier display
+  key?: string;
+  bpm: number;
+}
+
+// Type for the information displayed about the currently selected song
+export interface SongDisplayInfo {
+  id: string;
+  title: string;
+  author: string;
+  key?: string;
+  bpm: number;
 }

@@ -1,5 +1,5 @@
 
-import type { SongData, SongSection } from './types';
+import type { SongData, SongSection, Artist, SongEntry } from './types';
 
 const preProcessSongData = (data: Omit<SongData, 'totalDuration' | 'sections'> & { sections: Omit<SongSection, 'startTime' | 'endTime'>[] }): SongData => {
   let cumulativeTime = 0;
@@ -19,12 +19,13 @@ const preProcessSongData = (data: Omit<SongData, 'totalDuration' | 'sections'> &
   };
 };
 
-
+// --- Fully Detailed Song Data (Sample) ---
 export const sampleSong: SongData = preProcessSongData({
+  id: "beatles-wmgw", // Unique ID for this song
   title: "While My Guitar Gently Weeps",
   author: "The Beatles",
   bpm: 116,
-  key: "Am / A", // Added song key
+  key: "Am / A",
   sections: [
     { id: "intro", name: "Intro", duration: 8 },
     { id: "verse1", name: "Verse 1", duration: 16 },
@@ -52,8 +53,6 @@ export const sampleSong: SongData = preProcessSongData({
     [
       { text: "Still", startTime: 20.2, endTime: 20.8 }, { text: "my", startTime: 20.8, endTime: 21.0 }, { text: "guitar", startTime: 21.1, endTime: 21.8 }, { text: "gently", startTime: 22.0, endTime: 22.6 }, { text: "weeps", startTime: 22.8, endTime: 23.6 }
     ],
-
-    // Chorus 1 (Global time: 24s - 40s)
     [
       { text: "I", startTime: 24.0, endTime: 24.2 }, { text: "don't", startTime: 24.3, endTime: 24.7 }, { text: "know", startTime: 24.7, endTime: 25.0 }, { text: "why", startTime: 25.2, endTime: 25.8 },
       { text: "nobody", startTime: 26.2, endTime: 26.9 }, { text: "told", startTime: 27.0, endTime: 27.4 }, { text: "you", startTime: 27.4, endTime: 27.8 }
@@ -68,8 +67,6 @@ export const sampleSong: SongData = preProcessSongData({
     [
       { text: "They", startTime: 36.0, endTime: 36.4 }, { text: "bought", startTime: 36.6, endTime: 37.2 }, { text: "and", startTime: 37.4, endTime: 37.8 }, { text: "sold", startTime: 38.2, endTime: 38.8 }, { text: "you", startTime: 38.8, endTime: 39.2 }
     ],
-
-    // Verse 2 (Global time: 40s - 56s)
     [
       { text: "I", startTime: 40.0, endTime: 40.2 }, { text: "look", startTime: 40.3, endTime: 40.6 }, { text: "at", startTime: 40.6, endTime: 40.8 }, { text: "the", startTime: 40.8, endTime: 41.0 }, { text: "world", startTime: 41.1, endTime: 41.6 },
       { text: "and", startTime: 41.7, endTime: 42.0 }, { text: "I", startTime: 42.0, endTime: 42.2 }, { text: "notice", startTime: 42.4, endTime: 43.0 }, { text: "it's", startTime: 43.0, endTime: 43.2 }, { text: "turning", startTime: 43.2, endTime: 43.9 }
@@ -84,8 +81,6 @@ export const sampleSong: SongData = preProcessSongData({
     [
       { text: "Still", startTime: 52.4, endTime: 53.0 }, { text: "my", startTime: 53.0, endTime: 53.2 }, { text: "guitar", startTime: 53.3, endTime: 54.0 }, { text: "gently", startTime: 54.2, endTime: 54.8 }, { text: "weeps", startTime: 55.0, endTime: 55.8 }
     ],
-
-    // Chorus 2 (Global time: 56s - 72s)
     [
       { text: "I", startTime: 56.0, endTime: 56.2 }, { text: "don't", startTime: 56.3, endTime: 56.7 }, { text: "know", startTime: 56.7, endTime: 57.0 }, { text: "why", startTime: 57.2, endTime: 57.8 },
       { text: "nobody", startTime: 58.2, endTime: 58.9 }, { text: "told", startTime: 59.0, endTime: 59.4 }, { text: "you", startTime: 59.4, endTime: 59.8 }
@@ -100,10 +95,6 @@ export const sampleSong: SongData = preProcessSongData({
     [
       { text: "They", startTime: 68.0, endTime: 68.4 }, { text: "bought", startTime: 68.6, endTime: 69.2 }, { text: "and", startTime: 69.4, endTime: 69.8 }, { text: "sold", startTime: 70.2, endTime: 70.8 }, { text: "you", startTime: 70.8, endTime: 71.2 }
     ],
-    
-    // Solo 1 is from 72s to 88s - No lyrics
-
-    // Verse 3 (Global time: 88s - 104s)
     [
       { text: "I", startTime: 88.0, endTime: 88.2 }, { text: "look", startTime: 88.3, endTime: 88.6 }, { text: "at", startTime: 88.6, endTime: 88.8 }, { text: "you", startTime: 88.9, endTime: 89.2 }, { text: "all,", startTime: 89.3, endTime: 89.8 },
       { text: "see", startTime: 90.0, endTime: 90.3 }, { text: "the", startTime: 90.3, endTime: 90.5 }, { text: "love", startTime: 90.6, endTime: 91.0 }, { text: "there", startTime: 91.0, endTime: 91.3 }, { text: "that's", startTime: 91.3, endTime: 91.6 }, { text: "sleeping", startTime: 91.6, endTime: 92.3 }
@@ -117,8 +108,6 @@ export const sampleSong: SongData = preProcessSongData({
     [
       { text: "Still", startTime: 100.2, endTime: 100.8 }, { text: "my", startTime: 100.8, endTime: 101.0 }, { text: "guitar", startTime: 101.1, endTime: 101.8 }, { text: "gently", startTime: 102.0, endTime: 102.6 }, { text: "weeps", startTime: 102.8, endTime: 103.6 }
     ],
-
-    // Chorus 3 (Global time: 104s - 120s)
     [
       { text: "I", startTime: 104.0, endTime: 104.2 }, { text: "don't", startTime: 104.3, endTime: 104.7 }, { text: "know", startTime: 104.7, endTime: 105.0 }, { text: "why", startTime: 105.2, endTime: 105.8 },
       { text: "nobody", startTime: 106.2, endTime: 106.9 }, { text: "told", startTime: 107.0, endTime: 107.4 }, { text: "you", startTime: 107.4, endTime: 107.8 }
@@ -133,35 +122,122 @@ export const sampleSong: SongData = preProcessSongData({
     [
       { text: "They", startTime: 116.0, endTime: 116.4 }, { text: "bought", startTime: 116.6, endTime: 117.2 }, { text: "and", startTime: 117.4, endTime: 117.8 }, { text: "sold", startTime: 118.2, endTime: 118.8 }, { text: "you", startTime: 118.8, endTime: 119.2 }
     ],
-    // Outro Solo is from 120s to 144s - No lyrics
   ],
   chords: [
-    // Intro (0-8s)
     { chord: "Am", startTime: 0, endTime: 2 }, { chord: "G", startTime: 2, endTime: 4 }, { chord: "D/F#", startTime: 4, endTime: 6 }, { chord: "Fmaj7", startTime: 6, endTime: 8 },
-    // Verse 1 (8-24s)
     { chord: "Am", startTime: 8, endTime: 10 }, { chord: "G", startTime: 10, endTime: 12 }, { chord: "D/F#", startTime: 12, endTime: 14 }, { chord: "Fmaj7", startTime: 14, endTime: 16 },
     { chord: "Am", startTime: 16, endTime: 18 }, { chord: "G", startTime: 18, endTime: 20 }, { chord: "C", startTime: 20, endTime: 22 }, { chord: "E", startTime: 22, endTime: 24 },
-    // Chorus 1 (24-40s)
     { chord: "A", startTime: 24, endTime: 26 }, { chord: "C#m", startTime: 26, endTime: 28 }, { chord: "F#m", startTime: 28, endTime: 30 }, { chord: "C#m", startTime: 30, endTime: 32 },
     { chord: "Bm", startTime: 32, endTime: 34 }, { chord: "E7", startTime: 34, endTime: 36 }, { chord: "A", startTime: 36, endTime: 38 }, { chord: "E", startTime: 38, endTime: 40 },
-    // Verse 2 (40-56s)
     { chord: "Am", startTime: 40, endTime: 42 }, { chord: "G", startTime: 42, endTime: 44 }, { chord: "D/F#", startTime: 44, endTime: 46 }, { chord: "Fmaj7", startTime: 46, endTime: 48 },
     { chord: "Am", startTime: 48, endTime: 50 }, { chord: "G", startTime: 50, endTime: 52 }, { chord: "C", startTime: 52, endTime: 54 }, { chord: "E", startTime: 54, endTime: 56 },
-    // Chorus 2 (56-72s)
     { chord: "A", startTime: 56, endTime: 58 }, { chord: "C#m", startTime: 58, endTime: 60 }, { chord: "F#m", startTime: 60, endTime: 62 }, { chord: "C#m", startTime: 62, endTime: 64 },
     { chord: "Bm", startTime: 64, endTime: 66 }, { chord: "E7", startTime: 66, endTime: 68 }, { chord: "A", startTime: 68, endTime: 70 }, { chord: "E", startTime: 70, endTime: 72 },
-    // Solo 1 (72-88s)
     { chord: "Am", startTime: 72, endTime: 74 }, { chord: "G", startTime: 74, endTime: 76 }, { chord: "D/F#", startTime: 76, endTime: 78 }, { chord: "Fmaj7", startTime: 78, endTime: 80 },
     { chord: "Am", startTime: 80, endTime: 82 }, { chord: "G", startTime: 82, endTime: 84 }, { chord: "C", startTime: 84, endTime: 86 }, { chord: "E", startTime: 86, endTime: 88 },
-    // Verse 3 (88-104s)
     { chord: "Am", startTime: 88, endTime: 90 }, { chord: "G", startTime: 90, endTime: 92 }, { chord: "D/F#", startTime: 92, endTime: 94 }, { chord: "Fmaj7", startTime: 94, endTime: 96 },
     { chord: "Am", startTime: 96, endTime: 98 }, { chord: "G", startTime: 98, endTime: 100 }, { chord: "C", startTime: 100, endTime: 102 }, { chord: "E", startTime: 102, endTime: 104 },
-    // Chorus 3 (104-120s)
     { chord: "A", startTime: 104, endTime: 106 }, { chord: "C#m", startTime: 106, endTime: 108 }, { chord: "F#m", startTime: 108, endTime: 110 }, { chord: "C#m", startTime: 110, endTime: 112 },
     { chord: "Bm", startTime: 112, endTime: 114 }, { chord: "E7", startTime: 114, endTime: 116 }, { chord: "A", startTime: 116, endTime: 118 }, { chord: "E", startTime: 118, endTime: 120 },
-    // Outro Solo (120-144s)
     { chord: "Am", startTime: 120, endTime: 122 }, { chord: "G", startTime: 122, endTime: 124 }, { chord: "D/F#", startTime: 124, endTime: 126 }, { chord: "Fmaj7", startTime: 126, endTime: 128 },
     { chord: "Am", startTime: 128, endTime: 130 }, { chord: "G", startTime: 130, endTime: 132 }, { chord: "D/F#", startTime: 132, endTime: 134 }, { chord: "Fmaj7", startTime: 134, endTime: 136 },
     { chord: "Am", startTime: 136, endTime: 138 }, { chord: "G", startTime: 138, endTime: 140 }, { chord: "D/F#", startTime: 140, endTime: 142 }, { chord: "Fmaj7", startTime: 142, endTime: 144 },
   ],
 });
+
+// --- Song Catalog ---
+export const ARTISTS: Artist[] = [
+  { id: "beatles", name: "The Beatles" },
+  { id: "direstraits", name: "Dire Straits" },
+  { id: "ledzeppelin", name: "Led Zeppelin" },
+  { id: "aerosmith", name: "Aerosmith" },
+  { id: "gunsnroses", name: "Guns N' Roses" },
+  { id: "radiohead", name: "Radiohead" },
+  { id: "coldplay", name: "Coldplay" },
+];
+
+export const SONGS: SongEntry[] = [
+  // The Beatles
+  { id: "beatles-wmgw", title: "While My Guitar Gently Weeps", artistId: "beatles", artistName: "The Beatles", key: "Am / A", bpm: 116 },
+  { id: "beatles-heyjude", title: "Hey Jude", artistId: "beatles", artistName: "The Beatles", key: "F", bpm: 74 },
+  { id: "beatles-letitbe", title: "Let It Be", artistId: "beatles", artistName: "The Beatles", key: "C", bpm: 70 },
+  { id: "beatles-yesterday", title: "Yesterday", artistId: "beatles", artistName: "The Beatles", key: "F", bpm: 96 },
+  { id: "beatles-cometogether", title: "Come Together", artistId: "beatles", artistName: "The Beatles", key: "Dm", bpm: 82 },
+  { id: "beatles-twistandshout", title: "Twist and Shout", artistId: "beatles", artistName: "The Beatles", key: "D", bpm: 124 },
+  { id: "beatles-herecomesthesun", title: "Here Comes the Sun", artistId: "beatles", artistName: "The Beatles", key: "D", bpm: 129 },
+  { id: "beatles-blackbird", title: "Blackbird", artistId: "beatles", artistName: "The Beatles", key: "G", bpm: 94 },
+  { id: "beatles-inmylife", title: "In My Life", artistId: "beatles", artistName: "The Beatles", key: "A", bpm: 102 },
+  { id: "beatles-strawberryfields", title: "Strawberry Fields Forever", artistId: "beatles", artistName: "The Beatles", key: "A", bpm: 98 },
+
+  // Dire Straits
+  { id: "ds-sultans", title: "Sultans of Swing", artistId: "direstraits", artistName: "Dire Straits", key: "Dm", bpm: 148 },
+  { id: "ds-money", title: "Money for Nothing", artistId: "direstraits", artistName: "Dire Straits", key: "Gm", bpm: 134 },
+  { id: "ds-romeo", title: "Romeo and Juliet", artistId: "direstraits", artistName: "Dire Straits", key: "F", bpm: 120 },
+  { id: "ds-walk", title: "Walk of Life", artistId: "direstraits", artistName: "Dire Straits", key: "E", bpm: 172 },
+  { id: "ds-brothers", title: "Brothers in Arms", artistId: "direstraits", artistName: "Dire Straits", key: "G#m", bpm: 80 },
+  { id: "ds-private", title: "Private Investigations", artistId: "direstraits", artistName: "Dire Straits", key: "Am", bpm: 60 },
+  { id: "ds-tunnel", title: "Tunnel of Love", artistId: "direstraits", artistName: "Dire Straits", key: "F", bpm: 140 },
+  { id: "ds-telegraph", title: "Telegraph Road", artistId: "direstraits", artistName: "Dire Straits", key: "Am", bpm: 120 },
+  { id: "ds-sofar", title: "So Far Away", artistId: "direstraits", artistName: "Dire Straits", key: "A", bpm: 100 },
+  { id: "ds-latesttrick", title: "Your Latest Trick", artistId: "direstraits", artistName: "Dire Straits", key: "F#m", bpm: 120 },
+
+  // Led Zeppelin
+  { id: "lz-stairway", title: "Stairway to Heaven", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "Am", bpm: 82 }, // BPM varies
+  { id: "lz-wholelotta", title: "Whole Lotta Love", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "E", bpm: 90 },
+  { id: "lz-kashmir", title: "Kashmir", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "D", bpm: 80 },
+  { id: "lz-blackdog", title: "Black Dog", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "A", bpm: 82 }, // Complex rhythm
+  { id: "lz-immigrant", title: "Immigrant Song", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "F#m", bpm: 112 },
+  { id: "lz-rocknroll", title: "Rock and Roll", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "A", bpm: 170 },
+  { id: "lz-rambleon", title: "Ramble On", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "G", bpm: 100 },
+  { id: "lz-dazed", title: "Dazed and Confused", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "E", bpm: 60 }, // Varies
+  { id: "lz-heartbreaker", title: "Heartbreaker", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "A", bpm: 98 },
+  { id: "lz-sinceive", title: "Since I've Been Loving You", artistId: "ledzeppelin", artistName: "Led Zeppelin", key: "Cm", bpm: 50 }, // Varies
+
+  // Aerosmith
+  { id: "as-dreamon", title: "Dream On", artistId: "aerosmith", artistName: "Aerosmith", key: "Fm", bpm: 80 },
+  { id: "as-sweetemotion", title: "Sweet Emotion", artistId: "aerosmith", artistName: "Aerosmith", key: "A", bpm: 96 },
+  { id: "as-walkthisway", title: "Walk This Way", artistId: "aerosmith", artistName: "Aerosmith", key: "C", bpm: 108 },
+  { id: "as-idontwant", title: "I Don't Want to Miss a Thing", artistId: "aerosmith", artistName: "Aerosmith", key: "D", bpm: 121 },
+  { id: "as-crazy", title: "Crazy", artistId: "aerosmith", artistName: "Aerosmith", key: "A", bpm: 140 }, // Ballad, tempo might feel slower
+  { id: "as-janiesgotagun", title: "Janie's Got a Gun", artistId: "aerosmith", artistName: "Aerosmith", key: "D", bpm: 94 },
+  { id: "as-cryin", title: "Cryin'", artistId: "aerosmith", artistName: "Aerosmith", key: "A", bpm: 134 },
+  { id: "as-livinontheedge", title: "Livin' on the Edge", artistId: "aerosmith", artistName: "Aerosmith", key: "D", bpm: 98 },
+  { id: "as-dude", title: "Dude (Looks Like a Lady)", artistId: "aerosmith", artistName: "Aerosmith", key: "F", bpm: 120 },
+  { id: "as-loveinanelevator", title: "Love in an Elevator", artistId: "aerosmith", artistName: "Aerosmith", key: "C", bpm: 120 },
+
+  // Guns N' Roses
+  { id: "gnr-sweetchild", title: "Sweet Child o' Mine", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "Db", bpm: 125 },
+  { id: "gnr-welcome", title: "Welcome to the Jungle", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "B", bpm: 122 },
+  { id: "gnr-november", title: "November Rain", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "C", bpm: 72 },
+  { id: "gnr-paradise", title: "Paradise City", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "G", bpm: 100 },
+  { id: "gnr-dontcry", title: "Don't Cry", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "Am", bpm: 65 },
+  { id: "gnr-patience", title: "Patience", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "G", bpm: 120 },
+  { id: "gnr-civilwar", title: "Civil War", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "Am", bpm: 75 },
+  { id: "gnr-knockin", title: "Knockin' on Heaven's Door", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "G", bpm: 68 },
+  { id: "gnr-youcouldbemine", title: "You Could Be Mine", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "F#m", bpm: 130 },
+  { id: "gnr-estranged", title: "Estranged", artistId: "gunsnroses", artistName: "Guns N' Roses", key: "F", bpm: 70 },
+
+  // Radiohead
+  { id: "rh-creep", title: "Creep", artistId: "radiohead", artistName: "Radiohead", key: "G", bpm: 92 },
+  { id: "rh-karma", title: "Karma Police", artistId: "radiohead", artistName: "Radiohead", key: "Am", bpm: 76 },
+  { id: "rh-paranoid", title: "Paranoid Android", artistId: "radiohead", artistName: "Radiohead", key: "Gm", bpm: 82 }, // Multiple sections
+  { id: "rh-nosurprises", title: "No Surprises", artistId: "radiohead", artistName: "Radiohead", key: "F", bpm: 77 },
+  { id: "rh-highndry", title: "High and Dry", artistId: "radiohead", artistName: "Radiohead", key: "E", bpm: 86 },
+  { id: "rh-fakeplastic", title: "Fake Plastic Trees", artistId: "radiohead", artistName: "Radiohead", key: "A", bpm: 70 },
+  { id: "rh-streetspirit", title: "Street Spirit (Fade Out)", artistId: "radiohead", artistName: "Radiohead", key: "Am", bpm: 76 },
+  { id: "rh-idioteque", title: "Idioteque", artistId: "radiohead", artistName: "Radiohead", key: "C", bpm: 150 },
+  { id: "rh-pyramid", title: "Pyramid Song", artistId: "radiohead", artistName: "Radiohead", key: "F#", bpm: 80 }, // Complex rhythm
+  { id: "rh-weirdfishes", title: "Weird Fishes/Arpeggi", artistId: "radiohead", artistName: "Radiohead", key: "Em", bpm: 152 },
+
+  // Coldplay
+  { id: "cp-yellow", title: "Yellow", artistId: "coldplay", artistName: "Coldplay", key: "B", bpm: 87 },
+  { id: "cp-scientist", title: "The Scientist", artistId: "coldplay", artistName: "Coldplay", key: "F", bpm: 146 },
+  { id: "cp-clocks", title: "Clocks", artistId: "coldplay", artistName: "Coldplay", key: "Eb Mixolydian", bpm: 131 },
+  { id: "cp-fixyou", title: "Fix You", artistId: "coldplay", artistName: "Coldplay", key: "Eb", bpm: 138 },
+  { id: "cp-viva", title: "Viva La Vida", artistId: "coldplay", artistName: "Coldplay", key: "Ab", bpm: 138 },
+  { id: "cp-paradise", title: "Paradise", artistId: "coldplay", artistName: "Coldplay", key: "Fm", bpm: 140 },
+  { id: "cp-adventure", title: "Adventure of a Lifetime", artistId: "coldplay", artistName: "Coldplay", key: "Am", bpm: 112 },
+  { id: "cp-skyfull", title: "A Sky Full of Stars", artistId: "coldplay", artistName: "Coldplay", key: "Fm", bpm: 125 },
+  { id: "cp-sparks", title: "Sparks", artistId: "coldplay", artistName: "Coldplay", key: "D", bpm: 70 },
+  { id: "cp-trouble", title: "Trouble", artistId: "coldplay", artistName: "Coldplay", key: "Gm", bpm: 70 },
+];
