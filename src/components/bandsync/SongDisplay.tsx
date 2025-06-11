@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import type { SongData, SessionState, ChordChange, LyricWord } from '@/lib/types';
+import type { SongData, SessionState, ChordChange, LyricWord, SongSection } from '@/lib/types';
 import { sampleSong } from '@/lib/song-data';
 import { SongInfo } from './SongInfo';
 import { Metronome } from './Metronome';
@@ -260,17 +260,27 @@ export function SongDisplay() {
   }, [currentTime, songData.chords]);
 
   const activeLyricWordInfo = useMemo(() => {
-    if (!songData.lyrics) return null;
-    // Iterate through all words in all lines to find the active one
-    for (const line of songData.lyrics) {
-      for (const word of line) {
-        if (currentTime >= word.startTime && currentTime < word.endTime) {
-          return { word }; // Return the word object directly
+    if (!songData.lyrics || !songData.sections) return null;
+
+    for (const section of songData.sections) {
+      const lyricLinesInSection = songData.lyrics.filter(line => {
+        if (line.length === 0) return false;
+        const firstWordTime = line[0].startTime;
+        return firstWordTime >= section.startTime && firstWordTime < section.endTime;
+      });
+
+      for (let lineIndex = 0; lineIndex < lyricLinesInSection.length; lineIndex++) {
+        const line = lyricLinesInSection[lineIndex];
+        for (const word of line) {
+          if (currentTime >= word.startTime && currentTime < word.endTime) {
+            return { word, sectionId: section.id, lineIndexWithinSection: lineIndex };
+          }
         }
       }
     }
     return null;
-  }, [currentTime, songData.lyrics]);
+  }, [currentTime, songData.lyrics, songData.sections]);
+
 
   const currentSectionId = useMemo(() => {
     return songData.sections.find(s => currentTime >= s.startTime && currentTime < s.endTime)?.id || null;

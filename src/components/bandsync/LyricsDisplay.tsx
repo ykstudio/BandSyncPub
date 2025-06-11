@@ -10,7 +10,11 @@ interface LyricsDisplayProps {
   chords: ChordChange[];
   sections: SongSection[];
   activeSongChord: ChordChange | undefined;
-  activeLyricWordInfo: { word: LyricWord } | null;
+  activeLyricWordInfo: {
+    word: LyricWord;
+    sectionId: string;
+    lineIndexWithinSection: number;
+  } | null;
 }
 
 const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChange | undefined => {
@@ -19,13 +23,28 @@ const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChan
 
 export function LyricsDisplay({ lyrics, chords, sections, activeSongChord, activeLyricWordInfo }: LyricsDisplayProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections]);
-  renderedChordObjectsThisPass.clear();
+  const lineItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Memoize the set to avoid re-computation if props haven't changed identity
+  const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo]);
+  renderedChordObjectsThisPass.clear(); // Clear for the current render pass
 
   useEffect(() => {
     if (!scrollContainerRef.current || !activeLyricWordInfo?.word) return;
-    // Scrolling logic can be enhanced here if specific word elements have unique IDs
+
+    const { sectionId, lineIndexWithinSection } = activeLyricWordInfo;
+    const targetKey = `${sectionId}_${lineIndexWithinSection}`;
+    const targetElement = lineItemRefs.current[targetKey];
+
+    if (targetElement) {
+      targetElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
+    }
   }, [activeLyricWordInfo]);
+
 
   return (
     <div
@@ -47,81 +66,87 @@ export function LyricsDisplay({ lyrics, chords, sections, activeSongChord, activ
             >
               {section.name}
             </h3>
+            
+            <div className="pt-5"> {/* Added padding here to fix chord cutoff */}
+              {lyricLinesInSection.length > 0 ? (
+                lyricLinesInSection.map((line, lineIdx) => (
+                  <div
+                    key={`line-${section.id}-${lineIdx}`}
+                    ref={el => lineItemRefs.current[`${section.id}_${lineIdx}`] = el}
+                    className="mb-6"
+                  >
+                    <p className="flex flex-wrap items-baseline gap-x-1.5">
+                      {line.map((word, wordIndex) => {
+                        const isThisTheCurrentActiveWord = activeLyricWordInfo?.word === word;
+                        const chordForThisWord = getChordActiveAtTime(word.startTime, chords);
+                        let shouldDisplayChordSymbol = false;
 
-            {lyricLinesInSection.length > 0 ? (
-              lyricLinesInSection.map((line, lineIdx) => (
-                <div key={`line-${section.id}-${lineIdx}`} className="mb-6">
-                  <p className="flex flex-wrap items-baseline gap-x-1.5">
-                    {line.map((word, wordIndex) => {
-                      const isThisTheCurrentActiveWord = activeLyricWordInfo?.word === word;
-                      const chordForThisWord = getChordActiveAtTime(word.startTime, chords);
-                      let shouldDisplayChordSymbol = false;
+                        if (chordForThisWord && !renderedChordObjectsThisPass.has(chordForThisWord)) {
+                          shouldDisplayChordSymbol = true;
+                          renderedChordObjectsThisPass.add(chordForThisWord);
+                        }
 
-                      if (chordForThisWord && !renderedChordObjectsThisPass.has(chordForThisWord)) {
-                        shouldDisplayChordSymbol = true;
-                        renderedChordObjectsThisPass.add(chordForThisWord);
-                      }
+                        let highlightThisDisplayedChordSymbol = false;
+                        if (shouldDisplayChordSymbol && chordForThisWord && activeSongChord && chordForThisWord === activeSongChord) {
+                          highlightThisDisplayedChordSymbol = true;
+                        }
 
-                      let highlightThisDisplayedChordSymbol = false;
-                      if (shouldDisplayChordSymbol && chordForThisWord && activeSongChord && chordForThisWord === activeSongChord) {
-                        highlightThisDisplayedChordSymbol = true;
-                      }
-
-                      return (
-                        <span
-                          key={`word-${section.id}-${lineIdx}-${wordIndex}`}
-                          className="relative inline-block pt-px"
-                        >
-                          {shouldDisplayChordSymbol && chordForThisWord && (
+                        return (
+                          <span
+                            key={`word-${section.id}-${lineIdx}-${wordIndex}`}
+                            className="relative inline-block pt-px"
+                          >
+                            {shouldDisplayChordSymbol && chordForThisWord && (
+                              <span
+                                className={cn(
+                                  "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none p-1",
+                                  highlightThisDisplayedChordSymbol 
+                                    ? "bg-accent/20 text-accent font-bold rounded-md" 
+                                    : "text-primary"
+                                )}
+                              >
+                                {chordForThisWord.chord}
+                              </span>
+                            )}
                             <span
                               className={cn(
-                                "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none p-1",
-                                highlightThisDisplayedChordSymbol 
-                                  ? "bg-accent/20 text-accent font-bold rounded-md" 
-                                  : "text-primary"
+                                'transition-colors duration-100 leading-snug',
+                                isThisTheCurrentActiveWord ? 'text-accent font-bold' : 'text-foreground'
                               )}
                             >
-                              {chordForThisWord.chord}
+                              {word.text}
                             </span>
-                          )}
-                          <span
-                            className={cn(
-                              'transition-colors duration-100 leading-snug',
-                              isThisTheCurrentActiveWord ? 'text-accent font-bold' : 'text-foreground'
-                            )}
-                          >
-                            {word.text}
                           </span>
+                        );
+                      })}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-1">
+                  {chords.map((chord, chordIdx) => {
+                    if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
+                      renderedChordObjectsThisPass.add(chord);
+                      const isChordActive = activeSongChord === chord;
+                      return (
+                        <span
+                          key={`section-chord-${section.id}-${chordIdx}`}
+                          className={cn(
+                            "text-sm font-semibold p-1 rounded-md",
+                            isChordActive 
+                              ? "bg-accent/20 text-accent font-bold" 
+                              : "text-primary bg-primary/10"
+                          )}
+                        >
+                          {chord.chord}
                         </span>
                       );
-                    })}
-                  </p>
+                    }
+                    return null;
+                  })}
                 </div>
-              ))
-            ) : (
-              <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-1">
-                {chords.map((chord, chordIdx) => {
-                  if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
-                    renderedChordObjectsThisPass.add(chord);
-                    const isChordActive = activeSongChord === chord;
-                    return (
-                      <span
-                        key={`section-chord-${section.id}-${chordIdx}`}
-                        className={cn(
-                          "text-sm font-semibold p-1 rounded-md",
-                          isChordActive 
-                            ? "bg-accent/20 text-accent font-bold" 
-                            : "text-primary bg-primary/10"
-                        )}
-                      >
-                        {chord.chord}
-                      </span>
-                    );
-                  }
-                  return null;
-                })}
-              </div>
-            )}
+              )}
+            </div>
           </div>
         );
       })}
