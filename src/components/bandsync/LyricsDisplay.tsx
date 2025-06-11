@@ -121,7 +121,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                               className={cn(
                                 'transition-colors duration-100 leading-snug',
                                 isThisTheCurrentActiveWord 
-                                  ? 'text-accent font-bold bg-accent-lightBg px-1 rounded-sm' 
+                                  ? 'text-accent font-bold bg-accent-lightBg rounded-sm' 
                                   : 'text-foreground'
                               )}
                             >
