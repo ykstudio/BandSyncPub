@@ -7,8 +7,8 @@ import { useEffect, useRef } from 'react';
 
 interface LyricsDisplayProps {
   lyrics: LyricLine[];
-  chords: ChordChange[];
-  activeSongChord: ChordChange | undefined; // The single chord active in the song right now
+  chords: ChordChange[]; // This is songData.chords
+  activeSongChord: ChordChange | undefined; // The single chord active in the song right now, derived from currentTime
   activeLyricWordInfo: { lineIndex: number; wordIndex: number; word: LyricWord } | null;
 }
 
@@ -38,28 +38,17 @@ export function LyricsDisplay({ lyrics, chords, activeSongChord, activeLyricWord
       className="p-4 space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto"
     >
       {lyrics.map((line, lineIndex) => {
-        let lastDisplayedChordText: string | null = null;
-
         return (
           <div key={lineIndex} className="mb-6">
             <p className="flex flex-wrap items-baseline gap-x-1.5">
               {line.map((word, wordIndex) => {
                 const isThisTheCurrentActiveWord = activeLyricWordInfo?.lineIndex === lineIndex && activeLyricWordInfo?.wordIndex === wordIndex;
                 
-                const chordAssociatedWithWord = getChordActiveAtTime(word.startTime, chords);
-                let chordToDisplayAboveWord: ChordChange | null = null;
+                // Determine the chord active at this specific word's start time
+                const chordToDisplayForWord = getChordActiveAtTime(word.startTime, chords);
 
-                if (chordAssociatedWithWord) {
-                  if (wordIndex === 0 || lastDisplayedChordText !== chordAssociatedWithWord.chord) {
-                    chordToDisplayAboveWord = chordAssociatedWithWord;
-                    lastDisplayedChordText = chordAssociatedWithWord.chord;
-                  }
-                } else {
-                  lastDisplayedChordText = null;
-                }
-                
                 let highlightThisDisplayedChord = false;
-                if (activeSongChord && chordToDisplayAboveWord === activeSongChord) {
+                if (chordToDisplayForWord && activeSongChord && chordToDisplayForWord === activeSongChord) {
                   highlightThisDisplayedChord = true;
                 }
 
@@ -69,14 +58,14 @@ export function LyricsDisplay({ lyrics, chords, activeSongChord, activeLyricWord
                     id={`word-${lineIndex}-${wordIndex}`}
                     className="relative inline-block pt-px" 
                   >
-                    {chordToDisplayAboveWord && (
+                    {chordToDisplayForWord && (
                       <span
                         className={cn(
                           "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none",
                           highlightThisDisplayedChord ? "text-accent font-bold" : "text-primary"
                         )}
                       >
-                        {chordToDisplayAboveWord.chord}
+                        {chordToDisplayForWord.chord}
                       </span>
                     )}
                     <span
@@ -102,4 +91,3 @@ export function LyricsDisplay({ lyrics, chords, activeSongChord, activeLyricWord
     </div>
   );
 }
-
