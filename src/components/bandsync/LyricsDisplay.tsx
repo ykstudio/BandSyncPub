@@ -26,8 +26,6 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lineItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // This Set tracks ChordChange *objects* that have been rendered in this pass.
-  // It's reset on each render by being part of the component's execution scope.
   const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo, currentTime]);
   renderedChordObjectsThisPass.clear();
 
@@ -57,7 +55,6 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
       {sections.map((section, sectionIndex) => {
         const lyricLinesInSection = lyrics.filter(line => {
           if (line.length === 0) return false;
-          // A line belongs to a section if its first word starts within the section's time
           const firstWordTime = line[0].startTime;
           return firstWordTime >= section.startTime && firstWordTime < section.endTime;
         });
@@ -65,19 +62,19 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         return (
           <div key={`section-${section.id}-${sectionIndex}`} className="mb-3">
             <h3
-              className="text-base sm:text-lg font-semibold mt-3 mb-2 text-primary sticky top-0 bg-card py-1 z-10 border-b border-border"
+              className="text-base sm:text-lg font-semibold text-primary sticky top-0 bg-card py-2 z-10 border-b border-border"
               id={`section-header-${section.id}`}
             >
               {section.name}
             </h3>
             
-            <div className="pt-8"> {/* Increased padding from pt-5 to pt-8 */}
+            <div className="pt-16"> {/* Increased padding significantly */}
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => (
                   <div
                     key={`line-${section.id}-${lineIdx}`}
                     ref={el => lineItemRefs.current[`${section.id}_${lineIdx}`] = el}
-                    className="mb-6" // Added more bottom margin for lines
+                    className="mb-6"
                   >
                     <p className="flex flex-wrap items-baseline gap-x-1.5">
                       {line.map((word, wordIndex) => {
@@ -96,7 +93,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                         return (
                           <span
                             key={`word-${section.id}-${lineIdx}-${wordIndex}`}
-                            className="relative inline-block pt-px" // pt-px to give a tiny bit of room if descenders clip
+                            className="relative inline-block pt-px" 
                           >
                             {shouldDisplayChordSymbol && chordForThisWord && (
                               <span
@@ -114,7 +111,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                             )}
                             <span
                               className={cn(
-                                'transition-colors duration-100 leading-snug', // leading-snug might be tight
+                                'transition-colors duration-100 leading-snug',
                                 isThisTheCurrentActiveWord ? 'text-accent font-bold' : 'text-foreground'
                               )}
                             >
@@ -127,7 +124,6 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                   </div>
                 ))
               ) : (
-                // Render chords for sections without lyrics
                 <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-1">
                   {chords.map((chord, chordIdx) => {
                     if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
