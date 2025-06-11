@@ -17,7 +17,7 @@ const getChordActiveAtTime = (time: number, allChords: ChordChange[]): ChordChan
 
 export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const overallCurrentChord = getChordActiveAtTime(currentTime, chords);
+  const overallCurrentChord = getChordActiveAtTime(currentTime, chords); // This can be ChordChange | undefined
 
   let activeWordLineIndex = -1;
   let activeWordIndexInLine = -1;
@@ -72,15 +72,15 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                     lastDisplayedChordText = chordAssociatedWithWord.chord;
                   }
                 } else {
-                  lastDisplayedChordText = null; 
+                  lastDisplayedChordText = null;
                 }
                 
                 let highlightThisDisplayedChord = false;
-                if (
-                  chordToDisplayAboveWord !== null &&
-                  overallCurrentChord !== undefined &&
-                  chordToDisplayAboveWord === overallCurrentChord // Highlight if the displayed chord is the overall current chord
-                ) {
+                // A chord symbol is highlighted IF AND ONLY IF:
+                // 1. There is an overallCurrentChord active in the song.
+                // 2. We are about to display a chord symbol for the current word (chordToDisplayAboveWord is not null).
+                // 3. The chord we are about to display IS the overallCurrentChord (strict object equality).
+                if (overallCurrentChord && chordToDisplayAboveWord === overallCurrentChord) {
                   highlightThisDisplayedChord = true;
                 }
 
