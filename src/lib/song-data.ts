@@ -186,25 +186,7 @@ export const sampleSong: SongData = preProcessSongData({
       { text: "dreams.", startTime: 78.2, endTime: 78.8 },
     ],
 
-    // Solo - New lyrics/vocalizations (80-94s)
-    [
-      { text: "Ooh,", startTime: 80, endTime: 81.0 },
-      { text: "yeah,", startTime: 81.0, endTime: 82.0 },
-      { text: "BandSync!", startTime: 82.0, endTime: 83.0 },
-    ],
-    [
-      { text: "Feel", startTime: 84, endTime: 84.8 },
-      { text: "it", startTime: 84.8, endTime: 85.2 },
-      { text: "now...", startTime: 85.2, endTime: 86.0 },
-    ],
-    [
-      { text: "Alright!", startTime: 88, endTime: 89.5 },
-    ],
-    [
-      { text: "Sync", startTime: 92, endTime: 92.8 },
-      { text: "it", startTime: 92.8, endTime: 93.2 },
-      { text: "up!", startTime: 93.2, endTime: 94.0 },
-    ],
+    // Solo section (80s-96s) - No lyrics
 
     // Chorus 3 - Reuse Chorus 1 lyrics (96-109.2s)
     [
