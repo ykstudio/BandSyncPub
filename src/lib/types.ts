@@ -37,7 +37,8 @@ export interface SessionState {
   isPlaying: boolean;
   currentTime: number;
   lastUpdated: any; // Firestore Timestamp (or ServerTimestamp sentinel)
-  // songId?: string; // Future: if multiple songs are supported
+  currentSongIdInJam?: string; // To track which song in a jam is playing
+  currentSongIndexInJam?: number; // To track index for jams
 }
 
 // New types for song catalog
@@ -55,11 +56,22 @@ export interface SongEntry {
   bpm: number;
 }
 
-// Type for the information displayed about the currently selected song
+// Type for the information displayed about the currently selected song OR current song in a Jam
 export interface SongDisplayInfo {
   id: string;
   title: string;
   author: string;
   key?: string;
   bpm: number;
+}
+
+export interface JamSession {
+  id: string; // Firestore document ID
+  name: string;
+  songIds: string[];
+  createdAt: any; // Firestore Timestamp
+}
+
+export interface JamPlaylistEntry extends SongEntry {
+  // May add more specific playlist-related fields later if needed
 }

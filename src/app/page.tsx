@@ -1,32 +1,135 @@
 
-'use client'; // Add 'use client' if using hooks like useState for loading, or if dynamic import itself requires it.
-            // However, for basic dynamic import of a client component, the page itself can remain a Server Component.
-            // Let's assume page.tsx can remain a Server Component and dynamic handles client boundary.
+'use client';
 
-import dynamic from 'next/dynamic';
-import { Skeleton } from '@/components/ui/skeleton'; // For a more structured loader
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { db } from '@/lib/firebase';
+import type { JamSession } from '@/lib/types';
+import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { ListMusic, PlusCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const SongDisplay = dynamic(() => import('@/components/bandsync/SongDisplay').then(mod => mod.SongDisplay), {
-  ssr: false, // Firestore interactions are client-side
-  loading: () => (
-    <div className="container mx-auto p-4 space-y-6">
-      <Skeleton className="h-[120px] w-full rounded-xl" />
-      <div className="space-y-4">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Skeleton className="h-64 md:h-96" />
-          <Skeleton className="h-24 md:h-96" />
-        </div>
-      </div>
-    </div>
-  ),
-});
+export default function HomePage() {
+  const [jams, setJams] = useState<JamSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export default function Home() {
+  useEffect(() => {
+    if (!db) {
+      setError("Firebase is not configured. Cannot load Jams.");
+      setIsLoading(false);
+      return;
+    }
+
+    const jamsCollectionRef = collection(db, 'jams');
+    const q = query(jamsCollectionRef, orderBy('createdAt', 'desc'));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const jamsData: JamSession[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        jamsData.push({
+          id: doc.id,
+          name: data.name,
+          songIds: data.songIds,
+          createdAt: data.createdAt,
+        });
+      });
+      setJams(jamsData);
+      setIsLoading(false);
+      setError(null);
+    }, (err) => {
+      console.error("Error fetching Jams:", err);
+      setError("Could not fetch Jam Sessions. Please try again later.");
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
-    <main className="min-h-screen py-8">
-      <SongDisplay />
+    <main className="container mx-auto min-h-screen p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+        <div className="text-center sm:text-left">
+          <h1 className="text-4xl font-bold text-primary font-headline">BandSync Jams</h1>
+          <p className="text-muted-foreground mt-1">Create, share, and play your Jam Sessions in real-time.</p>
+        </div>
+        <Link href="/create-jam" passHref>
+          <Button size="lg">
+            <PlusCircle className="mr-2 h-5 w-5" /> Create New Jam
+          </Button>
+        </Link>
+      </div>
+
+      {error && (
+        <Card className="mb-6 bg-destructive/10 border-destructive">
+          <CardHeader>
+            <CardTitle className="text-destructive">Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{error}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2 mt-1" />
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-10 w-1/3 mt-2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : jams.length === 0 && !error ? (
+        <Card className="text-center py-12">
+          <CardHeader>
+            <ListMusic className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+            <CardTitle>No Jam Sessions Yet</CardTitle>
+            <CardDescription className="mt-2">
+              Be the first to create a Jam! Click the "Create New Jam" button to get started.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {jams.map((jam) => (
+            <Card key={jam.id} className="flex flex-col">
+              <CardHeader className="flex-grow">
+                <CardTitle className="text-primary hover:underline">
+                  <Link href={`/jam/${jam.id}`}>
+                    {jam.name}
+                  </Link>
+                </CardTitle>
+                <CardDescription>
+                  {jam.songIds.length} song{jam.songIds.length !== 1 ? 's' : ''}
+                  {jam.createdAt && (
+                    <span className="block text-xs mt-1">
+                      Created: {new Date((jam.createdAt as Timestamp).seconds * 1000).toLocaleDateString()}
+                    </span>
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href={`/jam/${jam.id}`} passHref>
+                  <Button className="w-full sm:w-auto">
+                    <ListMusic className="mr-2 h-4 w-4" /> Open Jam
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </main>
   );
 }
