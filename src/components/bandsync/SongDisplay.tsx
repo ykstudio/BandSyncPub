@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Play, Pause, SkipBack, Settings2, Wifi, WifiOff } from 'lucide-react';
 import { db } from '@/lib/firebase'; // Firebase Firestore instance
-import { doc, onSnapshot, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,8 @@ import { useToast } from "@/hooks/use-toast";
 const SESSION_ID = 'global-bandsync-session';
 const TIME_DRIFT_THRESHOLD = 1.0;
 const FIRESTORE_UPDATE_INTERVAL = 2000;
+// const SONG_DOCUMENT_ID = 'bandsync-jam-v1';
+
 
 export function SongDisplay() {
   const songData: SongData = sampleSong;
@@ -235,7 +237,7 @@ export function SongDisplay() {
           setIsSyncEnabled(checked);
           if (!checked) {
             toast({ title: "Sync Disabled", description: "Playback is now local." });
-          } else if (!firebaseInitialized || !db) { // Added !db check
+          } else if (!firebaseInitialized || !db) { 
              toast({ title: "Sync Failed", description: "Firebase not configured. Sync remains off.", variant: "destructive" });
              setIsSyncEnabled(false);
           } else {
@@ -309,7 +311,7 @@ export function SongDisplay() {
   }
   
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="container mx-auto p-4 space-y-2"> {/* Reduced overall container spacing if needed, or keep as space-y-6 if only CardContent changes */}
       <Card className="shadow-xl">
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -320,7 +322,7 @@ export function SongDisplay() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-2"> {/* Reduced space between Card elements */}
           <div className="flex items-center justify-between p-2 bg-secondary rounded-md">
              <div className="flex items-center gap-2">
                 <Button onClick={handlePlayPause} variant="ghost" size="icon" aria-label={isPlaying ? 'Pause' : 'Play'}>
@@ -345,7 +347,7 @@ export function SongDisplay() {
             onSectionSelect={handleSectionSelect}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2"> {/* Reduced gap between lyrics and chords display */}
             <LyricsDisplay 
               lyrics={songData.lyrics} 
               chords={songData.chords}
