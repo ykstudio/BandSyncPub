@@ -181,7 +181,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => {
                   const lineKey = `${section.id}_${lineIdx}`;
-                  const isCurrentActiveLine = activeLineKeyForHighlight === lineKey;
+                  const isCurrentLineActive = activeLineKeyForHighlight === lineKey;
                   
                   return (
                     <div
@@ -191,10 +191,10 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                     >
                       <p className={cn(
                         "flex flex-wrap items-baseline gap-x-1.5",
-                        isCurrentActiveLine ? "text-primary" : "text-foreground"
+                        isCurrentLineActive ? "text-primary" : "text-foreground"
                       )}>
                         {line.map((word, wordIndex) => {
-                          const isThisTheCurrentActiveWord = activeLyricWordInfo?.word === word;
+                          const isThisTheCurrentSingingWord = activeLyricWordInfo?.word === word;
                           const chordForThisWord = getChordActiveAtTime(word.startTime, chords);
                           let shouldDisplayChordSymbol = false;
 
@@ -206,8 +206,6 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                           const isChordSymbolActive = activeSongChord && chordForThisWord === activeSongChord;
                           const isChordSymbolPast = !isChordSymbolActive && chordForThisWord && chordForThisWord.endTime < currentTime;
                           const isChordSymbolUpcoming = !isChordSymbolActive && !isChordSymbolPast && chordForThisWord;
-
-                          const isPlayedWordInActiveLine = isCurrentActiveLine && !isThisTheCurrentActiveWord && currentTime > word.endTime;
 
                           return (
                             <span
@@ -233,11 +231,13 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                               <span
                                 className={cn(
                                   'transition-colors duration-100 leading-snug',
-                                  isThisTheCurrentActiveWord 
-                                    ? 'text-accent font-bold bg-accent-lightBg rounded-sm' 
-                                    : isPlayedWordInActiveLine
-                                    ? 'text-muted-foreground'
-                                    : '' // Color inherited from parent <p> (blue if active line, default otherwise)
+                                  isThisTheCurrentSingingWord
+                                    ? 'text-accent font-bold bg-accent-lightBg rounded-sm' // Current singing word is purple
+                                    : isCurrentLineActive
+                                      ? '' // Word in active line (played or upcoming) inherits blue from parent <p>
+                                      : currentTime > word.endTime // Word in INACTIVE line and is PLAYED
+                                        ? 'text-muted-foreground' // Gray
+                                        : '' // Word in INACTIVE line and is UPCOMING inherits dark from parent <p>
                                 )}
                               >
                                 {word.text}
