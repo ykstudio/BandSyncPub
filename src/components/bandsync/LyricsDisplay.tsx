@@ -79,8 +79,7 @@ export function LyricsDisplay({ lyrics, currentTime, chords }: LyricsDisplayProp
                 if (
                   chordToDisplayAboveWord !== null &&
                   overallCurrentChord !== undefined &&
-                  chordToDisplayAboveWord === overallCurrentChord && // Strict object equality
-                  isThisTheCurrentActiveWord // Highlight only if it's above the active word
+                  chordToDisplayAboveWord === overallCurrentChord // Highlight if the displayed chord is the overall current chord
                 ) {
                   highlightThisDisplayedChord = true;
                 }
