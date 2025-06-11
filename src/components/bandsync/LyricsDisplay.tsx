@@ -26,8 +26,11 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lineItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // This Set tracks ChordChange *objects* that have been rendered in this pass.
+  // It's reset on each render by being part of the component's execution scope.
   const renderedChordObjectsThisPass = useMemo(() => new Set<ChordChange>(), [lyrics, chords, sections, activeSongChord, activeLyricWordInfo, currentTime]);
   renderedChordObjectsThisPass.clear();
+
 
   useEffect(() => {
     if (!scrollContainerRef.current || !activeLyricWordInfo?.word) return;
@@ -35,7 +38,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
     const { sectionId, lineIndexWithinSection } = activeLyricWordInfo;
     const targetKey = `${sectionId}_${lineIndexWithinSection}`;
     const targetElement = lineItemRefs.current[targetKey];
-
+    
     if (targetElement) {
       targetElement.scrollIntoView({
         behavior: 'smooth',
@@ -54,6 +57,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
       {sections.map((section, sectionIndex) => {
         const lyricLinesInSection = lyrics.filter(line => {
           if (line.length === 0) return false;
+          // A line belongs to a section if its first word starts within the section's time
           const firstWordTime = line[0].startTime;
           return firstWordTime >= section.startTime && firstWordTime < section.endTime;
         });
@@ -67,35 +71,34 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
               {section.name}
             </h3>
             
-            <div className="pt-5">
+            <div className="pt-8"> {/* Increased padding from pt-5 to pt-8 */}
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => (
                   <div
                     key={`line-${section.id}-${lineIdx}`}
                     ref={el => lineItemRefs.current[`${section.id}_${lineIdx}`] = el}
-                    className="mb-6"
+                    className="mb-6" // Added more bottom margin for lines
                   >
                     <p className="flex flex-wrap items-baseline gap-x-1.5">
                       {line.map((word, wordIndex) => {
                         const isThisTheCurrentActiveWord = activeLyricWordInfo?.word === word;
-                        const chordToDisplay = getChordActiveAtTime(word.startTime, chords);
+                        const chordForThisWord = getChordActiveAtTime(word.startTime, chords);
                         let shouldDisplayChordSymbol = false;
 
-                        if (chordToDisplay && !renderedChordObjectsThisPass.has(chordToDisplay)) {
+                        if (chordForThisWord && !renderedChordObjectsThisPass.has(chordForThisWord)) {
                           shouldDisplayChordSymbol = true;
-                          renderedChordObjectsThisPass.add(chordToDisplay);
+                          renderedChordObjectsThisPass.add(chordForThisWord);
                         }
-
-                        const isChordSymbolActive = activeSongChord && chordToDisplay === activeSongChord;
-                        const isChordSymbolPast = !isChordSymbolActive && chordToDisplay && chordToDisplay.endTime < currentTime;
-
+                        
+                        const isChordSymbolActive = activeSongChord && chordForThisWord === activeSongChord;
+                        const isChordSymbolPast = !isChordSymbolActive && chordForThisWord && chordForThisWord.endTime < currentTime;
 
                         return (
                           <span
                             key={`word-${section.id}-${lineIdx}-${wordIndex}`}
-                            className="relative inline-block pt-px"
+                            className="relative inline-block pt-px" // pt-px to give a tiny bit of room if descenders clip
                           >
-                            {shouldDisplayChordSymbol && chordToDisplay && (
+                            {shouldDisplayChordSymbol && chordForThisWord && (
                               <span
                                 className={cn(
                                   "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none p-1 rounded-md",
@@ -103,15 +106,15 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                                     ? "bg-accent/20 text-accent font-bold" 
                                     : isChordSymbolPast
                                     ? "text-muted-foreground bg-muted/10"
-                                    : "text-primary" // Upcoming chords are now just blue text
+                                    : "text-primary"
                                 )}
                               >
-                                {chordToDisplay.chord}
+                                {chordForThisWord.chord}
                               </span>
                             )}
                             <span
                               className={cn(
-                                'transition-colors duration-100 leading-snug',
+                                'transition-colors duration-100 leading-snug', // leading-snug might be tight
                                 isThisTheCurrentActiveWord ? 'text-accent font-bold' : 'text-foreground'
                               )}
                             >
@@ -124,6 +127,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                   </div>
                 ))
               ) : (
+                // Render chords for sections without lyrics
                 <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-1">
                   {chords.map((chord, chordIdx) => {
                     if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
@@ -139,7 +143,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                               ? "bg-accent/20 text-accent font-bold" 
                               : isChordSymbolPast
                               ? "text-muted-foreground bg-muted/10"
-                              : "text-primary" // Upcoming chords are now just blue text
+                              : "text-primary"
                           )}
                         >
                           {chord.chord}
