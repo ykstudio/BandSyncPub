@@ -204,7 +204,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       unsubscribe();
       localUpdateInProgressRef.current = false;
     }
-  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length, currentTime]); // Added jamSession and playlist.length
+  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length]);
 
   // Local timer and Firestore periodic update
   useEffect(() => {
@@ -514,4 +514,3 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </div>
   );
 }
-
