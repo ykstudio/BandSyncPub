@@ -60,7 +60,7 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
           const isActive = section.id === currentSectionId;
 
           let dynamicStyles: React.CSSProperties = {};
-          const sectionBaseClasses = 'flex items-center justify-center text-xs md:text-sm font-medium transition-colors duration-300 ease-in-out border-r last:border-r-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1';
+          const sectionBaseClasses = 'flex items-center justify-center text-xs md:text-sm font-medium transition-colors duration-300 ease-in-out border-r last:border-r-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-muted focus:ring-offset-1';
           let sectionModeClasses: string[] = [];
 
           if (isActive) {
