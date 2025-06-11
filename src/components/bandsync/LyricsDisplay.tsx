@@ -36,20 +36,23 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
     if (!scrollContainerRef.current) return;
 
     let targetElement: HTMLElement | null = null;
+    let scrollBlockOption: ScrollLogicalPosition = 'nearest'; // Default for lyrics
 
     if (activeLyricWordInfo?.word) {
       const { sectionId, lineIndexWithinSection } = activeLyricWordInfo;
       const targetKey = `${sectionId}_${lineIndexWithinSection}`;
       targetElement = lineItemRefs.current[targetKey];
+      scrollBlockOption = 'nearest'; // Use 'nearest' for lyric lines
     } else if (currentSectionId) {
       targetElement = sectionHeaderRefs.current[currentSectionId];
+      scrollBlockOption = 'start'; // Use 'start' for section headers when no lyrics are active
     }
     
     if (targetElement) {
       targetElement.scrollIntoView({
         behavior: 'smooth',
-        block: 'nearest', 
-        inline: 'nearest',
+        block: scrollBlockOption, 
+        inline: 'nearest', // Keep inline as 'nearest'
       });
     }
   }, [activeLyricWordInfo, currentSectionId]);
@@ -84,13 +87,13 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
               {section.name}
             </h3>
             
-            <div className="pt-16"> {/* Increased padding to avoid chord overlap with sticky header */}
+            <div className="pt-16 px-4"> {/* Maintain horizontal padding here */}
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => (
                   <div
                     key={`line-${section.id}-${lineIdx}`}
                     ref={el => lineItemRefs.current[`${section.id}_${lineIdx}`] = el}
-                    className="mb-6 px-4" 
+                    className="mb-6" // Removed px-4 from here, parent has it
                   >
                     <p className="flex flex-wrap items-baseline gap-x-1.5">
                       {line.map((word, wordIndex) => {
@@ -105,6 +108,8 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                         
                         const isChordSymbolActive = activeSongChord && chordForThisWord === activeSongChord;
                         const isChordSymbolPast = !isChordSymbolActive && chordForThisWord && chordForThisWord.endTime < currentTime;
+                        const isChordSymbolUpcoming = !isChordSymbolActive && !isChordSymbolPast && chordForThisWord;
+
 
                         return (
                           <span
@@ -119,7 +124,9 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                                     ? "bg-accent-lightBg text-accent font-bold" 
                                     : isChordSymbolPast
                                     ? "text-muted-foreground bg-muted/10"
-                                    : "text-primary"
+                                    : isChordSymbolUpcoming // This will be true for upcoming chords
+                                    ? "text-primary" // No background for upcoming
+                                    : "text-primary" // Default to primary if none of the above (should not happen)
                                 )}
                               >
                                 {chordForThisWord.chord}
@@ -142,22 +149,26 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                   </div>
                 ))
               ) : (
-                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2 px-4"> {/* Added px-4 for consistency */}
+                <div className="flex flex-wrap gap-x-3 gap-y-1 my-2"> {/* Removed px-4 from here, parent has it */}
                   {chords.map((chord, chordIdx) => {
                     if (chord.startTime >= section.startTime && chord.startTime < section.endTime && !renderedChordObjectsThisPass.has(chord)) {
                       renderedChordObjectsThisPass.add(chord);
                       const isChordSymbolActive = activeSongChord === chord;
                       const isChordSymbolPast = !isChordSymbolActive && chord.endTime < currentTime;
+                      const isChordSymbolUpcoming = !isChordSymbolActive && !isChordSymbolPast;
+
                       return (
                         <span
                           key={`section-chord-${section.id}-${chordIdx}`}
                           className={cn(
                             "text-sm font-semibold p-1 rounded-md",
-                            isChordSymbolActive 
+                             isChordSymbolActive 
                               ? "bg-accent-lightBg text-accent font-bold" 
                               : isChordSymbolPast
                               ? "text-muted-foreground bg-muted/10"
-                              : "text-primary"
+                              : isChordSymbolUpcoming
+                              ? "text-primary" // No background for upcoming
+                              : "text-primary" // Default
                           )}
                         >
                           {chord.chord}
@@ -173,10 +184,11 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         );
       })}
       {sections.length === 0 && lyrics.length === 0 && (
-        <p className="text-muted-foreground px-4 pb-4"> {/* Added px-4 for consistency */}
+        <p className="text-muted-foreground px-4 pb-4"> {/* Maintain horizontal padding here */}
           No lyrics or sections available for this song.
         </p>
       )}
     </div>
   );
 }
+
