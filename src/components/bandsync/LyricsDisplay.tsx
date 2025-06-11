@@ -66,7 +66,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
           <div key={`section-${section.id}-${sectionIndex}`} className="mb-3">
             <h3
               className={cn(
-                "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-border mr-4",
+                "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-border pl-4",
                 isActiveSection 
                   ? "text-accent font-bold bg-accent-lightBg" 
                   : "text-primary bg-card"

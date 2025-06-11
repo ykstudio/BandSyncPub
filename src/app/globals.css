@@ -28,7 +28,7 @@ body {
 
     --accent: 283 76% 52%; /* Contrasting purple (#A229E2) */
     --accent-foreground: 0 0% 100%; /* White text on accent */
-    --accent-light-solid-bg: 283 80% 94%; /* New: Lighter solid purple for active backgrounds */
+    --accent-light-solid-bg: 283 80% 97%; /* New: Lighter solid purple for active backgrounds */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -71,7 +71,7 @@ body {
     --muted-foreground: 0 0% 63.9%;
     --accent: 283 76% 52%;
     --accent-foreground: 0 0% 100%;
-    --accent-light-solid-bg: 283 50% 15%; /* New: Darker solid purple for dark mode active backgrounds */
+    --accent-light-solid-bg: 283 50% 22%; /* New: Darker solid purple for dark mode active backgrounds */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 14.9%;
