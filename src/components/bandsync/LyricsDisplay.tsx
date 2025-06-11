@@ -67,13 +67,12 @@ export function LyricsDisplay({
         line[0].startTime < currentSecData.endTime
       );
       
-      // activeLyricWordInfo.lineIndexWithinSection is already the index within linesInCurrentSec
       const currentLineIdxInSec = activeLyricWordInfo.lineIndexWithinSection;
 
       if (currentLineIdxInSec + LYRIC_SCROLL_TARGET_OFFSET_LINES < linesInCurrentSec.length) {
         key = `${activeLyricWordInfo.sectionId}_${currentLineIdxInSec + LYRIC_SCROLL_TARGET_OFFSET_LINES}`;
         type = 'line';
-      } else { // End of current section's lyrics, or targeting beyond it
+      } else { 
         const currentGlobalSectionIndex = sections.findIndex(s => s.id === activeLyricWordInfo.sectionId);
         if (currentGlobalSectionIndex + 1 < sections.length) {
           const nextSection = sections[currentGlobalSectionIndex + 1];
@@ -89,18 +88,16 @@ export function LyricsDisplay({
             key = nextSection.id;
             type = 'header';
           }
-        } else if (activeLineKeyForHighlight) { // At the very end of all lyrics
+        } else if (activeLineKeyForHighlight) { 
             key = activeLineKeyForHighlight;
             type = 'line';
         }
       }
     } else if (currentSectionId) {
-      // No active lyric word, but we are in a section (e.g., instrumental, or gap between lyrics)
       key = currentSectionId;
       type = 'header';
     }
 
-    // If still no key (e.g. before song starts), and before the very first lyric/section
     if (!key && sections.length > 0 && currentTime < (sections[0].startTime)) {
        const firstSection = sections[0];
        const linesInFirstSec = lyrics.filter(line =>
@@ -109,9 +106,9 @@ export function LyricsDisplay({
           line[0].startTime < firstSection.endTime
         );
         if (linesInFirstSec.length > 0) {
-            key = `${firstSection.id}_0`; // Target first line of first section
+            key = `${firstSection.id}_0`; 
             type = 'line';
-        } else { // First section is instrumental
+        } else { 
             key = firstSection.id;
             type = 'header';
         }
@@ -146,27 +143,23 @@ export function LyricsDisplay({
 
         if (scrollTargetType === 'header') {
             scrollBlockPosition = 'start';
-            // If the header is not already very close to the top, scroll it.
-            if (Math.abs(elementTopRelativeToContainer) > 5) { 
+            if (Math.abs(elementTopRelativeToContainer) > 5 || (elementTopRelativeToContainer < 0 && Math.abs(elementTopRelativeToContainer) > elementRect.height * 0.5 )) { 
                 shouldScroll = true;
             }
         } else if (scrollTargetType === 'line') {
             const isActiveLineElement = lineItemRefs.current[activeLineKeyForHighlight!] === elementToScrollTo;
             if (isActiveLineElement) {
-                // If current active line is out of top 1/3 view
                 if (elementTopRelativeToContainer < 0 || elementTopRelativeToContainer > containerRect.height / 3) {
-                    scrollBlockPosition = 'start'; // Consider 'center' or an offset if 'start' is too high
+                    scrollBlockPosition = 'start'; 
                     shouldScroll = true;
                 }
-            } else { // Upcoming line (not the currently active one)
-                 // If upcoming line is not roughly in the middle to lower part of viewport
+            } else { 
                 if (elementTopRelativeToContainer < containerRect.height * 0.2 || elementTopRelativeToContainer > containerRect.height * 0.8) {
                     scrollBlockPosition = 'center'; 
                     shouldScroll = true;
                 }
             }
         } else if (lineItemRefs.current[activeLineKeyForHighlight!] === elementToScrollTo && activeLineKeyForHighlight) {
-            // Fallback for activeLineKeyForHighlight when no specific targetType
              if (elementTopRelativeToContainer < 0 || elementTopRelativeToContainer > containerRect.height / 3) {
                 scrollBlockPosition = 'start';
                 shouldScroll = true;
@@ -216,21 +209,20 @@ export function LyricsDisplay({
             
             <div className="px-4 pt-2 pb-1">
               {lyricLinesInSection.length > 0 ? (
-                lyricLinesInSection.map((line, lineIdxInSection) => { // lineIdxInSection is the index *within this section's lines*
+                lyricLinesInSection.map((line, lineIdxInSection) => { 
                   const lineKey = `${section.id}_${lineIdxInSection}`;
                   
-                  const isCurrentLineActiveForStyling = activeLineKeyForHighlight === lineKey || 
-                                                        (!activeLineKeyForHighlight && 
+                  const isLineCurrentlyActiveForStyling = activeLineKeyForHighlight === lineKey || 
+                                                        (activeLineKeyForHighlight === null && 
                                                          lastTrackedActiveLineKey === lineKey && 
                                                          line.length > 0 && 
-                                                         currentTime < (line[line.length-1].endTime + LYRIC_LINE_RELEVANCE_BUFFER)) ||
-                                                        (!activeLineKeyForHighlight && !lastTrackedActiveLineKey && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0));
+                                                         currentTime < (line[line.length-1].endTime + LYRIC_LINE_RELEVANCE_BUFFER));
 
                   return (
                     <div
                       key={lineKey}
                       ref={el => lineItemRefs.current[lineKey] = el}
-                      className="mb-6"
+                      className="mb-6" 
                     >
                       <p className="flex flex-wrap items-baseline gap-x-1.5">
                         {line.map((word, wordIndex) => {
@@ -254,8 +246,8 @@ export function LyricsDisplay({
                             wordTextStyle = 'text-accent bg-accent-lightBg rounded-sm';
                           } else if (isWordPast) {
                             wordTextStyle = 'text-muted-foreground';
-                          } else { // Upcoming word
-                            if (isCurrentLineActiveForStyling) {
+                          } else { 
+                            if (isLineCurrentlyActiveForStyling) {
                                 wordTextStyle = 'text-primary';
                             } else {
                                 wordTextStyle = 'text-foreground';
@@ -263,7 +255,7 @@ export function LyricsDisplay({
                           }
                           
                           // Special handling for the very first line of the song to be blue before play starts
-                          if (!isPlaying && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0) && !isWordPast && !isThisTheCurrentSingingWord) {
+                          if (!songIsPlaying && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0) && !isWordPast && !isThisTheCurrentSingingWord) {
                             wordTextStyle = 'text-primary';
                           }
 
@@ -271,7 +263,7 @@ export function LyricsDisplay({
                           return (
                             <span
                               key={`word-${section.id}-${lineIdxInSection}-${wordIndex}`}
-                              className="relative inline-block" // Removed pt-px
+                              className="relative inline-block"
                             >
                               {shouldDisplayChordSymbol && chordForThisWord && (
                                 <span
@@ -281,7 +273,7 @@ export function LyricsDisplay({
                                       ? "bg-accent-lightBg text-accent font-bold" 
                                       : isChordSymbolPast
                                       ? "text-muted-foreground bg-muted/10"
-                                      : isChordSymbolUpcoming // Default to primary for upcoming chords in lyrics
+                                      : isChordSymbolUpcoming 
                                       ? "text-primary" 
                                       : "text-primary"
                                   )}
@@ -304,7 +296,7 @@ export function LyricsDisplay({
                     </div>
                   );
                 })
-              ) : ( // No lyrics in this section, display chords if any
+              ) : ( 
                 <div className="flex flex-wrap gap-x-3 gap-y-1 my-2">
                   {chords.filter(c => c.startTime >= section.startTime && c.startTime < section.endTime)
                          .map((chord, chordIdx) => {
@@ -312,7 +304,6 @@ export function LyricsDisplay({
                       renderedChordObjectsThisPass.add(chord);
                       const isChordSymbolActive = activeSongChord === chord;
                       const isChordSymbolPast = !isChordSymbolActive && chord.endTime < currentTime;
-                      // Upcoming chords in instrumental sections could be primary or muted based on preference
                       const isChordSymbolUpcoming = !isChordSymbolActive && !isChordSymbolPast; 
 
                       return (
@@ -325,8 +316,8 @@ export function LyricsDisplay({
                               : isChordSymbolPast
                               ? "text-muted-foreground bg-muted/10"
                               : isChordSymbolUpcoming 
-                              ? "text-primary" // Or text-muted-foreground if preferred for instrumental upcoming
-                              : "text-primary" // Default for chords that don't fit other categories
+                              ? "text-primary" 
+                              : "text-primary" 
                           )}
                         >
                           {chord.chord}
