@@ -151,7 +151,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
   return (
     <div
       ref={scrollContainerRef}
-      className="space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-auto scroll-smooth border border-border"
+      className="space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-scroll border border-border"
     >
       {sections.map((section, sectionIndex) => {
         const lyricLinesInSection = lyrics.filter(line => {

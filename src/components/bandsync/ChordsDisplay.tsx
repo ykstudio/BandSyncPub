@@ -66,7 +66,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
       
       if (activeElement) {
         activeElement.scrollIntoView({
-          behavior: 'auto', // Changed from 'smooth'
+          behavior: 'auto', 
           inline: 'center', 
           block: 'nearest', 
         });
@@ -84,7 +84,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
         className={cn(
           "flex overflow-x-auto overflow-y-hidden h-full items-center",
           "space-x-4 md:space-x-6", 
-          "py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent", // Removed scroll-smooth
+          "py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent", 
           "scroll-pl-32 md:scroll-pl-64 scroll-pr-32 md:scroll-pr-64" 
         )}
       >
@@ -102,14 +102,15 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
             chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-px text-3xl sm:text-5xl md:text-6xl leading-none';
           } else if (isVisuallyCurrent) {
             chordSpecificClasses = 'font-bold text-accent text-5xl sm:text-7xl md:text-9xl leading-none bg-accent-lightBg px-4 py-2 rounded-xl';
-            if (songBpm > 0) {
-              animationStyle = {
-                animationName: 'metronome-pulse',
-                animationDuration: `${currentChordPulseDurationStr}s`,
-                animationIterationCount: 'infinite',
-                animationTimingFunction: 'ease-in-out',
-              };
-            }
+            // Temporarily remove scaling animation to test "blinking" issue
+            // if (songBpm > 0) {
+            //   animationStyle = {
+            //     animationName: 'metronome-pulse',
+            //     animationDuration: `${currentChordPulseDurationStr}s`,
+            //     animationIterationCount: 'infinite',
+            //     animationTimingFunction: 'ease-in-out',
+            //   };
+            // }
           } else if (isVisuallyNext) {
             chordSpecificClasses = 'text-primary text-6xl sm:text-8xl md:text-[10rem] leading-none';
           } else {
