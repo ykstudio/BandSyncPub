@@ -19,7 +19,6 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const chordItemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Ensure refs array is always the correct size for the sections
   useEffect(() => {
     chordItemRefs.current = chordItemRefs.current.slice(0, chords.length);
   }, [chords]);
@@ -75,7 +74,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
     <div className="p-4 bg-card rounded-lg shadow-md h-24 md:h-96">
       <div 
         ref={scrollContainerRef} 
-        className="flex overflow-x-auto h-full items-end space-x-6 py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+        className="flex overflow-x-auto overflow-y-hidden h-full items-end space-x-6 py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
       >
         {chords.map((chord, index) => {
           const isVisuallyPrevious = chord === visuallyPreviousChord;
