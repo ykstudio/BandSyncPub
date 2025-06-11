@@ -10,7 +10,7 @@ import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card'; // Removed CardFooter
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff,
   AlertTriangle, Loader2, Info, RefreshCw, ChevronLeft,
@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 const TIME_DRIFT_THRESHOLD = 1.0;
 const FIRESTORE_UPDATE_INTERVAL = 2000;
 const SESSION_ID_PREFIX = 'global-bandsync-session-jam-';
+const LYRIC_ACTIVE_BUFFER_MS = 0.05; // 50ms buffer
 
 interface JamPlayerProps {
   jamId: string;
@@ -408,7 +409,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       for (let lineIndex = 0; lineIndex < lyricLinesInSection.length; lineIndex++) {
         const line = lyricLinesInSection[lineIndex];
         for (const word of line) {
-          if (currentTime >= word.startTime && currentTime < word.endTime) {
+          if (currentTime >= word.startTime && currentTime < (word.endTime + LYRIC_ACTIVE_BUFFER_MS)) {
             return { word, sectionId: section.id, lineIndexWithinSection: lineIndex };
           }
         }
@@ -499,7 +500,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="flex items-center justify-between p-2 mb-3 border-b border-border">
+           <div className="flex items-center justify-between p-2 mb-3 border-b border-border">
             <Button
                 onClick={() => handleSongNavigation('prev')}
                 disabled={currentSongIndex === 0}
@@ -556,7 +557,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             <ChordsDisplay chords={playableSongData.chords} currentTime={currentTime} songBpm={currentDisplaySongInfo.bpm} />
           </div>
         </CardContent>
-        {/* CardFooter removed */}
       </Card>
       {currentDisplaySongInfo.id !== sampleSong.id && (
         <Alert variant="default" className="mt-4">
@@ -571,3 +571,4 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </div>
   );
 }
+
