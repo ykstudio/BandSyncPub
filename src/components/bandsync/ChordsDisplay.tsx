@@ -16,7 +16,8 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
   const nextChord = currentChordIndex !== -1 && currentChordIndex < chords.length - 1 ? chords[currentChordIndex + 1] : null;
 
   const pulseDuration = songBpm > 0 ? 60 / songBpm : 0.5; // Default to 0.5s if bpm is 0 or invalid
-  const entryAnimationDuration = Math.min(0.3, pulseDuration / 2); // Quick, but related to tempo, capped at 0.3s
+  // Make the entry animation duration equal to one full beat
+  const entryAnimationDuration = pulseDuration; 
 
   const entryAnimationProps = (isCurrentPulse = false) => ({
     animationName: isCurrentPulse ? 'metronome-pulse, chord-visual-entry' : 'chord-visual-entry',
@@ -25,7 +26,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
       : `${entryAnimationDuration}s`,
     animationIterationCount: isCurrentPulse ? 'infinite, 1' : '1',
     animationFillMode: 'both', // Applies to both animations
-    animationTimingFunction: isCurrentPulse ? 'ease-in-out, ease-out' : 'ease-out',
+    animationTimingFunction: isCurrentPulse ? 'ease-in-out, ease-out' : 'ease-out', // ease-out for entry
   });
 
   return (
