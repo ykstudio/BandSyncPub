@@ -126,8 +126,8 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         const elementRect = activeLineElement.getBoundingClientRect();
         if (elementRect.bottom > containerRect.bottom - 20 || elementRect.top < containerRect.top + 20) {
             activeLineElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            scrolledThisUpdate = true; // Ensure only one scroll action if this one is taken
         }
-        scrolledThisUpdate = true;
       }
     }
     
@@ -139,6 +139,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         // Only scroll to section header if it's not already mostly visible or at the top
         if (elementRect.top > containerRect.top + 20) { // if it's further down
             sectionHeaderElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+            // scrolledThisUpdate = true; // Not strictly needed here as it's the last check
         }
       }
     }
