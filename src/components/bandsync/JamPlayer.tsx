@@ -18,6 +18,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Link from 'next/link'; // Added import
 
 const TIME_DRIFT_THRESHOLD = 1.0;
 const FIRESTORE_UPDATE_INTERVAL = 2000;
