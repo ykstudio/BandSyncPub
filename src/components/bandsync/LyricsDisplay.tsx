@@ -42,19 +42,15 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         const currentSectionIdxInAllSections = sections.findIndex(s => s.id === activeLyricWordInfo.sectionId);
         
         if (currentSectionIdxInAllSections !== -1) {
-            // Get all lines that belong to the current active section, maintaining their order as they appear in the original lyrics array.
-            // Their index within this filtered list is what activeLyricWordInfo.lineIndexWithinSection refers to.
             const linesFilteredForCurrentSection = lyrics.filter(line => {
                 if (line.length === 0) return false;
                 const firstWordTime = line[0].startTime;
                 return firstWordTime >= sections[currentSectionIdxInAllSections].startTime && firstWordTime < sections[currentSectionIdxInAllSections].endTime;
             });
 
-            // Check for next line in the same section
             if (activeLyricWordInfo.lineIndexWithinSection + 1 < linesFilteredForCurrentSection.length) {
                 targetScrollKey = `${activeLyricWordInfo.sectionId}_${activeLyricWordInfo.lineIndexWithinSection + 1}`;
             } else {
-                // No more lines in current section, check for the first line in subsequent sections
                 for (let i = currentSectionIdxInAllSections + 1; i < sections.length; i++) {
                     const nextOverallSection = sections[i];
                     const linesFilteredForNextOverallSection = lyrics.filter(line =>
@@ -63,7 +59,6 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                         line[0].startTime < nextOverallSection.endTime
                     );
                     if (linesFilteredForNextOverallSection.length > 0) {
-                        // The lineIndexWithinSection for the first line of any section is always 0
                         targetScrollKey = `${nextOverallSection.id}_0`; 
                         break;
                     }
@@ -72,8 +67,6 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
         }
     }
 
-    // If no target found yet (e.g., no active lyric, or end of all lyrics),
-    // find the *absolute* next line based on currentTime to scroll to.
     if (!targetScrollKey) {
         let earliestNextTime = Infinity;
         let candidateKey: string | null = null;
@@ -108,7 +101,6 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
     if (!scrollContainerRef.current) return;
 
     const isNewSectionJustActivated = currentSectionId !== null && prevCurrentSectionIdRef.current !== currentSectionId;
-
     let scrolledThisUpdate = false;
 
     if (isNewSectionJustActivated && currentSectionId) {
@@ -127,11 +119,9 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
       }
     }
     
-    // Fallback if no specific scrollTargetLineKey but an active line exists (e.g. last line of song)
     if (!scrolledThisUpdate && activeLineKeyForHighlight && !isNewSectionJustActivated) {
       const activeLineElement = lineItemRefs.current[activeLineKeyForHighlight];
       if (activeLineElement) {
-         // Check if the active line is mostly out of view before forcing a scroll
         const containerRect = scrollContainerRef.current.getBoundingClientRect();
         const elementRect = activeLineElement.getBoundingClientRect();
         if (elementRect.bottom > containerRect.bottom - 20 || elementRect.top < containerRect.top + 20) {
@@ -141,13 +131,13 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
       }
     }
     
-    // If no lyrics scrolled, and it's an instrumental section (not new)
     if (!scrolledThisUpdate && currentSectionId && !activeLyricWordInfo && !isNewSectionJustActivated) {
       const sectionHeaderElement = sectionHeaderRefs.current[currentSectionId];
       if (sectionHeaderElement) {
         const containerRect = scrollContainerRef.current.getBoundingClientRect();
         const elementRect = sectionHeaderElement.getBoundingClientRect();
-        if (elementRect.top > containerRect.top + 20) { 
+        // Only scroll to section header if it's not already mostly visible or at the top
+        if (elementRect.top > containerRect.top + 20) { // if it's further down
             sectionHeaderElement.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
         }
       }
@@ -188,7 +178,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
               {section.name}
             </h3>
             
-            <div className="pt-16 px-4">
+            <div className="pt-16 px-4"> {/* Increased top padding to avoid overlap with sticky header */}
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => {
                   const lineKey = `${section.id}_${lineIdx}`;
@@ -218,6 +208,8 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                           const isChordSymbolPast = !isChordSymbolActive && chordForThisWord && chordForThisWord.endTime < currentTime;
                           const isChordSymbolUpcoming = !isChordSymbolActive && !isChordSymbolPast && chordForThisWord;
 
+                          const isPlayedWordInActiveLine = isCurrentActiveLine && !isThisTheCurrentActiveWord && currentTime > word.endTime;
+
                           return (
                             <span
                               key={`word-${section.id}-${lineIdx}-${wordIndex}`}
@@ -244,7 +236,9 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                                   'transition-colors duration-100 leading-snug',
                                   isThisTheCurrentActiveWord 
                                     ? 'text-accent font-bold bg-accent-lightBg rounded-sm' 
-                                    : '' // Text color is inherited from parent <p>
+                                    : isPlayedWordInActiveLine
+                                    ? 'text-muted-foreground'
+                                    : '' // Color inherited from parent <p> (blue if active line, default otherwise)
                                 )}
                               >
                                 {word.text}
