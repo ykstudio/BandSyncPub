@@ -82,7 +82,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
       <div 
         ref={scrollContainerRef} 
         className={cn(
-          "flex overflow-x-auto overflow-y-hidden h-full items-center", // Changed from items-end
+          "flex overflow-x-auto overflow-y-hidden h-full items-center",
           "space-x-4 md:space-x-6", 
           "py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent scroll-smooth",
           "scroll-pr-32 md:scroll-pr-64" 
@@ -101,7 +101,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
           if (isVisuallyPrevious) {
             chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-px text-4xl sm:text-5xl md:text-7xl leading-none';
           } else if (isVisuallyCurrent) {
-            chordSpecificClasses = 'font-bold text-accent text-6xl sm:text-8xl md:text-[10rem] leading-none border-l-2 border-r-2 border-accent';
+            chordSpecificClasses = 'font-bold text-accent text-6xl sm:text-8xl md:text-[10rem] leading-none bg-accent/20 px-4 py-2 rounded-xl';
             if (songBpm > 0) {
               animationStyle = {
                 animationName: 'metronome-pulse',
@@ -121,7 +121,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
               key={baseKey}
               ref={el => chordItemRefs.current[index] = el}
               className={cn(
-                'flex-shrink-0 p-1', // Ensure some padding so border isn't flush with text
+                'flex-shrink-0', 
                 chordSpecificClasses
               )}
               style={animationStyle}
@@ -134,4 +134,3 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
     </div>
   );
 }
-
