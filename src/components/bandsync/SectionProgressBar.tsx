@@ -8,17 +8,16 @@ import React, { useEffect, useRef } from 'react';
 interface SectionProgressBarProps {
   sections: SongSection[];
   currentSectionId: string | null;
-  currentTime: number; // For potential intra-section progress, not fully implemented here
+  currentTime: number;
+  onSectionSelect: (startTime: number) => void;
 }
 
-export function SectionProgressBar({ sections, currentSectionId }: SectionProgressBarProps) {
+export function SectionProgressBar({ sections, currentSectionId, onSectionSelect }: SectionProgressBarProps) {
   const totalDuration = sections.reduce((sum, s) => sum + s.duration, 0);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  // Use an array of refs for individual section items
   const sectionItemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Ensure refs array is always the correct size for the sections
   useEffect(() => {
     sectionItemRefs.current = sectionItemRefs.current.slice(0, sections.length);
   }, [sections]);
@@ -31,8 +30,8 @@ export function SectionProgressBar({ sections, currentSectionId }: SectionProgre
         if (activeElement) {
           activeElement.scrollIntoView({
             behavior: 'smooth',
-            inline: 'center', // Tries to center the element horizontally
-            block: 'nearest',  // Ensures vertical visibility if applicable
+            inline: 'center',
+            block: 'nearest',
           });
         }
       }
@@ -42,21 +41,26 @@ export function SectionProgressBar({ sections, currentSectionId }: SectionProgre
 
   if (totalDuration === 0) return null;
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, section: SongSection) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      onSectionSelect(section.startTime);
+    }
+  };
+
   return (
     <div className="w-full p-2 my-4 rounded-lg shadow-md bg-card">
       <div
         ref={scrollContainerRef}
-        className="flex w-full h-12 rounded overflow-x-auto" // Changed overflow-hidden to overflow-x-auto
+        className="flex w-full h-12 rounded overflow-x-auto"
       >
         {sections.map((section, index) => {
-          // Assign ref to each section item
           const itemRef = (el: HTMLDivElement | null) => sectionItemRefs.current[index] = el;
 
           const sectionWidthPercentage = (section.duration / totalDuration) * 100;
           const isActive = section.id === currentSectionId;
 
           let dynamicStyles: React.CSSProperties = {};
-          const sectionBaseClasses = 'flex items-center justify-center text-xs md:text-sm font-medium transition-colors duration-300 ease-in-out border-r last:border-r-0';
+          const sectionBaseClasses = 'flex items-center justify-center text-xs md:text-sm font-medium transition-colors duration-300 ease-in-out border-r last:border-r-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1';
           let sectionModeClasses: string[] = [];
 
           if (isActive) {
@@ -66,7 +70,7 @@ export function SectionProgressBar({ sections, currentSectionId }: SectionProgre
               minWidth: 'max-content',
             };
           } else {
-            sectionModeClasses = ['bg-secondary', 'text-secondary-foreground', 'hover:bg-muted', 'flex-shrink'];
+            sectionModeClasses = ['bg-secondary', 'text-secondary-foreground', 'hover:bg-muted', 'hover:text-muted-foreground', 'flex-shrink'];
             dynamicStyles = {
               flexBasis: `${sectionWidthPercentage}%`,
             };
@@ -75,10 +79,14 @@ export function SectionProgressBar({ sections, currentSectionId }: SectionProgre
           return (
             <div
               key={section.id}
-              ref={itemRef} // Assign the ref here
+              ref={itemRef}
+              role="button"
+              tabIndex={0}
               className={cn(sectionBaseClasses, sectionModeClasses)}
               style={dynamicStyles}
-              title={`${section.name} (${section.duration}s)`}
+              title={`${section.name} (${section.duration}s) - Click to jump`}
+              onClick={() => onSectionSelect(section.startTime)}
+              onKeyDown={(e) => handleKeyDown(e, section)}
             >
               <span className={cn(
                 "inline-block px-1",
@@ -93,3 +101,4 @@ export function SectionProgressBar({ sections, currentSectionId }: SectionProgre
     </div>
   );
 }
+

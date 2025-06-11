@@ -213,6 +213,15 @@ export function SongDisplay() {
     }
   }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
 
+  const handleSectionSelect = useCallback((newTime: number) => {
+    setCurrentTime(newTime);
+    // isPlayingRef.current holds the latest isPlaying state.
+    // We send this current playback state along with the new time.
+    if (isSyncEnabled && firebaseInitialized) {
+      updateFirestoreSession({ currentTime: newTime, isPlaying: isPlayingRef.current });
+    }
+  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
+
   const formatTime = (timeInSeconds: number) => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
@@ -317,6 +326,7 @@ export function SongDisplay() {
             sections={songData.sections}
             currentSectionId={currentSectionId}
             currentTime={currentTime}
+            onSectionSelect={handleSectionSelect}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -335,3 +345,4 @@ export function SongDisplay() {
 }
 
   
+
