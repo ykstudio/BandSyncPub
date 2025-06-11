@@ -10,8 +10,11 @@ import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff, AlertTriangle, Loader2, Info, RefreshCw, ChevronLeft } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
+import {
+  Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff,
+  AlertTriangle, Loader2, Info, RefreshCw, ChevronLeft,
+} from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { Switch } from '@/components/ui/switch';
@@ -204,7 +207,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       unsubscribe();
       localUpdateInProgressRef.current = false;
     }
-  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length, currentTime]); // Removed currentTime, it was problematic
+  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length]);
 
 
   // Local timer and Firestore periodic update
@@ -495,26 +498,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 p-4 border-b mb-2">
-            <Button 
-              onClick={() => handleSongNavigation('prev')} 
-              disabled={currentSongIndex === 0}
-              variant="outline"
-            >
-              <SkipBack className="mr-2 h-4 w-4"/> Previous Song
-            </Button>
-            <div className="text-sm text-muted-foreground text-center">
-              Up Next: {currentSongIndex + 1 < playlist.length ? playlist[currentSongIndex + 1].title : "End of Jam"}
-            </div>
-            <Button 
-              onClick={() => handleSongNavigation('next')} 
-              disabled={currentSongIndex >= playlist.length - 1}
-              variant="outline"
-            >
-              Next Song <SkipForward className="ml-2 h-4 w-4"/>
-            </Button>
-          </div>
-
           <div className="flex items-center justify-between p-2 bg-secondary rounded-md">
             <div className="flex items-center gap-1 sm:gap-2">
               <Button onClick={handlePlayPause} variant="ghost" size="icon" aria-label={isPlaying ? 'Pause' : 'Play'}>
@@ -550,6 +533,25 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             <ChordsDisplay chords={playableSongData.chords} currentTime={currentTime} songBpm={currentDisplaySongInfo.bpm} />
           </div>
         </CardContent>
+        <CardFooter className="flex flex-col sm:flex-row justify-between items-center gap-2 p-4 border-t">
+           <Button
+              onClick={() => handleSongNavigation('prev')}
+              disabled={currentSongIndex === 0}
+              variant="outline"
+            >
+              <SkipBack className="mr-2 h-4 w-4"/> Previous Song
+            </Button>
+            <div className="text-sm text-muted-foreground text-center">
+              Up Next: {currentSongIndex + 1 < playlist.length ? playlist[currentSongIndex + 1].title : "End of Jam"}
+            </div>
+            <Button
+              onClick={() => handleSongNavigation('next')}
+              disabled={currentSongIndex >= playlist.length - 1}
+              variant="outline"
+            >
+              Next Song <SkipForward className="ml-2 h-4 w-4"/>
+            </Button>
+        </CardFooter>
       </Card>
       {currentDisplaySongInfo.id !== sampleSong.id && (
         <Alert variant="default" className="mt-4">
@@ -564,3 +566,5 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </div>
   );
 }
+
+    
