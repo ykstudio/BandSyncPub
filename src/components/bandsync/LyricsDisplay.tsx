@@ -92,6 +92,18 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
             targetScrollKey = candidateKey;
         }
     }
+    
+    // If no active lyric, but we are before the first lyric of the song, ensure the first line is the scroll target.
+    if (!activeLyricWordInfo && !targetScrollKey && lyrics.length > 0 && lyrics[0].length > 0 && currentTime < lyrics[0][0].startTime) {
+      const firstSection = sections.find(s => lyrics[0][0].startTime >= s.startTime && lyrics[0][0].startTime < s.endTime);
+      if (firstSection) {
+        const linesInFirstSection = lyrics.filter(line => line.length > 0 && line[0].startTime >= firstSection.startTime && line[0].startTime < firstSection.endTime);
+        if (linesInFirstSection.length > 0 && linesInFirstSection[0] === lyrics[0]) {
+            targetScrollKey = `${firstSection.id}_0`;
+        }
+      }
+    }
+
 
     return { activeLineKeyForHighlight: highlightKey, scrollTargetLineKey: targetScrollKey };
   }, [lyrics, sections, currentTime, activeLyricWordInfo]);
@@ -136,8 +148,6 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
       if (sectionHeaderElement) {
         const containerRect = scrollContainerRef.current.getBoundingClientRect();
         const elementRect = sectionHeaderElement.getBoundingClientRect();
-        // Only scroll section header if it's not mostly visible or if we are scrolling down to it.
-        // This might reduce some jitter if it was scrolling unnecessarily.
         if (elementRect.top < containerRect.top || elementRect.top > containerRect.top + containerRect.height / 3) { 
             sectionHeaderElement.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
         }
@@ -179,11 +189,10 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
               {section.name}
             </h3>
             
-            <div className="pt-16 px-4"> {/* Increased top padding to avoid overlap with sticky header */}
+            <div className="pt-16 px-4"> 
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdx) => {
                   const lineKey = `${section.id}_${lineIdx}`;
-                  // isCurrentLineActive determines if this line contains the currently singing word.
                   const isCurrentLineActive = activeLineKeyForHighlight === lineKey;
                   
                   return (
@@ -195,6 +204,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                       <p className="flex flex-wrap items-baseline gap-x-1.5">
                         {line.map((word, wordIndex) => {
                           const isThisTheCurrentSingingWord = activeLyricWordInfo?.word === word;
+                          const isWordPast = currentTime > word.endTime;
                           const chordForThisWord = getChordActiveAtTime(word.startTime, chords);
                           let shouldDisplayChordSymbol = false;
 
@@ -210,18 +220,24 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                           let wordTextStyle = '';
                           if (isThisTheCurrentSingingWord) {
                             wordTextStyle = 'text-accent font-bold bg-accent-lightBg rounded-sm';
-                          } else if (currentTime > word.endTime) { // Word is in the past
+                          } else if (isWordPast) {
                             wordTextStyle = 'text-muted-foreground';
-                          } else if (isCurrentLineActive) { // Word is upcoming in the active line
+                          } else if (isCurrentLineActive) { // Upcoming word in the active line
                             wordTextStyle = 'text-primary';
-                          } else { // Word is upcoming in an inactive line
-                            wordTextStyle = 'text-foreground';
+                          } else { // Upcoming word in an inactive line or before first lyric in song
+                             // If this is the very first line and before any lyric is active, color it blue
+                            const isFirstLyricLineOfSong = sectionIndex === 0 && lineIdx === 0 && lyrics[0] === line;
+                            if (isFirstLyricLineOfSong && !activeLyricWordInfo && currentTime < word.startTime) {
+                                wordTextStyle = 'text-primary';
+                            } else {
+                                wordTextStyle = 'text-foreground';
+                            }
                           }
 
                           return (
                             <span
                               key={`word-${section.id}-${lineIdx}-${wordIndex}`}
-                              className="relative inline-block pt-px" 
+                              className="relative inline-block" 
                             >
                               {shouldDisplayChordSymbol && chordForThisWord && (
                                 <span
@@ -241,7 +257,7 @@ export function LyricsDisplay({ lyrics, chords, sections, currentTime, activeSon
                               )}
                               <span
                                 className={cn(
-                                  'transition-colors duration-100 leading-snug',
+                                  'leading-snug', // Removed transition-colors duration-100
                                   wordTextStyle
                                 )}
                               >

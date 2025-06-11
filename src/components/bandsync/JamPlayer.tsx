@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
 const TIME_DRIFT_THRESHOLD = 1.0;
 const FIRESTORE_UPDATE_INTERVAL = 2000;
 const SESSION_ID_PREFIX = 'global-bandsync-session-jam-';
-const LYRIC_ACTIVE_BUFFER_MS = 0.05; // 50ms buffer
+const LYRIC_ACTIVE_BUFFER_MS = 0.1; // Increased from 0.05 (50ms) to 0.1 (100ms)
 
 interface JamPlayerProps {
   jamId: string;
