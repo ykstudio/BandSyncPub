@@ -8,6 +8,20 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: {
+        DEFAULT: '1rem', // Default horizontal padding (like px-4)
+        sm: '2rem',    // Horizontal padding for sm screens and up (like px-8)
+      },
+      screens: { // Max-width of the container at different breakpoints
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
+        '2xl': '1536px', // Wider container on 2xl screens
+      },
+    },
     extend: {
       fontFamily: {
         body: ['PT Sans', 'sans-serif'],

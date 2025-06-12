@@ -16,7 +16,7 @@ export default function JamPage() {
     // This case should ideally be handled by Next.js routing if jamId is missing,
     // but as a fallback:
     return (
-      <main className="container mx-auto min-h-screen px-4 sm:px-8 py-8 flex flex-col items-center justify-center">
+      <main className="container mx-auto min-h-screen py-8 flex flex-col items-center justify-center">
          <div className="mb-6 self-start">
           <Link href="/" passHref>
             <Button variant="outline" size="sm">
@@ -52,7 +52,7 @@ export default function JamPage() {
 
 
   return (
-    <main className="container mx-auto min-h-screen px-4 sm:px-8 py-8">
+    <main className="container mx-auto min-h-screen py-8">
        <div className="mb-4">
          <Link href="/" passHref>
            <Button variant="outline" size="sm">
