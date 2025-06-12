@@ -65,10 +65,9 @@ export function LyricsDisplay({
       elementToScroll = lineItemRefs.current[activeLineKeyForHighlight];
     } else if (currentSectionId && sectionHeaderRefs.current[currentSectionId]) {
       elementToScroll = sectionHeaderRefs.current[currentSectionId];
-    } else if (lyrics.length > 0 && lyrics[0].length > 0 && sections.length > 0) {
-      // Fallback for initial load: target first lyric line if available and its section header.
+    } else if (lyrics.length > 0 && sections.length > 0 && sections[0].id) {
       const firstSectionId = sections[0].id;
-      const firstLineKey = `${firstSectionId}_0`;
+      const firstLineKey = `${firstSectionId}_0`; // Assuming line index 0 for the first line of the first section
       if (lineItemRefs.current[firstLineKey]) {
         elementToScroll = lineItemRefs.current[firstLineKey];
       } else if (sectionHeaderRefs.current[firstSectionId]) {
@@ -78,9 +77,6 @@ export function LyricsDisplay({
 
     if (!elementToScroll) return;
     
-    const elementRect = elementToScroll.getBoundingClientRect();
-    const topOffset = elementRect.top - containerRect.top;
-
     if (songIsPlaying && !initialScrollDoneRef.current) {
       elementToScroll.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
       initialScrollDoneRef.current = true;
@@ -88,14 +84,17 @@ export function LyricsDisplay({
     }
     
     if (songIsPlaying && elementToScroll) {
+      const elementRect = elementToScroll.getBoundingClientRect();
+      const topOffset = elementRect.top - containerRect.top;
+
       if (activeLineKeyForHighlight && lineItemRefs.current[activeLineKeyForHighlight]) { // Scrolling a lyric line
         // If line is out of view at the top OR too far down
         if (topOffset < 0 || topOffset > containerRect.height * 0.15) { 
            elementToScroll.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
         }
-      } else if (currentSectionId && sectionHeaderRefs.current[currentSectionId]) { // Scrolling a section header
+      } else if (currentSectionId && sectionHeaderRefs.current[currentSectionId] && elementToScroll === sectionHeaderRefs.current[currentSectionId]) { // Scrolling a section header
          // If header is not near the top (allowing for small discrepancies)
-        if (Math.abs(topOffset) > 5) { 
+        if (Math.abs(topOffset) > 5) { // Check if it's more than 5px away from the top (after scroll-padding)
            elementToScroll.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
         }
       }
@@ -112,7 +111,8 @@ export function LyricsDisplay({
         const lyricLinesInSection = lyrics.filter(line => {
           if (line.length === 0) return false;
           const firstWordTime = line[0].startTime;
-          return firstWordTime >= section.startTime && firstWordTime < section.endTime;
+          // Ensure firstWordTime is a number; it might be undefined if line is empty or malformed
+          return typeof firstWordTime === 'number' && firstWordTime >= section.startTime && firstWordTime < section.endTime;
         });
 
         const isActiveSection = section.id === currentSectionId;
@@ -132,7 +132,7 @@ export function LyricsDisplay({
               {section.name}
             </h3>
             
-            <div className="px-4 pt-2 pb-1">
+            <div className="px-4 pt-10 pb-1"> {/* Increased pt-2 to pt-10 */}
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdxInSection) => { 
                   const lineKey = `${section.id}_${lineIdxInSection}`;
@@ -143,13 +143,11 @@ export function LyricsDisplay({
                   if (!isLineActiveForStyling && line.length > 0) {
                      const lineStartTime = line[0].startTime;
                      const lineEndTime = line[line.length-1].endTime;
-                     // Check if the last tracked active line was this line AND current time is still within this line's relevance
                      if (lastTrackedActiveLineKey === lineKey && currentTime >= lineStartTime && currentTime < (lineEndTime + LYRIC_LINE_RELEVANCE_BUFFER)) {
                        isLineActiveForStyling = true;
                      }
                   }
                   
-                  // Special handling for the very first line of the song to be blue before play starts
                   if (!songIsPlaying && !activeLineKeyForHighlight && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0)) {
                     isLineActiveForStyling = true;
                   }
@@ -204,7 +202,6 @@ export function LyricsDisplay({
                               key={`word-${section.id}-${lineIdxInSection}-${wordIndex}`}
                               className={cn(
                                 "relative inline-block leading-snug",
-                                // wordTextStyle - applied directly to inner span now
                               )}
                             >
                               {shouldDisplayChordSymbol && chordForThisWord && (
