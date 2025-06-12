@@ -246,10 +246,34 @@ export const stairwayToHeavenData: SongData = preProcessSongData({
     [
       { text: "And", startTime: 37.5, endTime: 37.8 }, { text: "she's", startTime: 37.8, endTime: 38.1 }, { text: "buying", startTime: 38.3, endTime: 39.0 }, { text: "a", startTime: 39.0, endTime: 39.1 }, { text: "stairway", startTime: 39.3, endTime: 40.3 }, { text: "to", startTime: 40.3, endTime: 40.5 }, { text: "heaven", startTime: 40.6, endTime: 41.5 },
     ],
-    // Bridge ("Ooh, it makes me wonder", ~96s + 16s from song start)
-     [
-      { text: "Ooh,", startTime: 96.0, endTime: 97.0 }, { text: "it", startTime: 97.2, endTime: 97.5 }, { text: "makes", startTime: 97.6, endTime: 98.2 }, { text: "me", startTime: 98.2, endTime: 98.5 }, { text: "wonder", startTime: 98.8, endTime: 99.8 },
+    // ... more lyrics for Verse 1 and Verse 2 would go here.
+    // For brevity, skipping to the bridge which has sparse lyrics and many chord changes.
+
+    // Bridge (Global time: 96s - 112s)
+    // Original single line for "Ooh, it makes me wonder"
+    // [ { text: "Ooh,", startTime: 96.0, endTime: 97.0 }, { text: "it", startTime: 97.2, endTime: 97.5 }, { text: "makes", startTime: 97.6, endTime: 98.2 }, { text: "me", startTime: 98.2, endTime: 98.5 }, { text: "wonder", startTime: 98.8, endTime: 99.8 }, ],
+    // New structure with anchor lines for chords:
+    [ // Line for "Ooh, it makes me wonder" - covers C (96s) and G/B (98s)
+      { text: "Ooh,", startTime: 96.0, endTime: 97.0 }, { text: "it", startTime: 97.2, endTime: 97.5 }, 
+      { text: "makes", startTime: 97.6, endTime: 98.2 }, { text: "me", startTime: 98.2, endTime: 98.5 }, 
+      { text: "wonder", startTime: 98.8, endTime: 99.8 } 
     ],
+    [ // Anchor line for Am chord (starts at 100s)
+      { text: "", startTime: 100.0, endTime: 100.1 } 
+    ],
+    [ // Anchor line for F chord (starts at 102s)
+      { text: "", startTime: 102.0, endTime: 102.1 }
+    ],
+    [ // Anchor line for C chord (starts at 104s)
+      { text: "", startTime: 104.0, endTime: 104.1 }
+    ],
+    [ // Anchor line for G/B chord (starts at 106s)
+      { text: "", startTime: 106.0, endTime: 106.1 }
+    ],
+    [ // Anchor line for F chord (starts at 108s)
+      { text: "", startTime: 108.0, endTime: 108.1 }
+    ],
+    // ... Other lyrics for Verse 3 etc. would follow
   ],
   chords: [
     // Intro
@@ -257,13 +281,17 @@ export const stairwayToHeavenData: SongData = preProcessSongData({
     { chord: "Fmaj7", startTime: 8, endTime: 12 }, { chord: "G/B", startTime: 12, endTime: 14 }, { chord: "Am", startTime: 14, endTime: 16 },
     { chord: "Am", startTime: 16, endTime: 18 }, { chord: "G#+", startTime: 18, endTime: 20 }, { chord: "C/G", startTime: 20, endTime: 22 }, { chord: "D/F#", startTime: 22, endTime: 24 },
     { chord: "Fmaj7", startTime: 24, endTime: 28 }, { chord: "G/B", startTime: 28, endTime: 30 }, { chord: "Am", startTime: 30, endTime: 32 },
-    // Verse 1 & 2 (similar)
+    // Verse 1 & 2 (similar) - These chords align fairly well with the example lyrics provided
     { chord: "Am", startTime: 32, endTime: 36 }, { chord: "G", startTime: 36, endTime: 40 }, { chord: "Fmaj7", startTime: 40, endTime: 44 }, { chord: "G", startTime: 44, endTime: 48 },
     { chord: "Am", startTime: 48, endTime: 52 }, { chord: "G", startTime: 52, endTime: 56 }, { chord: "Fmaj7", startTime: 56, endTime: 60 }, { chord: "G", startTime: 60, endTime: 64 },
-    // ... (Simplified, actual song is more complex)
-    // Bridge
-    { chord: "C", startTime: 96, endTime: 98 }, { chord: "G/B", startTime: 98, endTime: 100 }, { chord: "Am", startTime: 100, endTime: 102 }, { chord: "F", startTime: 102, endTime: 104 },
-    { chord: "C", startTime: 104, endTime: 106 }, { chord: "G/B", startTime: 106, endTime: 108 }, { chord: "F", startTime: 108, endTime: 112 },
+    // Bridge Chords
+    { chord: "C", startTime: 96, endTime: 98 }, 
+    { chord: "G/B", startTime: 98, endTime: 100 }, 
+    { chord: "Am", startTime: 100, endTime: 102 }, 
+    { chord: "F", startTime: 102, endTime: 104 },
+    { chord: "C", startTime: 104, endTime: 106 }, 
+    { chord: "G/B", startTime: 106, endTime: 108 }, 
+    { chord: "F", startTime: 108, endTime: 112 }, // End of Bridge section time
     // Solo (Am, G, F typically)
     { chord: "Am", startTime: 128, endTime: 136 }, { chord: "G", startTime: 136, endTime: 144 }, { chord: "F", startTime: 144, endTime: 152 },
     { chord: "Am", startTime: 152, endTime: 160 }, { chord: "G", startTime: 160, endTime: 168 }, { chord: "F", startTime: 168, endTime: 176 },
@@ -416,18 +444,12 @@ SONGS.forEach(songEntry => {
         author: songEntry.artistName, // Override with specific author
         bpm: songEntry.bpm, // Override with specific BPM
         key: songEntry.key, // Override with specific key
-        // Sections, lyrics, chords, totalDuration will come from placeholderPlayableSongData
-        // but re-run preProcessSongData if sections need recalc based on new BPM (though placeholder is fixed duration)
     };
-    // If placeholder durations are static, direct assignment is fine.
-    // If durations should adapt (e.g. if placeholder had sections based on measures and BPM changed),
-    // then it would need more complex regeneration or preProcessSongData for the specificPlaceholder.
-    // For now, assume placeholderPlayableSongData's structure is fixed & generic.
     FULL_SONG_DATA[songEntry.id] = specificPlaceholder;
   }
 });
 
 // sampleSong is used in forms for the info message.
-export const sampleSong = whileMyGuitarGentlyWeepsData; // Keep "WMGGW" as the main example for the info text
+export const sampleSong = whileMyGuitarGentlyWeepsData; 
 export const detailedSongExamples = [whileMyGuitarGentlyWeepsData.title, sultansOfSwingData.title, stairwayToHeavenData.title];
 
