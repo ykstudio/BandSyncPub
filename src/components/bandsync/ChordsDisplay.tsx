@@ -13,7 +13,8 @@ interface ChordsDisplayProps {
 
 export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayProps) {
   const pulseDuration = songBpm > 0 ? 60 / songBpm : 0.5;
-  const anticipationLeadTime = pulseDuration;
+  // Set anticipationLeadTime to 0 for exact synchronization
+  const anticipationLeadTime = 0; 
   const targetDisplayTime = currentTime + anticipationLeadTime;
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
