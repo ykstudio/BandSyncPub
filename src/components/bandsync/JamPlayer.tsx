@@ -279,11 +279,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         }
         else {
             if (remoteIsPlaying) { 
-                if (remoteCurrentTime > localCurrentTime + TIME_DRIFT_TOLERANCE_PLAYING) {
+                 if (remoteCurrentTime > localCurrentTime && remoteCurrentTime - localCurrentTime > TIME_DRIFT_TOLERANCE_PLAYING) {
                     setCurrentTime(remoteCurrentTime);
                 }
             } else { 
-                if (Math.abs(localCurrentTime - remoteCurrentTime) > 0.05) { // Be more precise if paused
+                if (Math.abs(localCurrentTime - remoteCurrentTime) > 0.05) { 
                     setCurrentTime(remoteCurrentTime);
                 }
             }
@@ -579,26 +579,26 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             <div className="flex items-center gap-1">
                 <Button 
                     onClick={() => handleSongNavigation('prev')} 
-                    variant="ghost" 
+                    variant="secondary" 
                     size="icon" 
                     aria-label="Previous Song"
                     disabled={currentSongIndex === 0}
                 >
                     <SkipBack className="w-5 h-5" />
                 </Button>
-                <Button onClick={handlePlayPause} variant="ghost" size="icon" aria-label={isPlaying ? 'Pause' : 'Play'} className="w-10 h-10">
-                    {isPlaying ? <Pause className="w-7 h-7 text-primary" /> : <Play className="w-7 h-7 text-primary" />}
+                <Button onClick={handlePlayPause} variant="default" size="icon" aria-label={isPlaying ? 'Pause' : 'Play'} className="w-10 h-10">
+                    {isPlaying ? <Pause className="w-7 h-7 text-primary-foreground" /> : <Play className="w-7 h-7 text-primary-foreground" />}
                 </Button>
                 <Button 
                     onClick={() => handleSongNavigation('next')} 
-                    variant="ghost" 
+                    variant="secondary" 
                     size="icon" 
                     aria-label="Next Song"
                     disabled={currentSongIndex >= playlist.length - 1}
                 >
                     <SkipForward className="w-5 h-5" />
                 </Button>
-                 <Button onClick={handleResetCurrentSong} variant="ghost" size="icon" aria-label="Reset Current Song">
+                 <Button onClick={handleResetCurrentSong} variant="secondary" size="icon" aria-label="Reset Current Song">
                     <RefreshCw className="w-5 h-5" />
                 </Button>
             </div>
@@ -610,3 +610,4 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </Card>
   );
 }
+
