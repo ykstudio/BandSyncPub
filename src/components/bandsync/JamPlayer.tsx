@@ -321,9 +321,9 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     localUpdateInProgressRef.current = true;
     setCurrentSongIndex(0);
     setCurrentTime(0);
-    setIsPlaying(true);
+    setIsPlaying(false); // Changed from true to false
     if (isSyncEnabled && firebaseInitialized) {
-      updateFirestoreSession({ isPlaying: true, currentTime: 0, currentSongIndexInJam: 0 });
+      updateFirestoreSession({ isPlaying: false, currentTime: 0, currentSongIndexInJam: 0 }); // Changed isPlaying to false
     }
     localUpdateInProgressRef.current = false;
   }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
