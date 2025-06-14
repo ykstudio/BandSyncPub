@@ -28,8 +28,8 @@ body {
 
     --accent: 283 76% 52%; /* Contrasting purple (#A229E2) */
     --accent-foreground: 0 0% 100%; /* White text on accent */
-    --accent-light-solid-bg: 283 80% 87%; /* Darker light solid purple */
-    --accent-pulse-darker-target: 283 80% 77%; /* Darker target for pulse animation */
+    --accent-light-solid-bg: 283 80% 92%; /* Lightened solid purple */
+    --accent-pulse-darker-target: 283 80% 82%; /* Lightened target for pulse animation */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -72,8 +72,8 @@ body {
     --muted-foreground: 0 0% 63.9%;
     --accent: 283 76% 52%;
     --accent-foreground: 0 0% 100%;
-    --accent-light-solid-bg: 283 50% 20%; /* Darker dark solid purple */
-    --accent-pulse-darker-target: 283 50% 15%; /* Darker target for pulse animation in dark mode */
+    --accent-light-solid-bg: 283 50% 25%; /* Lightened dark solid purple */
+    --accent-pulse-darker-target: 283 50% 20%; /* Lightened target for pulse animation in dark mode */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 14.9%;
