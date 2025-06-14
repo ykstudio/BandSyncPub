@@ -60,7 +60,7 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
           const isActive = section.id === currentSectionId;
 
           let dynamicStyles: React.CSSProperties = {};
-          const sectionBaseClasses = 'flex items-center justify-center text-xs md:text-sm font-medium transition-colors duration-300 ease-in-out border-r last:border-r-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-muted focus:ring-offset-1';
+          const sectionBaseClasses = 'flex items-center justify-center px-2 text-xs md:text-sm font-medium transition-colors duration-300 ease-in-out border-r last:border-r-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-muted focus:ring-offset-1';
           let sectionModeClasses: string[] = [];
 
           if (isActive) {
@@ -89,7 +89,7 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
               onKeyDown={(e) => handleKeyDown(e, section)}
             >
               <span className={cn(
-                "inline-block px-1",
+                "inline-block", // Removed px-1
                 isActive ? "whitespace-nowrap" : "truncate"
               )}>
                 {section.name}
@@ -101,3 +101,4 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
     </div>
   );
 }
+
