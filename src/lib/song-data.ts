@@ -230,7 +230,7 @@ export const stairwayToHeavenData: SongData = preProcessSongData({
     { id: "verse1", name: "Verse 1 (Flute)", duration: 32 },
     { id: "verse2", name: "Verse 2", duration: 32 },
     { id: "bridge", name: "Bridge", duration: 16 }, // ~15.8s
-    { id: "soloBuild", name: "Solo Build-up", duration: 16 },
+    { id: "soloBuild", name: "Solo Build-up", duration: 16 }, // Starts at 112s, ends at 128s
     { id: "solo", name: "Guitar Solo", duration: 48 }, // ~47.3s
     { id: "verse3", name: "Verse 3 (Faster)", duration: 32 },
     { id: "outro", name: "Outro", duration: 24 }, // ~23.6s
@@ -246,34 +246,22 @@ export const stairwayToHeavenData: SongData = preProcessSongData({
     [
       { text: "And", startTime: 37.5, endTime: 37.8 }, { text: "she's", startTime: 37.8, endTime: 38.1 }, { text: "buying", startTime: 38.3, endTime: 39.0 }, { text: "a", startTime: 39.0, endTime: 39.1 }, { text: "stairway", startTime: 39.3, endTime: 40.3 }, { text: "to", startTime: 40.3, endTime: 40.5 }, { text: "heaven", startTime: 40.6, endTime: 41.5 },
     ],
-    // ... more lyrics for Verse 1 and Verse 2 would go here.
-    // For brevity, skipping to the bridge which has sparse lyrics and many chord changes.
-
     // Bridge (Global time: 96s - 112s)
-    // Original single line for "Ooh, it makes me wonder"
-    // [ { text: "Ooh,", startTime: 96.0, endTime: 97.0 }, { text: "it", startTime: 97.2, endTime: 97.5 }, { text: "makes", startTime: 97.6, endTime: 98.2 }, { text: "me", startTime: 98.2, endTime: 98.5 }, { text: "wonder", startTime: 98.8, endTime: 99.8 }, ],
-    // New structure with anchor lines for chords:
-    [ // Line for "Ooh, it makes me wonder" - covers C (96s) and G/B (98s)
+    [ 
       { text: "Ooh,", startTime: 96.0, endTime: 97.0 }, { text: "it", startTime: 97.2, endTime: 97.5 }, 
       { text: "makes", startTime: 97.6, endTime: 98.2 }, { text: "me", startTime: 98.2, endTime: 98.5 }, 
       { text: "wonder", startTime: 98.8, endTime: 99.8 } 
     ],
-    [ // Anchor line for Am chord (starts at 100s)
-      { text: "", startTime: 100.0, endTime: 100.1 } 
-    ],
-    [ // Anchor line for F chord (starts at 102s)
-      { text: "", startTime: 102.0, endTime: 102.1 }
-    ],
-    [ // Anchor line for C chord (starts at 104s)
-      { text: "", startTime: 104.0, endTime: 104.1 }
-    ],
-    [ // Anchor line for G/B chord (starts at 106s)
-      { text: "", startTime: 106.0, endTime: 106.1 }
-    ],
-    [ // Anchor line for F chord (starts at 108s)
-      { text: "", startTime: 108.0, endTime: 108.1 }
-    ],
-    // ... Other lyrics for Verse 3 etc. would follow
+    [ { text: "", startTime: 100.0, endTime: 100.1 } ], // Anchor for Am chord
+    [ { text: "", startTime: 102.0, endTime: 102.1 } ], // Anchor for F chord
+    [ { text: "", startTime: 104.0, endTime: 104.1 } ], // Anchor for C chord
+    [ { text: "", startTime: 106.0, endTime: 106.1 } ], // Anchor for G/B chord
+    [ { text: "", startTime: 108.0, endTime: 108.1 } ], // Anchor for F chord
+    // Solo Build-up (Global time: 112s - 128s)
+    [ { text: "", startTime: 112.0, endTime: 112.1 } ], // Anchor for Am chord
+    [ { text: "", startTime: 116.0, endTime: 116.1 } ], // Anchor for G chord
+    [ { text: "", startTime: 120.0, endTime: 120.1 } ], // Anchor for F chord
+    [ { text: "", startTime: 124.0, endTime: 124.1 } ], // Anchor for G chord
   ],
   chords: [
     // Intro
@@ -284,14 +272,19 @@ export const stairwayToHeavenData: SongData = preProcessSongData({
     // Verse 1 & 2 (similar) - These chords align fairly well with the example lyrics provided
     { chord: "Am", startTime: 32, endTime: 36 }, { chord: "G", startTime: 36, endTime: 40 }, { chord: "Fmaj7", startTime: 40, endTime: 44 }, { chord: "G", startTime: 44, endTime: 48 },
     { chord: "Am", startTime: 48, endTime: 52 }, { chord: "G", startTime: 52, endTime: 56 }, { chord: "Fmaj7", startTime: 56, endTime: 60 }, { chord: "G", startTime: 60, endTime: 64 },
-    // Bridge Chords
+    // Bridge Chords (96s - 112s)
     { chord: "C", startTime: 96, endTime: 98 }, 
     { chord: "G/B", startTime: 98, endTime: 100 }, 
     { chord: "Am", startTime: 100, endTime: 102 }, 
     { chord: "F", startTime: 102, endTime: 104 },
     { chord: "C", startTime: 104, endTime: 106 }, 
     { chord: "G/B", startTime: 106, endTime: 108 }, 
-    { chord: "F", startTime: 108, endTime: 112 }, // End of Bridge section time
+    { chord: "F", startTime: 108, endTime: 112 }, 
+    // Solo Build-up Chords (112s - 128s)
+    { chord: "Am", startTime: 112, endTime: 116 },
+    { chord: "G", startTime: 116, endTime: 120 },
+    { chord: "F", startTime: 120, endTime: 124 },
+    { chord: "G", startTime: 124, endTime: 128 },
     // Solo (Am, G, F typically)
     { chord: "Am", startTime: 128, endTime: 136 }, { chord: "G", startTime: 136, endTime: 144 }, { chord: "F", startTime: 144, endTime: 152 },
     { chord: "Am", startTime: 152, endTime: 160 }, { chord: "G", startTime: 160, endTime: 168 }, { chord: "F", startTime: 168, endTime: 176 },
