@@ -321,9 +321,9 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     localUpdateInProgressRef.current = true;
     setCurrentSongIndex(0);
     setCurrentTime(0);
-    setIsPlaying(false); // Changed from true to false
+    setIsPlaying(false); 
     if (isSyncEnabled && firebaseInitialized) {
-      updateFirestoreSession({ isPlaying: false, currentTime: 0, currentSongIndexInJam: 0 }); // Changed isPlaying to false
+      updateFirestoreSession({ isPlaying: false, currentTime: 0, currentSongIndexInJam: 0 }); 
     }
     localUpdateInProgressRef.current = false;
   }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
@@ -571,7 +571,12 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
               activeLineKeyForHighlight={activeLineKeyForHighlight}
               songIsPlaying={isPlayingRef.current}
             />
-            <ChordsDisplay chords={playableSongData.chords} currentTime={currentTime} songBpm={currentDisplaySongInfo.bpm} />
+            <ChordsDisplay 
+              chords={playableSongData.chords} 
+              currentTime={currentTime} 
+              songBpm={currentDisplaySongInfo.bpm}
+              isPlaying={isPlaying} 
+            />
           </div>
         </CardContent>
       </Card>

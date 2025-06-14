@@ -115,6 +115,22 @@ body {
   animation-iteration-count: infinite;
 }
 
+@keyframes chord-background-pulse {
+  0%, 100% {
+    background-color: hsl(var(--accent-light-solid-bg) / 0.75); /* Slightly reduced alpha */
+  }
+  50% {
+    background-color: hsl(var(--accent-light-solid-bg) / 1); /* Full alpha */
+  }
+}
+
+.animate-chord-bg-pulse {
+  animation-name: chord-background-pulse;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+
 @keyframes nextChordEnter {
   0% { opacity: 0; transform: translateX(150%) scale(0.8); }
   100% { opacity: 1; transform: translateX(0) scale(1); }

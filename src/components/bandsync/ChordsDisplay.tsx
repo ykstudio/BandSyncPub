@@ -9,11 +9,11 @@ interface ChordsDisplayProps {
   chords: ChordChange[];
   currentTime: number;
   songBpm: number;
+  isPlaying: boolean;
 }
 
-export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayProps) {
+export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: ChordsDisplayProps) {
   const pulseDuration = songBpm > 0 ? 60 / songBpm : 0.5;
-  // Set anticipationLeadTime to 0 for exact synchronization
   const anticipationLeadTime = 0; 
   const targetDisplayTime = currentTime + anticipationLeadTime;
 
@@ -95,6 +95,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
           const isVisuallyNext = chord === visuallyNextChord;
 
           let chordSpecificClasses = '';
+          let animationClass = '';
           let animationStyle: React.CSSProperties = {};
           
           const baseKey = `${chord.chord}-${chord.startTime}-${index}`;
@@ -103,15 +104,12 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
             chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-px text-3xl sm:text-5xl md:text-6xl leading-none';
           } else if (isVisuallyCurrent) {
             chordSpecificClasses = 'font-bold text-accent text-5xl sm:text-7xl md:text-9xl leading-none bg-accent-lightBg px-4 py-2 rounded-xl';
-            // Temporarily remove scaling animation to test "blinking" issue
-            // if (songBpm > 0) {
-            //   animationStyle = {
-            //     animationName: 'metronome-pulse',
-            //     animationDuration: `${currentChordPulseDurationStr}s`,
-            //     animationIterationCount: 'infinite',
-            //     animationTimingFunction: 'ease-in-out',
-            //   };
-            // }
+            if (isPlaying && songBpm > 0) {
+              animationClass = 'animate-chord-bg-pulse';
+              animationStyle = {
+                animationDuration: `${currentChordPulseDurationStr}s`,
+              };
+            }
           } else if (isVisuallyNext) {
             chordSpecificClasses = 'text-primary text-6xl sm:text-8xl md:text-[10rem] leading-none';
           } else {
@@ -124,7 +122,8 @@ export function ChordsDisplay({ chords, currentTime, songBpm }: ChordsDisplayPro
               ref={el => chordItemRefs.current[index] = el}
               className={cn(
                 'flex-shrink-0', 
-                chordSpecificClasses
+                chordSpecificClasses,
+                animationClass
               )}
               style={animationStyle}
             >
