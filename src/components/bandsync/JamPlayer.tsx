@@ -10,9 +10,9 @@ import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import {
-  Play, Pause, SkipBack, SkipForward, ListMusic, Settings2, Wifi, WifiOff,
+  Play, Pause, SkipBack, SkipForward, ListMusic, Wifi, WifiOff,
   AlertTriangle, Loader2, RefreshCw,
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
@@ -25,6 +25,8 @@ import Link from 'next/link';
 const FIRESTORE_UPDATE_INTERVAL = 2000; // Milliseconds
 const SESSION_ID_PREFIX = 'global-bandsync-session-jam-';
 const LYRIC_ACTIVE_BUFFER_MS = 0.1; // 100ms buffer
+const TIME_DRIFT_TOLERANCE_PLAYING = 0.15; // seconds
+
 
 interface JamPlayerProps {
   jamId: string;
@@ -51,7 +53,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
   const isPlayingRef = useRef(isPlaying);
   const currentSongIndexRef = useRef(currentSongIndex);
-  const localUpdateInProgressRef = useRef(false); // True if local client is currently pushing an update or processing one
+  const localUpdateInProgressRef = useRef(false); 
   const latestCurrentTimeRef = useRef(currentTime); 
 
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
@@ -112,7 +114,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       console.error("Error fetching Jam:", err);
       setError("Could not load Jam Session data.");
     }).finally(() => {
-        // setIsLoadingJamData(false) will be handled by Firestore listener effect or if sync is off
+        // setIsLoadingJamData(false) handled by Firestore listener or sync off
     });
   }, [jamId]);
 
@@ -147,13 +149,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
   useEffect(() => {
     if (db) setFirebaseInitialized(true);
-    setIsLoadingSessionState(isSyncEnabled && db); // Initial session loading state
+    setIsLoadingSessionState(isSyncEnabled && db);
   }, [isSyncEnabled, db]);
 
-  // Firestore Update Function
   const updateFirestoreSession = useCallback(async (newState: Partial<SessionState>) => {
     if (!isSyncEnabled || !db || !firebaseInitialized) return;
-    // Note: localUpdateInProgressRef is typically managed by the caller of this function
     const sessionDocRef = doc(db, 'sessions', currentSessionId);
     try {
       await setDoc(sessionDocRef, { ...newState, lastUpdated: serverTimestamp() }, { merge: true });
@@ -164,32 +164,31 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   }, [isSyncEnabled, db, firebaseInitialized, toast, currentSessionId]);
 
 
-  // Local Timer Effect
   useEffect(() => {
     let localTimerIntervalId: NodeJS.Timeout | undefined = undefined;
 
     if (isPlayingRef.current && playlist.length > 0 && playableSongData.totalDuration > 0) {
       localTimerIntervalId = setInterval(() => {
-        if (localUpdateInProgressRef.current) return; // Pause local timer advancement during sync operations
+        if (localUpdateInProgressRef.current) return; 
 
         setCurrentTime((prevTime) => {
-          const nextTime = prevTime + 0.1; // Advance by 100ms
+          const nextTime = prevTime + 0.1; 
           if (nextTime >= playableSongData.totalDuration) {
-            setIsPlaying(false); // Stop at the end of the current song
+            setIsPlaying(false); 
             const nextSongIndex = currentSongIndexRef.current + 1;
-            if (nextSongIndex < playlist.length) { // If there's a next song
+            if (nextSongIndex < playlist.length) { 
               localUpdateInProgressRef.current = true;
               setCurrentSongIndex(nextSongIndex);
               setCurrentTime(0);
-              setIsPlaying(true); // Auto-play next song
+              setIsPlaying(true); 
               if (isSyncEnabled && firebaseInitialized) {
                 updateFirestoreSession({ isPlaying: true, currentTime: 0, currentSongIndexInJam: nextSongIndex })
                   .finally(() => { localUpdateInProgressRef.current = false; });
               } else {
                 localUpdateInProgressRef.current = false;
               }
-              return 0; // Return the new time for the next song
-            } else { // End of playlist
+              return 0; 
+            } else { 
               if (isSyncEnabled && firebaseInitialized) {
                 localUpdateInProgressRef.current = true;
                 updateFirestoreSession({ isPlaying: false, currentTime: playableSongData.totalDuration, currentSongIndexInJam: currentSongIndexRef.current })
@@ -197,10 +196,10 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
               } else {
                 localUpdateInProgressRef.current = false;
               }
-              return playableSongData.totalDuration; // Stay at the end of the last song
+              return playableSongData.totalDuration; 
             }
           }
-          return nextTime; // Continue current song
+          return nextTime; 
         });
       }, 100);
     }
@@ -209,20 +208,18 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     };
   }, [isPlaying, playableSongData.totalDuration, isSyncEnabled, firebaseInitialized, playlist, updateFirestoreSession]);
 
-  // Periodic Firestore Update Effect (sends local state to Firestore)
   useEffect(() => {
     let firestoreUpdateIntervalId: NodeJS.Timeout | undefined = undefined;
     if (isPlayingRef.current && isSyncEnabled && firebaseInitialized && playlist.length > 0) {
       firestoreUpdateIntervalId = setInterval(() => {
-        // Only send update if not currently processing another local->Firestore update or remote->local update
         if (!localUpdateInProgressRef.current) { 
-          localUpdateInProgressRef.current = true; // Mark as busy before async operation
+          localUpdateInProgressRef.current = true; 
           updateFirestoreSession({ 
             currentTime: latestCurrentTimeRef.current, 
-            isPlaying: true, // isPlayingRef.current would be true here
+            isPlaying: true, 
             currentSongIndexInJam: currentSongIndexRef.current 
           }).finally(() => {
-            localUpdateInProgressRef.current = false; // Clear busy flag
+            localUpdateInProgressRef.current = false; 
           });
         }
       }, FIRESTORE_UPDATE_INTERVAL);
@@ -233,32 +230,26 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   }, [isPlaying, isSyncEnabled, firebaseInitialized, playlist.length, updateFirestoreSession]);
 
 
-  // Firestore Listener Effect (receives remote state)
   useEffect(() => {
     if (!isSyncEnabled || !db || !firebaseInitialized || !jamSession) {
       setIsLoadingSessionState(false);
-      setIsLoadingJamData(false); // Ensure this is false if sync is off or prerequisites missing
-      if (jamSession && playlist.length > 0) setIsLoadingJamData(false); // If jam loaded but sync off
+      setIsLoadingJamData(false); 
+      if (jamSession && playlist.length > 0) setIsLoadingJamData(false); 
       return;
     }
     
     setIsLoadingSessionState(true); 
-    if (!jamSession) setIsLoadingJamData(true); // If jamSession itself isn't loaded yet
+    if (!jamSession) setIsLoadingJamData(true); 
 
     const sessionDocRef = doc(db, 'sessions', currentSessionId);
     const unsubscribe = onSnapshot(sessionDocRef, (snapshot) => {
-      setIsLoadingSessionState(false); // Received an update or initial state
+      setIsLoadingSessionState(false); 
       if (!jamSession && snapshot.exists()) { 
-          // If jamSession wasn't loaded via getDoc but session exists,
-          // we might be able to infer initial song index, but it's safer to rely on getDoc for playlist.
-          // For now, ensure jam loading is also false if session state is resolved.
           setIsLoadingJamData(false);
       } else if (jamSession) {
-          setIsLoadingJamData(false); // If jamSession is loaded, data loading is done.
+          setIsLoadingJamData(false); 
       }
 
-
-      // Ignore updates that are from local changes not yet ack'd by server, or if we are mid-local-update
       if (snapshot.metadata.hasPendingWrites || localUpdateInProgressRef.current) {
         return;
       }
@@ -266,7 +257,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       if (snapshot.exists()) {
         const remoteState = snapshot.data() as SessionState;
         
-        localUpdateInProgressRef.current = true; // Mark that we are processing a remote update
+        localUpdateInProgressRef.current = true;
 
         const remoteSongIndex = remoteState.currentSongIndexInJam;
         const remoteIsPlaying = remoteState.isPlaying;
@@ -276,38 +267,29 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         const localIsPlaying = isPlayingRef.current;
         const localCurrentTime = latestCurrentTimeRef.current;
 
-        // 1. Handle song changes first:
         if (remoteSongIndex !== undefined && remoteSongIndex !== localSongIndex &&
             playlist.length > 0 && remoteSongIndex < playlist.length) {
             setCurrentSongIndex(remoteSongIndex);
-            setCurrentTime(remoteCurrentTime); // Time must be accepted on song change
+            setCurrentTime(remoteCurrentTime); 
             setIsPlaying(remoteIsPlaying);
         }
-        // 2. Else, if same song, handle play state changes:
         else if (remoteIsPlaying !== localIsPlaying) {
             setIsPlaying(remoteIsPlaying);
-            // When play state changes, remote time is authoritative for that change event.
             setCurrentTime(remoteCurrentTime);
         }
-        // 3. Else, if same song and same play state:
         else {
-            if (remoteIsPlaying) { // Both are playing
-                // Only update if remote time is demonstrably ahead.
-                // This prevents backward jumps if local timer got slightly ahead of a received Firestore update.
-                if (remoteCurrentTime > localCurrentTime) {
+            if (remoteIsPlaying) { 
+                if (remoteCurrentTime > localCurrentTime + TIME_DRIFT_TOLERANCE_PLAYING) {
                     setCurrentTime(remoteCurrentTime);
                 }
-                // If remoteCurrentTime <= localCurrentTime, do nothing. Local client is on time or ahead.
-            } else { // Both are paused
-                // If paused, times should be exact.
-                if (localCurrentTime !== remoteCurrentTime) {
+            } else { 
+                if (Math.abs(localCurrentTime - remoteCurrentTime) > 0.05) { // Be more precise if paused
                     setCurrentTime(remoteCurrentTime);
                 }
             }
         }
-        localUpdateInProgressRef.current = false; // Finished processing remote update
+        localUpdateInProgressRef.current = false; 
       } else {
-        // Session document doesn't exist, current client should initialize it.
         localUpdateInProgressRef.current = true;
         updateFirestoreSession({
             isPlaying: isPlayingRef.current, 
@@ -419,26 +401,20 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         id="sync-toggle"
         checked={isSyncEnabled}
         onCheckedChange={(checked) => {
-          localUpdateInProgressRef.current = true; // Prevent immediate reactions while state is changing
+          localUpdateInProgressRef.current = true; 
           setIsSyncEnabled(checked);
           if (!checked) {
             toast({ title: "Sync Disabled", description: "Playback is now local." });
-            setIsLoadingSessionState(false); // No session to load if sync is off
+            setIsLoadingSessionState(false); 
             localUpdateInProgressRef.current = false;
           } else if (!firebaseInitialized || !db) {
             toast({ title: "Sync Failed", description: "Firebase not configured. Sync remains off.", variant: "destructive" });
-            setIsSyncEnabled(false); // Force it back off
+            setIsSyncEnabled(false); 
             setIsLoadingSessionState(false);
             localUpdateInProgressRef.current = false;
           } else {
             toast({ title: "Sync Enabled", description: "Attempting to connect to shared session." });
-            setIsLoadingSessionState(true); // Trigger loading state for the session listener to pick up
-            // The Firestore listener useEffect will re-run and handle fetching/subscribing
-            // No need to manually getDoc here as the listener will establish or create the session doc
-            // Setting localUpdateInProgressRef to false will happen in the listener or if it errors
-            // However, to be safe, let's ensure it's false after a short delay if listener doesn't run.
-            // This is a bit of a workaround for immediate state after toggle.
-            // The main session loading will be handled by the useEffect [isSyncEnabled, db, ...]
+            setIsLoadingSessionState(true); 
             setTimeout(() => { localUpdateInProgressRef.current = false; }, 500);
           }
         }}
@@ -545,103 +521,92 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
 
   return (
-    <div className="w-full space-y-2">
-      <Card className="shadow-xl w-full">
-        <CardHeader>
-          <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-            <SongInfo
-              title={currentDisplaySongInfo.title}
-              author={currentDisplaySongInfo.author}
-              songKey={currentDisplaySongInfo.key}
-            />
-            <div className="flex flex-col items-center md:items-end gap-2">
-              <Metronome bpm={currentDisplaySongInfo.bpm} isPlaying={isPlaying} />
-              <SyncToggle />
-              {(!firebaseInitialized || !db) && (<p className="text-xs text-destructive mt-1 text-right"> (Firebase not configured,<br />Sync disabled)</p>)}
-            </div>
-          </div>
-          <div className="mt-4 text-center md:text-left">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div>
-                    <h2 className="text-lg font-semibold text-primary">{jamSession?.name}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Song {currentSongIndex + 1} of {playlist.length}
-                    </p>
-                </div>
-                {playlist.length > 0 && (
-                    <Button onClick={handleReplayJam} variant="outline" size="sm" className="self-center sm:self-auto">
-                        <RefreshCw className="mr-2 h-4 w-4" /> Restart Jam
-                    </Button>
-                )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-           <div className="flex items-center justify-between p-2 mb-3 border-b border-border">
-            <Button
-                onClick={() => handleSongNavigation('prev')}
-                disabled={currentSongIndex === 0}
-                variant="outline"
-                size="sm"
-              >
-                <SkipBack className="mr-2 h-4 w-4"/> Previous Song
+    <Card className="shadow-xl w-full flex flex-col h-[calc(100vh-4rem)]">
+      <CardHeader className="flex-shrink-0">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-semibold text-primary truncate max-w-xs sm:max-w-md md:max-w-lg">{jamSession?.name}</h2>
+          <p className="text-sm text-muted-foreground whitespace-nowrap">
+            Song {currentSongIndex + 1} of {playlist.length}
+          </p>
+        </div>
+        <SongInfo
+          title={currentDisplaySongInfo.title}
+          author={currentDisplaySongInfo.author}
+          songKey={currentDisplaySongInfo.key}
+        />
+        <div className="flex justify-between items-center mt-3 gap-4">
+          <Metronome bpm={currentDisplaySongInfo.bpm} isPlaying={isPlaying} />
+          <SyncToggle />
+          {playlist.length > 0 && (
+              <Button onClick={handleReplayJam} variant="outline" size="sm">
+                  <RefreshCw className="mr-2 h-4 w-4" /> Restart Jam
               </Button>
-              <div className="text-sm text-muted-foreground text-center px-2 truncate">
-                Up Next: {currentSongIndex + 1 < playlist.length ? playlist[currentSongIndex + 1].title : "End of Jam"}
-              </div>
-              <Button
-                onClick={() => handleSongNavigation('next')}
-                disabled={currentSongIndex >= playlist.length - 1}
-                variant="outline"
-                size="sm"
-              >
-                Next Song <SkipForward className="ml-2 h-4 w-4"/>
-              </Button>
-          </div>
+          )}
+        </div>
+         {(!firebaseInitialized || !db) && (<p className="text-xs text-destructive mt-1 text-right"> (Firebase not configured, Sync disabled)</p>)}
+      </CardHeader>
 
-          <div className="flex items-center justify-between p-2 bg-secondary rounded-md">
-            <div className="flex items-center gap-1 sm:gap-2">
-              <Button onClick={handlePlayPause} variant="ghost" size="icon" aria-label={isPlaying ? 'Pause' : 'Play'}>
-                {isPlaying ? <Pause className="w-6 h-6 text-primary" /> : <Play className="w-6 h-6 text-primary" />}
-              </Button>
-              <Button onClick={handleResetCurrentSong} variant="ghost" size="icon" aria-label="Reset song">
-                <SkipBack className="w-5 h-5 text-primary" />
-              </Button>
-            </div>
-            <div className="text-sm font-mono text-muted-foreground">
-              {formatTime(currentTime)} / {formatTime(playableSongData.totalDuration)}
-            </div>
-            <Button variant="ghost" size="icon" aria-label="Settings (placeholder)">
-              <Settings2 className="w-5 h-5 text-primary" />
-            </Button>
-          </div>
-          <SectionProgressBar
+      <CardContent className="flex-grow overflow-y-auto space-y-2 p-3 md:p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 h-full">
+          <LyricsDisplay
+            lyrics={playableSongData.lyrics}
+            chords={playableSongData.chords}
+            sections={playableSongData.sections}
+            currentTime={currentTime}
+            activeSongChord={activeSongChord}
+            activeLyricWordInfo={activeLyricWordInfo}
+            currentSectionId={currentSectionId}
+            activeLineKeyForHighlight={activeLineKeyForHighlight}
+            songIsPlaying={isPlayingRef.current}
+          />
+          <ChordsDisplay 
+            chords={playableSongData.chords} 
+            currentTime={currentTime} 
+            songBpm={currentDisplaySongInfo.bpm}
+            isPlaying={isPlaying} 
+          />
+        </div>
+      </CardContent>
+
+      <CardFooter className="flex-shrink-0 flex flex-col gap-2 p-3 border-t bg-background">
+        <SectionProgressBar
             sections={playableSongData.sections}
             currentSectionId={currentSectionId}
             currentTime={currentTime}
             onSectionSelect={handleSectionSelect}
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <LyricsDisplay
-              lyrics={playableSongData.lyrics}
-              chords={playableSongData.chords}
-              sections={playableSongData.sections}
-              currentTime={currentTime}
-              activeSongChord={activeSongChord}
-              activeLyricWordInfo={activeLyricWordInfo}
-              currentSectionId={currentSectionId}
-              activeLineKeyForHighlight={activeLineKeyForHighlight}
-              songIsPlaying={isPlayingRef.current}
-            />
-            <ChordsDisplay 
-              chords={playableSongData.chords} 
-              currentTime={currentTime} 
-              songBpm={currentDisplaySongInfo.bpm}
-              isPlaying={isPlaying} 
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        />
+        <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-1">
+                <Button 
+                    onClick={() => handleSongNavigation('prev')} 
+                    variant="ghost" 
+                    size="icon" 
+                    aria-label="Previous Song"
+                    disabled={currentSongIndex === 0}
+                >
+                    <SkipBack className="w-5 h-5" />
+                </Button>
+                <Button onClick={handlePlayPause} variant="ghost" size="icon" aria-label={isPlaying ? 'Pause' : 'Play'} className="w-10 h-10">
+                    {isPlaying ? <Pause className="w-7 h-7 text-primary" /> : <Play className="w-7 h-7 text-primary" />}
+                </Button>
+                <Button 
+                    onClick={() => handleSongNavigation('next')} 
+                    variant="ghost" 
+                    size="icon" 
+                    aria-label="Next Song"
+                    disabled={currentSongIndex >= playlist.length - 1}
+                >
+                    <SkipForward className="w-5 h-5" />
+                </Button>
+                 <Button onClick={handleResetCurrentSong} variant="ghost" size="icon" aria-label="Reset Current Song">
+                    <RefreshCw className="w-5 h-5" />
+                </Button>
+            </div>
+            <div className="text-sm font-mono text-muted-foreground">
+              {formatTime(currentTime)} / {formatTime(playableSongData.totalDuration)}
+            </div>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }

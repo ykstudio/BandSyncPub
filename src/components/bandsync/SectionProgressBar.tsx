@@ -8,7 +8,7 @@ import React, { useEffect, useRef } from 'react';
 interface SectionProgressBarProps {
   sections: SongSection[];
   currentSectionId: string | null;
-  currentTime: number;
+  currentTime: number; // Not directly used for progress logic here, but good for context
   onSectionSelect: (startTime: number) => void;
 }
 
@@ -48,10 +48,10 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
   };
 
   return (
-    <div className="w-full p-2 my-4 rounded-lg shadow-md bg-card">
+    <div className="w-full rounded-lg bg-muted"> {/* Removed shadow, p-2, my-4. Changed bg-card to bg-muted */}
       <div
         ref={scrollContainerRef}
-        className="flex w-full h-12 rounded overflow-x-auto" 
+        className="flex w-full h-10 rounded overflow-x-auto"  {/* Reduced height to h-10 */}
       >
         {sections.map((section, index) => {
           const itemRef = (el: HTMLDivElement | null) => sectionItemRefs.current[index] = el;
@@ -60,19 +60,20 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
           const isActive = section.id === currentSectionId;
 
           let dynamicStyles: React.CSSProperties = {};
-          const sectionBaseClasses = 'flex items-center justify-center px-2 text-xs md:text-sm font-medium transition-colors duration-300 ease-in-out border-r last:border-r-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-muted focus:ring-offset-1';
+          const sectionBaseClasses = 'flex items-center justify-center px-2 text-xs font-medium transition-colors duration-300 ease-in-out border-r border-border last:border-r-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-0';
           let sectionModeClasses: string[] = [];
 
           if (isActive) {
-            sectionModeClasses = ['bg-accent-lightBg', 'text-accent', 'flex-grow', 'flex-shrink-0', 'font-semibold'];
+            sectionModeClasses = ['bg-accent-lightBg', 'text-accent', 'font-semibold', 'flex-grow', 'flex-shrink-0'];
             dynamicStyles = {
               flexBasis: 'auto',
               minWidth: 'max-content', 
             };
           } else {
-            sectionModeClasses = ['bg-secondary', 'text-secondary-foreground', 'hover:bg-muted', 'hover:text-muted-foreground', 'flex-shrink'];
-            dynamicStyles = {
+            sectionModeClasses = ['text-secondary-foreground', 'hover:bg-secondary/80', 'flex-shrink'];
+             dynamicStyles = {
               flexBasis: `${sectionWidthPercentage}%`,
+               minWidth: `${Math.max(sectionWidthPercentage, 5)}%` // Ensure even tiny sections are clickable
             };
           }
 
@@ -89,7 +90,7 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
               onKeyDown={(e) => handleKeyDown(e, section)}
             >
               <span className={cn(
-                "inline-block", // Removed px-1
+                "inline-block",
                 isActive ? "whitespace-nowrap" : "truncate"
               )}>
                 {section.name}
@@ -101,4 +102,3 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
     </div>
   );
 }
-
