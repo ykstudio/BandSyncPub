@@ -80,7 +80,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
 
   return (
     <div 
-      className="p-4 rounded-lg shadow-md h-24 md:h-96 overflow-hidden"
+      className="pt-4 px-4 rounded-lg shadow-md h-24 md:h-96 overflow-hidden"
       style={{ backgroundColor: 'hsl(var(--chords-panel-background))' }}
     >
       <div 
@@ -88,7 +88,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
         className={cn(
           "flex overflow-x-auto overflow-y-hidden h-full items-center",
           "space-x-4 md:space-x-6", 
-          "py-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent", 
+          "pt-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent", 
           "scroll-pl-32 md:scroll-pl-64 scroll-pr-32 md:scroll-pr-64" 
         )}
       >
