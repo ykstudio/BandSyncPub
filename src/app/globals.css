@@ -113,15 +113,15 @@ body {
 
   /* Tropic Theme */
   .tropic {
-    --background: 40 60% 95%; /* Very light, warm off-white/pale yellow, like sand */
+    --background: 350 75% 94%; /* Light, slightly warm Pink */
     --foreground: 200 15% 25%; /* Dark, slightly desaturated blue/grey for text */
 
-    --card: 40 50% 90%; /* Slightly darker/more saturated sand than main background */
+    --card: 350 65% 90%; /* Slightly less saturated and darker pink than main background */
     --card-foreground: 200 15% 25%; /* Same as main foreground */
 
     --chords-panel-background: 200 70% 90%; /* Very light Sky Blue, like a clear sky reflection */
 
-    --popover: 40 50% 90%; /* Same as card */
+    --popover: 350 65% 90%; /* Same as card */
     --popover-foreground: 200 15% 25%;
 
     --primary: 200 80% 60%; /* Sky Blue */
@@ -131,7 +131,7 @@ body {
     --secondary: 120 60% 45%; /* Leaf Green */
     --secondary-foreground: 0 0% 100%; /* White */
 
-    --muted: 40 40% 85%; /* Desaturated sandy color */
+    --muted: 350 50% 88%; /* Desaturated pinkish color */
     --muted-foreground: 200 15% 50%; /* Muted version of foreground */
 
     --accent: 35 90% 60%; /* Mango */
@@ -142,8 +142,8 @@ body {
     --destructive: 0 70% 55%; /* Standard Red */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 30% 80%; /* Subtle sandy border */
-    --input: 40 30% 88%; /* Slightly lighter sandy input background */
+    --border: 350 40% 85%; /* Subtle pinkish border */
+    --input: 350 45% 90%; /* Slightly lighter pinkish input background */
     --ring: 35 90% 60%; /* Mango, same as accent */
 
     /* Chart Colors */
@@ -154,13 +154,13 @@ body {
     --chart-5: 260 70% 65%;  /* A vibrant violet/purple as a contrasting 5th color */
     
     /* Sidebar Colors */
-    --sidebar-background: 40 55% 93%;
+    --sidebar-background: 350 70% 92%; /* Light pinkish for sidebar bg */
     --sidebar-foreground: 200 15% 30%;
     --sidebar-primary: 200 80% 60%;    /* Sky Blue */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 35 90% 60%;      /* Mango */
     --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 40 30% 82%;
+    --sidebar-border: 350 40% 82%; /* Pinkish border for sidebar */
     --sidebar-ring: 35 90% 60%;        /* Mango */
   }
 
@@ -324,3 +324,6 @@ body {
   0% { opacity: 0; transform: translateX(100%) scale(0.9); }
   100% { opacity: 1; transform: translateX(0) scale(1); }
 }
+
+
+    
