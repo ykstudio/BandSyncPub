@@ -5,7 +5,6 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { SongData, SessionState, ChordChange, LyricWord, SongSection, SongDisplayInfo, JamSession, SongEntry } from '@/lib/types';
 import { FULL_SONG_DATA, placeholderPlayableSongData } from '@/lib/song-data';
 import { SongInfo } from './SongInfo';
-// Metronome is now imported and used within ChordsDisplay
 import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
@@ -379,7 +378,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     <div className="flex items-center space-x-1.5">
        <Label htmlFor="sync-toggle" className="text-xs flex items-center gap-1 select-none">
         {isSyncEnabled && firebaseInitialized && db ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-red-500" />}
-        Real-time Sync
+        <span className="hidden md:inline">Real-time Sync</span>
       </Label>
       <Switch
         id="sync-toggle"
@@ -516,9 +515,24 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
           {/* Right Side: Stacked Sync Toggle, Jam Name, Song Count AND SongInfo for mobile */}
           <div className="flex flex-col items-end text-right ml-auto md:ml-4 gap-1 w-full md:w-auto">
-            <SyncToggle />
-            <h2 className="text-lg md:text-xl font-semibold text-primary truncate">{jamSession?.name}</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+             {/* Mobile: Jam Name and Sync Toggle in a row */}
+            <div className="flex md:hidden flex-row items-center justify-between w-full mb-1">
+              <h2 className="text-lg font-semibold text-primary truncate">
+                {jamSession?.name}
+              </h2>
+              <SyncToggle />
+            </div>
+
+            {/* Desktop: Sync Toggle (first in column) */}
+            <div className="hidden md:block self-end">
+              <SyncToggle />
+            </div>
+            {/* Desktop: Jam Name (second in column) */}
+            <h2 className="hidden md:block text-lg md:text-xl font-semibold text-primary truncate self-end">
+              {jamSession?.name}
+            </h2>
+            
+            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap self-end">
               Song {currentSongIndex + 1} of {playlist.length}
             </p>
              {/* SongInfo for MOBILE - to appear below "Song X of Y" */}
