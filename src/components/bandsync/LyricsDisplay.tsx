@@ -125,7 +125,7 @@ export function LyricsDisplay({
                 "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-border pl-4",
                 isActiveSection 
                   ? "text-accent font-bold bg-accent-lightBg" 
-                  : "text-primary bg-card" // bg-card will now be on top of bg-white
+                  : "text-primary bg-neutral-100" 
               )}
               id={`section-header-${section.id}`}
             >
@@ -182,7 +182,7 @@ export function LyricsDisplay({
                           let wordTextStyle = 'text-neutral-800'; // Default dark text on white BG
 
                           if (isThisTheCurrentSingingWord) {
-                            wordTextStyle = 'text-accent bg-accent-lightBg rounded-sm';
+                            wordTextStyle = 'text-cyan-700 bg-accent-lightBg rounded-sm'; // Changed text-accent to text-cyan-700
                           } else if (isWordPast) {
                             wordTextStyle = 'text-neutral-500'; // Darker gray for past words
                           } else if (isLineActiveForStyling) {
@@ -207,7 +207,7 @@ export function LyricsDisplay({
                                     isChordSymbolActive 
                                       ? "bg-accent-lightBg text-accent font-bold" 
                                       : isChordSymbolPast
-                                      ? "text-neutral-500 bg-neutral-100" // Adjusted for white BG
+                                      ? "text-neutral-500 bg-neutral-100" 
                                       : isChordSymbolUpcoming 
                                       ? "text-primary" 
                                       : "text-primary"
@@ -244,7 +244,7 @@ export function LyricsDisplay({
                              isChordSymbolActive 
                               ? "bg-accent-lightBg text-accent font-bold" 
                               : isChordSymbolPast
-                              ? "text-neutral-500 bg-neutral-100" // Adjusted for white BG
+                              ? "text-neutral-500 bg-neutral-100" 
                               : isChordSymbolUpcoming 
                               ? "text-primary" 
                               : "text-primary" 
@@ -263,7 +263,7 @@ export function LyricsDisplay({
         );
       })}
       {sections.length === 0 && lyrics.length === 0 && (
-        <p className="text-neutral-600 px-4 pb-4"> {/* Adjusted for white BG */}
+        <p className="text-neutral-600 px-4 pb-4"> 
           No lyrics or sections available for this song.
         </p>
       )}
