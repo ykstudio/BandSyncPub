@@ -402,7 +402,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           }
         }}
         disabled={!firebaseInitialized && !db}
-        className="transform scale-[0.60] origin-center"
+        className="transform scale-[0.60] origin-center hidden md:block"
       />
     </div>
   );
@@ -515,12 +515,17 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
           {/* Right Side: Stacked Sync Toggle, Jam Name, Song Count AND SongInfo for mobile */}
           <div className="flex flex-col items-end text-right ml-auto md:ml-4 gap-1 w-full md:w-auto">
-             {/* Mobile: Jam Name and Sync Toggle in a row */}
+             {/* Mobile: Jam Name in a row with Sync Icon (no switch) and Song Count */}
             <div className="flex md:hidden flex-row items-center justify-between w-full mb-1">
               <h2 className="text-lg font-semibold text-primary truncate">
                 {jamSession?.name}
               </h2>
-              <SyncToggle />
+              <div className="flex items-center gap-2">
+                <SyncToggle /> {/* Will render Icon only on mobile */}
+                <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                  Song {currentSongIndex + 1} of {playlist.length}
+                </p>
+              </div>
             </div>
 
             {/* Desktop: Sync Toggle (first in column) */}
@@ -532,10 +537,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
               {jamSession?.name}
             </h2>
             
-            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap self-end">
+            {/* Desktop: Song Count (third in column) */}
+            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap self-end hidden md:block">
               Song {currentSongIndex + 1} of {playlist.length}
             </p>
-             {/* SongInfo for MOBILE - to appear below "Song X of Y" */}
+             {/* SongInfo for MOBILE - to appear below Jam Name / Sync & Song Count row */}
             <div className="block md:hidden w-full text-left mt-2"> 
               <SongInfo
                   title={currentDisplaySongInfo.title}
@@ -640,4 +646,3 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </Card>
   );
 }
-
