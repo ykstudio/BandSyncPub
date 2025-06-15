@@ -507,7 +507,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           "p-3 md:p-4" 
         )}>
         <div className="flex justify-between items-start">
-          <div className="hidden md:block flex-1">
+          <div className="hidden md:block flex-1"> {/* SongInfo for Desktop */}
             <SongInfo
               title={currentDisplaySongInfo.title}
               author={currentDisplaySongInfo.author}
@@ -515,10 +515,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             />
           </div>
 
+          {/* Right side of Header - Mobile: JamName/Sync+Count, then SongInfo. Desktop: Sync, JamName, Count */}
           <div className="flex flex-col items-end text-right ml-auto md:ml-4 w-full md:w-auto">
-            {/* Row 1: Jam Name | Sync Icon - Song X of Y (Mobile) */}
+            {/* Mobile: Jam Name | Sync Icon - Song X of Y */}
             <div className="flex md:hidden flex-row items-center justify-between w-full mb-0">
-                <h2 className="text-lg md:text-xl font-semibold text-accent truncate">
+                <h2 className="text-lg font-semibold text-accent truncate">
                     {jamSession?.name}
                 </h2>
                 <div className="flex items-center gap-2">
@@ -539,7 +540,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                 </p>
             </div>
             
-            {/* Row 2: SongInfo (Mobile) */}
+            {/* Mobile: SongInfo below Jam Name/Sync line */}
             <div className="block md:hidden w-full text-left mt-0"> 
               <SongInfo
                   title={currentDisplaySongInfo.title}
@@ -559,7 +560,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
       <CardContent className="flex-grow overflow-y-auto space-y-2 p-3 md:p-4">
         <div className="flex flex-col md:grid md:grid-cols-2 gap-2 h-full">
-          <div className="flex-grow-[3] basis-0 md:flex-grow-0 md:basis-auto overflow-hidden relative">
+          <div className="flex-grow-[6] basis-0 md:flex-grow-0 md:basis-auto overflow-hidden relative">
             <LyricsDisplay
               lyrics={playableSongData.lyrics}
               chords={playableSongData.chords}
@@ -572,7 +573,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
               songIsPlaying={isPlayingRef.current}
             />
           </div>
-          <div className="flex-grow-[7] basis-0 md:flex-grow-0 md:basis-auto overflow-hidden relative">
+          <div className="flex-grow-[4] basis-0 md:flex-grow-0 md:basis-auto overflow-hidden relative">
             <ChordsDisplay 
               chords={playableSongData.chords} 
               currentTime={currentTime} 
@@ -587,7 +588,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           "flex-shrink-0 flex flex-col gap-2 border-t bg-background",
           "p-3 md:p-4"
         )}>
-        <div className="w-full flex flex-col gap-2 md:hidden">
+        <div className="w-full flex flex-col gap-2 md:hidden"> {/* SectionProgressBar for Mobile */}
           <SectionProgressBar
               sections={playableSongData.sections}
               currentSectionId={currentSectionId}
@@ -632,7 +633,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                 </Button>
             </div>
 
-            <div className="hidden md:flex flex-grow min-w-0 mx-2">
+            <div className="hidden md:flex flex-grow min-w-0 mx-2"> {/* SectionProgressBar for Desktop */}
                 <SectionProgressBar
                     sections={playableSongData.sections}
                     currentSectionId={currentSectionId}
@@ -649,3 +650,5 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </Card>
   );
 }
+
+    
