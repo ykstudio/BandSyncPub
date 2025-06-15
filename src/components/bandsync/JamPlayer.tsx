@@ -377,7 +377,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
   const SyncToggle = () => (
     <div className="flex items-center space-x-1.5">
-      <Label htmlFor="sync-toggle" className="text-xs flex items-center gap-1 select-none">
+       <Label htmlFor="sync-toggle" className="text-xs flex items-center gap-1 select-none">
         {isSyncEnabled && firebaseInitialized && db ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-red-500" />}
         Real-time Sync
       </Label>
@@ -514,16 +514,13 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             />
           </div>
 
-          {/* Right Side: Stacked Jam Name, Song Count, Sync Toggle */}
-          <div className="flex flex-col items-end text-right ml-4">
+          {/* Right Side: Stacked Sync Toggle, Jam Name, Song Count */}
+          <div className="flex flex-col items-end text-right ml-4 gap-1">
+            <SyncToggle />
             <h2 className="text-xl font-semibold text-primary truncate">{jamSession?.name}</h2>
-            {/* Container for song count and sync toggle, in a row, below Jam Name */}
-            <div className="flex items-center gap-2 sm:gap-3 mt-1">
-              <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                Song {currentSongIndex + 1} of {playlist.length}
-              </p>
-              <SyncToggle />
-            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+              Song {currentSongIndex + 1} of {playlist.length}
+            </p>
           </div>
         </div>
         
