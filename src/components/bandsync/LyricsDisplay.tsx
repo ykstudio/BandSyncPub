@@ -17,7 +17,7 @@ interface LyricsDisplayProps {
     lineIndexWithinSection: number;
   } | null;
   currentSectionId: string | null;
-  activeLineKeyForHighlight: string | null;
+  activeLineKeyForHighlight: string |null;
   songIsPlaying: boolean;
 }
 
@@ -122,10 +122,10 @@ export function LyricsDisplay({
             <h3
               ref={el => sectionHeaderRefs.current[section.id] = el}
               className={cn(
-                "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-border pl-4",
+                "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-neutral-300 pl-4", // Changed border-border to border-neutral-300
                 isActiveSection 
                   ? "text-accent font-bold bg-accent-lightBg" 
-                  : "text-primary bg-neutral-100" 
+                  : "text-primary bg-neutral-100" // Inactive header bg
               )}
               id={`section-header-${section.id}`}
             >
@@ -182,15 +182,15 @@ export function LyricsDisplay({
                           let wordTextStyle = 'text-neutral-800'; // Default dark text on white BG
 
                           if (isThisTheCurrentSingingWord) {
-                            wordTextStyle = 'text-cyan-700 bg-accent-lightBg rounded-sm'; // Changed text-accent to text-cyan-700
+                            wordTextStyle = 'text-cyan-700 bg-accent-lightBg rounded-sm'; 
                           } else if (isWordPast) {
-                            wordTextStyle = 'text-neutral-500'; // Darker gray for past words
+                            wordTextStyle = 'text-neutral-500'; 
                           } else if (isLineActiveForStyling) {
-                            wordTextStyle = 'text-primary'; // Primary color (cyan/green) on white is fine
+                            wordTextStyle = 'text-cyan-700'; // Changed from text-primary
                           }
                           
                           if (!songIsPlaying && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0) && !isWordPast && !isThisTheCurrentSingingWord) {
-                            wordTextStyle = 'text-primary';
+                            wordTextStyle = 'text-cyan-700'; // Changed from text-primary
                           }
                           
                           return (
