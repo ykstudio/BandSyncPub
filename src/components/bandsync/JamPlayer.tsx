@@ -21,6 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 const FIRESTORE_UPDATE_INTERVAL = 2000; // Milliseconds
 const SESSION_ID_PREFIX = 'global-bandsync-session-jam-';
@@ -275,14 +276,19 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         }
         else if (remoteIsPlaying !== localIsPlaying) {
             setIsPlaying(remoteIsPlaying);
-            setCurrentTime(remoteCurrentTime);
+            // Only set time if it's a state change to playing (to get latest time)
+            // or if becoming paused (to sync final position)
+            if (remoteIsPlaying || !localIsPlaying) {
+                setCurrentTime(remoteCurrentTime);
+            }
         }
-        else {
-            if (remoteIsPlaying) { 
-                 if (remoteCurrentTime > localCurrentTime && remoteCurrentTime - localCurrentTime > TIME_DRIFT_TOLERANCE_PLAYING) {
+        else { // Song and IsPlaying state are the same
+            if (remoteIsPlaying) { // Both are playing
+                 if (remoteCurrentTime > localCurrentTime && (remoteCurrentTime - localCurrentTime > TIME_DRIFT_TOLERANCE_PLAYING)) {
                     setCurrentTime(remoteCurrentTime);
                 }
-            } else { 
+                 // Do NOT go backwards if remote time is less than local time while playing
+            } else { // Both are paused
                 if (Math.abs(localCurrentTime - remoteCurrentTime) > 0.05) { 
                     setCurrentTime(remoteCurrentTime);
                 }
@@ -415,7 +421,8 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           } else {
             toast({ title: "Sync Enabled", description: "Attempting to connect to shared session." });
             setIsLoadingSessionState(true); 
-            setTimeout(() => { localUpdateInProgressRef.current = false; }, 500);
+            // Allow Firestore to establish connection and sync
+            setTimeout(() => { localUpdateInProgressRef.current = false; }, 500); // A small delay
           }
         }}
         disabled={!firebaseInitialized && !db}
@@ -586,8 +593,16 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                 >
                     <SkipBack className="w-5 h-5" />
                 </Button>
-                <Button onClick={handlePlayPause} variant="default" size="icon" aria-label={isPlaying ? 'Pause' : 'Play'} className="w-10 h-10">
-                    {isPlaying ? <Pause className="w-7 h-7 text-primary-foreground" /> : <Play className="w-7 h-7 text-primary-foreground" />}
+                <Button 
+                  onClick={handlePlayPause} 
+                  size="icon" 
+                  aria-label={isPlaying ? 'Pause' : 'Play'} 
+                  className={cn(
+                    "w-10 h-10",
+                    "bg-accent text-accent-foreground hover:bg-accent/90"
+                  )}
+                >
+                    {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7" />}
                 </Button>
                 <Button 
                     onClick={() => handleSongNavigation('next')} 
