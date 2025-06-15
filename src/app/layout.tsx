@@ -24,8 +24,8 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            // defaultTheme will be handled by ThemeProvider internal default
+            enableSystem={false} // Explicitly disable system if we are not offering it
             disableTransitionOnChange
         >
           <div className="fixed top-4 right-4 z-50">

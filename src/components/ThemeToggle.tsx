@@ -1,8 +1,9 @@
 // src/components/ThemeToggle.tsx
 'use client';
 
-import { Moon, Sun, Laptop } from 'lucide-react';
+import { Moon, Sun, Palette } from 'lucide-react'; // Added Palette
 import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,29 +14,59 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function ThemeToggle() {
-  const { setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // Render a placeholder or null until the theme is resolved client-side
+    // to avoid hydration mismatch if the button icon depends on the theme.
+    return <Button variant="outline" size="icon" disabled className="h-[1.2rem] w-[1.2rem]" />;
+  }
+
+  const renderIcon = () => {
+    if (resolvedTheme === 'dark') {
+      return <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />;
+    }
+    if (resolvedTheme === 'light') {
+      return <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />;
+    }
+    // For tropic, chinatown, peach - use Palette icon
+    return <Palette className="h-[1.2rem] w-[1.2rem] transition-all" />;
+  };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          {renderIcon()}
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme('light')}>
-          <Sun className="mr-2 h-4 w-4" />
-          Light
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('dark')}>
           <Moon className="mr-2 h-4 w-4" />
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
-          <Laptop className="mr-2 h-4 w-4" />
-          System
+        <DropdownMenuItem onClick={() => setTheme('light')}>
+          <Sun className="mr-2 h-4 w-4" />
+          Light
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('tropic')}>
+          {/* Using Palette as a generic icon for custom themes for now */}
+          <Palette className="mr-2 h-4 w-4" /> 
+          Tropic
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('chinatown')}>
+          <Palette className="mr-2 h-4 w-4" />
+          Chinatown
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('peach')}>
+          <Palette className="mr-2 h-4 w-4" />
+          Peach
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

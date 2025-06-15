@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,7 +8,62 @@ body {
 }
 
 @layer base {
+  /* Default Theme: Dark */
   :root {
+    --background: 200 50% 5%; /* Even darker blue - Matches screenshot's main bg */
+    --foreground: 200 15% 85%; /* Slightly dimmer off-white - Matches screenshot text */
+
+    --card: 200 45% 10%; /* Dark Card BG for headers/footers - Matches screenshot */
+    --card-foreground: 200 15% 85%;
+
+    --chords-panel-background: 200 36% 20%; /* Tuned dark mode chords panel BG */
+
+    --popover: 200 45% 8%;
+    --popover-foreground: 200 15% 85%;
+
+    --primary: 180 70% 60%; /* Slightly brighter cyan - Matches screenshot titles/icons */
+    --primary-foreground: 0 0% 100%;
+    --primary-text-on-light: 195 81% 31%; /* Darker Cyan for light backgrounds (lyrics panel) */
+
+    --secondary: 200 40% 20%; /* For secondary buttons etc. */
+    --secondary-foreground: 200 15% 75%;
+
+    --muted: 200 35% 25%;
+    --muted-foreground: 200 15% 55%; /* For less prominent text - Matches screenshot */
+
+    --accent: 90 65% 55%; /* Slightly brighter/more saturated Yellowish Green - Matches screenshot metronome dot, play button */
+    --accent-foreground: 0 0% 100%; /* White text on accent elements */
+    
+    --accent-light-solid-bg: 90 70% 75%; /* Corrected to match screenshot's light green accent backgrounds */
+    --accent-pulse-darker-target: 90 70% 65%;
+
+    --destructive: 0 75% 55%; /* Slightly brighter red */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 200 30% 20%; /* Darker border for dark theme */
+    --input: 200 30% 20%;
+    --ring: 180 70% 60%; /* Brighter cyan for rings */
+
+    --radius: 0.5rem;
+
+    --chart-1: 180 70% 50%; 
+    --chart-2: 90 65% 50%;  
+    --chart-3: 200 30% 50%; 
+    --chart-4: 270 60% 60%; 
+    --chart-5: 300 60% 60%; 
+
+    --sidebar-background: 200 50% 7%;
+    --sidebar-foreground: 200 15% 80%;
+    --sidebar-primary: 180 70% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 90 65% 55%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 200 30% 15%;
+    --sidebar-ring: 180 70% 60%;
+  }
+
+  /* Light Theme */
+  .light {
     --background: 0 0% 100%; /* White */
     --foreground: 200 15% 15%; /* Dark Cool Gray */
 
@@ -21,7 +77,7 @@ body {
 
     --primary: 180 65% 55%; /* Bright Cyan */
     --primary-foreground: 0 0% 100%; /* White */
-    --primary-text-on-light: 195 81% 31%; /* Darker Cyan for light backgrounds */
+    --primary-text-on-light: 195 81% 31%; /* Darker Cyan for light backgrounds (lyrics panel) */
 
     --secondary: 200 20% 90%; /* Light Cool Gray */
     --secondary-foreground: 200 15% 25%; /* Darker Cool Gray */
@@ -41,13 +97,11 @@ body {
     --input: 200 20% 88%; /* Light Cool Gray Input */
     --ring: 180 65% 55%; /* Primary color for focus rings */
 
-    --radius: 0.5rem;
-
-    --chart-1: 180 70% 45%; /* Cyan tint */
-    --chart-2: 90 65% 45%;  /* Yellowish Green tint */
-    --chart-3: 200 30% 60%; /* Muted Blue tint */
-    --chart-4: 270 60% 65%; /* Purple tint */
-    --chart-5: 300 60% 65%; /* Magenta tint */
+    --chart-1: 180 70% 45%;
+    --chart-2: 90 65% 45%; 
+    --chart-3: 200 30% 60%; 
+    --chart-4: 270 60% 65%; 
+    --chart-5: 300 60% 65%; 
 
     --sidebar-background: 200 20% 96%;
     --sidebar-foreground: 200 15% 20%;
@@ -59,51 +113,159 @@ body {
     --sidebar-ring: 180 65% 55%;
   }
 
-  .dark {
-    --background: 200 50% 5%; /* Even darker blue - Matches screenshot's main bg */
-    --foreground: 200 15% 85%; /* Slightly dimmer off-white - Matches screenshot text */
+  /* Tropic Theme */
+  .tropic {
+    --background: 45 50% 92%; /* Light Sandy Beige */
+    --foreground: 180 25% 20%; /* Dark Teal */
 
-    --card: 200 45% 10%; /* Dark Card BG for headers/footers - Matches screenshot */
-    --card-foreground: 200 15% 85%;
+    --card: 45 40% 88%; /* Slightly Darker Sandy Beige */
+    --card-foreground: 180 25% 20%;
 
-    --chords-panel-background: 200 36% 20%; /* Tuned dark mode chords panel BG - Matches screenshot */
+    --chords-panel-background: 180 30% 85%; /* Light Muted Turquoise */
 
-    --popover: 200 45% 8%;
-    --popover-foreground: 200 15% 85%;
+    --popover: 45 40% 88%;
+    --popover-foreground: 180 25% 20%;
 
-    --primary: 180 70% 60%; /* Slightly brighter cyan - Matches screenshot titles/icons */
-    --primary-foreground: 0 0% 100%;
-    /* --primary-text-on-light remains as is, used by lyrics panel which is always light */
+    --primary: 180 60% 45%; /* Bright Turquoise */
+    --primary-foreground: 0 0% 100%; /* White */
+    --primary-text-on-light: 180 50% 30%; /* Darker Turquoise (lyrics panel) */
 
-    --secondary: 200 40% 20%; /* For secondary buttons etc. */
-    --secondary-foreground: 200 15% 75%;
+    --secondary: 180 25% 75%; /* Muted Turquoise */
+    --secondary-foreground: 180 25% 15%;
 
-    --muted: 200 35% 25%;
-    --muted-foreground: 200 15% 55%; /* For less prominent text - Matches screenshot */
+    --muted: 45 30% 80%; /* Lighter Beige */
+    --muted-foreground: 180 20% 35%; 
 
-    --accent: 90 65% 55%; /* Slightly brighter/more saturated Yellowish Green - Matches screenshot metronome dot, play button */
-    --accent-foreground: 0 0% 100%; /* White text on accent elements */
-    
-    /* Corrected to match screenshot's light green accent backgrounds */
-    --accent-light-solid-bg: 90 70% 75%; 
-    --accent-pulse-darker-target: 90 70% 65%;
+    --accent: 10 80% 60%; /* Vibrant Coral */
+    --accent-foreground: 0 0% 100%; /* White */
+    --accent-light-solid-bg: 10 80% 90%; /* Very light coral for BG */
+    --accent-pulse-darker-target: 10 80% 80%; 
 
-    --destructive: 0 75% 55%; /* Slightly brighter red */
+    --destructive: 0 70% 50%; 
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 30% 20%; /* Darker border for dark theme */
-    --input: 200 30% 20%;
-    --ring: 180 70% 60%; /* Brighter cyan for rings */
+    --border: 45 30% 75%; /* Soft Beige Border */
+    --input: 45 30% 80%; 
+    --ring: 10 80% 60%; /* Coral for focus rings */
 
-    --sidebar-background: 200 50% 7%;
-    --sidebar-foreground: 200 15% 80%;
-    --sidebar-primary: 180 70% 60%;
+    --chart-1: 180 60% 40%;
+    --chart-2: 10 70% 55%; 
+    --chart-3: 45 40% 50%; 
+    --chart-4: 200 50% 50%; 
+    --chart-5: 30 70% 60%; 
+
+    --sidebar-background: 45 45% 90%;
+    --sidebar-foreground: 180 25% 25%;
+    --sidebar-primary: 180 60% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 90 65% 55%;
+    --sidebar-accent: 10 80% 60%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 200 30% 15%;
-    --sidebar-ring: 180 70% 60%;
+    --sidebar-border: 45 30% 80%;
+    --sidebar-ring: 10 80% 60%;
   }
+
+  /* Chinatown Theme */
+  .chinatown {
+    --background: 0 70% 15%; /* Deep Red */
+    --foreground: 45 80% 85%; /* Cream/Light Gold */
+
+    --card: 0 60% 20%; /* Slightly Lighter Deep Red */
+    --card-foreground: 45 80% 85%;
+
+    --chords-panel-background: 30 20% 25%; /* Dark Wood Brown */
+
+    --popover: 0 60% 18%;
+    --popover-foreground: 45 80% 85%;
+
+    --primary: 40 90% 60%; /* Gold */
+    --primary-foreground: 0 0% 10%; /* Near Black */
+    --primary-text-on-light: 40 70% 40%; /* Darker Gold (lyrics panel) */
+
+    --secondary: 0 50% 30%; /* Muted Red */
+    --secondary-foreground: 45 70% 80%;
+
+    --muted: 0 40% 25%; 
+    --muted-foreground: 45 60% 70%; 
+
+    --accent: 140 60% 45%; /* Jade Green */
+    --accent-foreground: 0 0% 100%; /* White */
+    --accent-light-solid-bg: 140 60% 85%; /* Very light jade for BG */
+    --accent-pulse-darker-target: 140 60% 75%; 
+
+    --destructive: 0 90% 65%; /* Brighter red on dark bg */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 50% 30%; /* Dark Red Border */
+    --input: 0 50% 28%; 
+    --ring: 40 90% 60%; /* Gold for focus rings */
+
+    --chart-1: 40 80% 55%;
+    --chart-2: 140 50% 40%; 
+    --chart-3: 0 60% 50%; 
+    --chart-4: 200 50% 60%; 
+    --chart-5: 60 70% 50%; 
+
+    --sidebar-background: 0 70% 12%;
+    --sidebar-foreground: 45 75% 80%;
+    --sidebar-primary: 40 90% 60%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 140 60% 45%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 50% 25%;
+    --sidebar-ring: 40 90% 60%;
+  }
+
+  /* Peach Theme */
+  .peach {
+    --background: 30 100% 94%; /* Soft Peach */
+    --foreground: 30 15% 30%; /* Dark Warm Gray */
+
+    --card: 30 80% 90%; /* Cream */
+    --card-foreground: 30 15% 30%;
+
+    --chords-panel-background: 25 70% 88%; /* Slightly Desaturated Peach */
+
+    --popover: 30 80% 92%;
+    --popover-foreground: 30 15% 30%;
+
+    --primary: 20 90% 70%; /* Richer Peach/Soft Coral */
+    --primary-foreground: 30 15% 20%; /* Darker Warm Gray */
+    --primary-text-on-light: 20 70% 50%; /* Darker Peach (lyrics panel) */
+
+    --secondary: 30 60% 85%; /* Lighter Peach */
+    --secondary-foreground: 30 15% 25%;
+
+    --muted: 30 50% 88%; 
+    --muted-foreground: 30 15% 45%; 
+
+    --accent: 150 60% 70%; /* Mint Green */
+    --accent-foreground: 150 20% 25%; /* Dark Mint */
+    --accent-light-solid-bg: 150 60% 90%; /* Very light mint for BG */
+    --accent-pulse-darker-target: 150 60% 80%; 
+
+    --destructive: 0 70% 50%; 
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 30 50% 80%; /* Soft Peach Border */
+    --input: 30 50% 85%; 
+    --ring: 20 90% 70%; /* Richer Peach for focus rings */
+
+    --chart-1: 20 80% 65%;
+    --chart-2: 150 50% 65%; 
+    --chart-3: 40 70% 70%; 
+    --chart-4: 280 50% 70%; 
+    --chart-5: 220 60% 75%; 
+
+    --sidebar-background: 30 100% 92%;
+    --sidebar-foreground: 30 15% 35%;
+    --sidebar-primary: 20 90% 70%;
+    --sidebar-primary-foreground: 30 15% 20%;
+    --sidebar-accent: 150 60% 70%;
+    --sidebar-accent-foreground: 150 20% 25%;
+    --sidebar-border: 30 50% 85%;
+    --sidebar-ring: 20 90% 70%;
+  }
+
 }
 
 @layer base {
