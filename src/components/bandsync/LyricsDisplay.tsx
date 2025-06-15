@@ -105,7 +105,7 @@ export function LyricsDisplay({
   return (
     <div
       ref={scrollContainerRef}
-      className="space-y-1 text-lg md:text-xl bg-card rounded-lg shadow-md h-64 md:h-96 overflow-y-scroll border border-border scroll-pt-20"
+      className="space-y-1 text-lg md:text-xl bg-white text-neutral-800 rounded-lg shadow-md h-64 md:h-96 overflow-y-scroll border border-border scroll-pt-20"
     >
       {sections.map((section, sectionIndex) => {
         const lyricLinesInSection = lyrics.filter(line => {
@@ -125,7 +125,7 @@ export function LyricsDisplay({
                 "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-border pl-4",
                 isActiveSection 
                   ? "text-accent font-bold bg-accent-lightBg" 
-                  : "text-primary bg-card"
+                  : "text-primary bg-card" // bg-card will now be on top of bg-white
               )}
               id={`section-header-${section.id}`}
             >
@@ -179,18 +179,14 @@ export function LyricsDisplay({
                           const isChordSymbolPast = !isChordSymbolActive && chordForThisWord && chordForThisWord.endTime < currentTime;
                           const isChordSymbolUpcoming = !isChordSymbolActive && !isChordSymbolPast && chordForThisWord;
 
-                          let wordTextStyle = '';
+                          let wordTextStyle = 'text-neutral-800'; // Default dark text on white BG
 
                           if (isThisTheCurrentSingingWord) {
                             wordTextStyle = 'text-accent bg-accent-lightBg rounded-sm';
                           } else if (isWordPast) {
-                            wordTextStyle = 'text-muted-foreground';
-                          } else { 
-                            if (isLineActiveForStyling) {
-                                wordTextStyle = 'text-primary';
-                            } else {
-                                wordTextStyle = 'text-foreground';
-                            }
+                            wordTextStyle = 'text-neutral-500'; // Darker gray for past words
+                          } else if (isLineActiveForStyling) {
+                            wordTextStyle = 'text-primary'; // Primary color (cyan/green) on white is fine
                           }
                           
                           if (!songIsPlaying && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0) && !isWordPast && !isThisTheCurrentSingingWord) {
@@ -211,7 +207,7 @@ export function LyricsDisplay({
                                     isChordSymbolActive 
                                       ? "bg-accent-lightBg text-accent font-bold" 
                                       : isChordSymbolPast
-                                      ? "text-muted-foreground bg-muted/10"
+                                      ? "text-neutral-500 bg-neutral-100" // Adjusted for white BG
                                       : isChordSymbolUpcoming 
                                       ? "text-primary" 
                                       : "text-primary"
@@ -248,7 +244,7 @@ export function LyricsDisplay({
                              isChordSymbolActive 
                               ? "bg-accent-lightBg text-accent font-bold" 
                               : isChordSymbolPast
-                              ? "text-muted-foreground bg-muted/10"
+                              ? "text-neutral-500 bg-neutral-100" // Adjusted for white BG
                               : isChordSymbolUpcoming 
                               ? "text-primary" 
                               : "text-primary" 
@@ -267,7 +263,7 @@ export function LyricsDisplay({
         );
       })}
       {sections.length === 0 && lyrics.length === 0 && (
-        <p className="text-muted-foreground px-4 pb-4">
+        <p className="text-neutral-600 px-4 pb-4"> {/* Adjusted for white BG */}
           No lyrics or sections available for this song.
         </p>
       )}
