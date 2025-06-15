@@ -34,7 +34,7 @@ body {
     --accent: 90 65% 55%; /* Slightly brighter/more saturated Yellowish Green - Matches screenshot metronome dot, play button */
     --accent-foreground: 0 0% 100%; /* White text on accent elements */
     --current-chord-text: 90 65% 44%; /* accent L*0.8 */
-    --play-button-paused-bg: 90 42.25% 49.5%; /* accent S*0.65, L*0.9 */
+    --play-button-paused-bg: 90 22.75% 49.5%; /* accent S*0.35, L*0.9 */
     
     --accent-light-solid-bg: 90 70% 75%; /* Corrected to match screenshot's light green accent backgrounds */
     --accent-pulse-darker-target: 90 70% 65%;
@@ -88,7 +88,7 @@ body {
     --accent: 90 60% 50%; /* Vibrant Yellowish Green */
     --accent-foreground: 0 0% 100%; /* White */
     --current-chord-text: 90 60% 40%; /* accent L*0.8 */
-    --play-button-paused-bg: 90 39% 45%; /* accent S*0.65, L*0.9 */
+    --play-button-paused-bg: 90 21% 45%; /* accent S*0.35, L*0.9 */
     --accent-light-solid-bg: 90 60% 90%; /* Very light yellowish green for BG */
     --accent-pulse-darker-target: 90 60% 80%; /* Darker yellowish green for pulse */
 
@@ -141,7 +141,7 @@ body {
     --accent: 35 90% 60%; /* Mango */
     --accent-foreground: 0 0% 10%; /* Dark text for contrast on Mango */
     --current-chord-text: 35 90% 48%; /* accent L*0.8 */
-    --play-button-paused-bg: 35 58.5% 54%; /* accent S*0.65, L*0.9 */
+    --play-button-paused-bg: 35 31.5% 54%; /* accent S*0.35, L*0.9 */
     --accent-light-solid-bg: 35 90% 88%; /* Light Mango for highlights */
     --accent-pulse-darker-target: 35 90% 80%; /* Slightly darker light Mango */
 
@@ -196,7 +196,7 @@ body {
     --accent: 140 60% 45%; /* Jade Green */
     --accent-foreground: 0 0% 100%; /* White */
     --current-chord-text: 140 60% 36%; /* accent L*0.8 */
-    --play-button-paused-bg: 140 39% 40.5%; /* accent S*0.65, L*0.9 */
+    --play-button-paused-bg: 140 21% 40.5%; /* accent S*0.35, L*0.9 */
     --accent-light-solid-bg: 140 60% 85%; /* Very light jade for BG */
     --accent-pulse-darker-target: 140 60% 75%; 
 
@@ -249,7 +249,7 @@ body {
     --accent: 150 60% 70%; /* Mint Green */
     --accent-foreground: 150 20% 25%; /* Dark Mint */
     --current-chord-text: 150 60% 56%; /* accent L*0.8 */
-    --play-button-paused-bg: 150 39% 63%; /* accent S*0.65, L*0.9 */
+    --play-button-paused-bg: 150 21% 63%; /* accent S*0.35, L*0.9 */
     --accent-light-solid-bg: 150 60% 90%; /* Very light mint for BG */
     --accent-pulse-darker-target: 150 60% 80%; 
 
@@ -335,5 +335,7 @@ body {
   100% { opacity: 1; transform: translateX(0) scale(1); }
 }
 
+
+    
 
     
