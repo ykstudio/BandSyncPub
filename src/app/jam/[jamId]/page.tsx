@@ -99,11 +99,8 @@ export default function JamPage() {
       : "opacity-0 max-h-0 mb-0 overflow-hidden pointer-events-none"
     : "opacity-100 max-h-14 mb-4";
 
-  const mainContainerPadding = isMobile
-    ? isBackButtonVisible
-      ? "py-8"
-      : "pt-2 pb-8" 
-    : "py-8";
+  // Consistent padding for main container to avoid content being cut off
+  const mainContainerPadding = "py-8";
 
 
   return (
@@ -120,3 +117,4 @@ export default function JamPage() {
     </main>
   );
 }
+
