@@ -132,8 +132,8 @@ body {
     --primary-foreground: 0 0% 100%; /* White */
     --primary-text-on-light: 200 70% 35%; /* Darker Sky Blue for lyrics panel text */
 
-    --secondary: 120 60% 45%; /* Leaf Green */
-    --secondary-foreground: 0 0% 100%; /* White */
+    --secondary: 350 70% 85%; /* Darker shade of pink BG for secondary buttons */
+    --secondary-foreground: 200 15% 25%; /* Dark text for new secondary buttons */
 
     --muted: 350 50% 88%; /* Desaturated pinkish color */
     --muted-foreground: 200 15% 50%; /* Muted version of foreground */
@@ -155,7 +155,7 @@ body {
     /* Chart Colors */
     --chart-1: 200 80% 55%;  /* Sky Blue (Primary) */
     --chart-2: 35 90% 55%;   /* Mango (Accent) */
-    --chart-3: 120 60% 40%;  /* Leaf Green (Secondary) */
+    --chart-3: 120 60% 40%;  /* Leaf Green (Old Secondary) */
     --chart-4: 350 85% 65%;  /* Strawberry Pink */
     --chart-5: 260 70% 65%;  /* A vibrant violet/purple as a contrasting 5th color */
     
