@@ -1,7 +1,7 @@
 // src/components/ThemeToggle.tsx
 'use client';
 
-import { Moon, Sun, Palette, TreePalm, Landmark } from 'lucide-react';
+import { Moon, Sun, Palette, TreePalm, Landmark, Apple } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 // Specific HSL/color string values for icons in the dropdown
 const DARK_ICON_COLOR = 'hsl(220, 40%, 30%)'; // Navy Blue
@@ -56,7 +57,10 @@ export function ThemeToggle() {
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent 
+        align="end"
+        className="bg-neutral-200 dark:bg-neutral-700"
+      >
         <DropdownMenuItem onClick={() => setTheme('dark')}>
           <Moon className="mr-2 h-4 w-4" style={{ color: DARK_ICON_COLOR }} />
           Dark
@@ -74,7 +78,7 @@ export function ThemeToggle() {
           Chinatown
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('peach')}>
-          <Palette className="mr-2 h-4 w-4" style={{ color: PEACH_PRIMARY_HSL }} />
+          <Apple className="mr-2 h-4 w-4" style={{ color: PEACH_PRIMARY_HSL }} />
           Peach
         </DropdownMenuItem>
       </DropdownMenuContent>
