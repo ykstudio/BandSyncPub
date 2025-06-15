@@ -502,9 +502,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
   return (
     <Card className="shadow-xl w-full flex flex-col h-[calc(100vh-4rem)]">
-      <CardHeader className="flex-shrink-0">
-        <div className="flex justify-between items-start"> {/* Main row for header content */}
-          {/* Left Side: SongInfo - ONLY FOR DESKTOP NOW */}
+      <CardHeader className={cn(
+          "flex-shrink-0",
+          "p-3 md:p-4" // Reduced padding for mobile and desktop
+        )}>
+        <div className="flex justify-between items-start">
           <div className="hidden md:block flex-1">
             <SongInfo
               title={currentDisplaySongInfo.title}
@@ -513,36 +515,30 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             />
           </div>
 
-          {/* Right Side: Stacked Sync Toggle, Jam Name, Song Count AND SongInfo for mobile */}
           <div className="flex flex-col items-end text-right ml-auto md:ml-4 gap-1 w-full md:w-auto">
-             {/* Mobile: Jam Name in a row with Sync Icon (no switch) and Song Count */}
             <div className="flex md:hidden flex-row items-center justify-between w-full mb-1">
-              <h2 className="text-lg font-semibold text-primary truncate">
+              <h2 className="text-lg font-semibold text-accent truncate">
                 {jamSession?.name}
               </h2>
               <div className="flex items-center gap-2">
-                <SyncToggle /> {/* Will render Icon only on mobile */}
+                <SyncToggle />
                 <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                   Song {currentSongIndex + 1} of {playlist.length}
                 </p>
               </div>
             </div>
 
-            {/* Desktop: Sync Toggle (first in column) */}
-            <div className="hidden md:block self-end">
-              <SyncToggle />
+            <div className="hidden md:flex flex-col items-end text-right gap-1">
+                <SyncToggle />
+                <h2 className="text-lg md:text-xl font-semibold text-accent truncate self-end">
+                {jamSession?.name}
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap self-end">
+                Song {currentSongIndex + 1} of {playlist.length}
+                </p>
             </div>
-            {/* Desktop: Jam Name (second in column) */}
-            <h2 className="hidden md:block text-lg md:text-xl font-semibold text-primary truncate self-end">
-              {jamSession?.name}
-            </h2>
             
-            {/* Desktop: Song Count (third in column) */}
-            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap self-end hidden md:block">
-              Song {currentSongIndex + 1} of {playlist.length}
-            </p>
-             {/* SongInfo for MOBILE - to appear below Jam Name / Sync & Song Count row */}
-            <div className="block md:hidden w-full text-left mt-2"> 
+            <div className="block md:hidden w-full text-left mt-1"> 
               <SongInfo
                   title={currentDisplaySongInfo.title}
                   author={currentDisplaySongInfo.author}
@@ -552,7 +548,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           </div>
         </div>
         
-        {/* Firebase Configuration Warning */}
         {(!firebaseInitialized || !db) && (
           <p className="text-xs text-destructive mt-1 text-right">
              (Firebase not configured, Sync disabled)
@@ -582,8 +577,10 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="flex-shrink-0 flex flex-col gap-2 p-3 border-t bg-background">
-        {/* Mobile specific layout for ProgressBar */}
+      <CardFooter className={cn(
+          "flex-shrink-0 flex flex-col gap-2 border-t bg-background",
+          "p-3 md:p-4" // Reduced padding for mobile and desktop
+        )}>
         <div className="w-full flex flex-col gap-2 md:hidden">
           <SectionProgressBar
               sections={playableSongData.sections}
