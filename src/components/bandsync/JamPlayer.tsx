@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import {
   Play, Pause, SkipBack, SkipForward, ListMusic, Wifi, WifiOff,
-  AlertTriangle, Loader2, RefreshCw,
+  AlertTriangle, Loader2,
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
@@ -360,18 +360,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     localUpdateInProgressRef.current = false;
   }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
 
-  const handleReplayJam = useCallback(async () => {
-    if (playlist.length === 0) return;
-    localUpdateInProgressRef.current = true;
-    setCurrentSongIndex(0);
-    setCurrentTime(0);
-    setIsPlaying(false); 
-    if (isSyncEnabled && firebaseInitialized) {
-      await updateFirestoreSession({ isPlaying: false, currentTime: 0, currentSongIndexInJam: 0 }); 
-    }
-    localUpdateInProgressRef.current = false;
-  }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
-
 
   const handleSectionSelect = useCallback(async (newTime: number) => {
     if (playlist.length === 0 || playableSongData.totalDuration === 0) return;
@@ -533,11 +521,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         <div className="flex justify-between items-center mt-3 gap-4">
           <Metronome bpm={currentDisplaySongInfo.bpm} isPlaying={isPlaying} />
           <SyncToggle />
-          {playlist.length > 0 && (
-              <Button onClick={handleReplayJam} variant="outline" size="sm">
-                  <RefreshCw className="mr-2 h-4 w-4" /> Restart Jam
-              </Button>
-          )}
         </div>
          {(!firebaseInitialized || !db) && (<p className="text-xs text-destructive mt-1 text-right"> (Firebase not configured, Sync disabled)</p>)}
       </CardHeader>
@@ -565,13 +548,18 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       </CardContent>
 
       <CardFooter className="flex-shrink-0 flex flex-col gap-2 p-3 border-t bg-background">
-        <SectionProgressBar
-            sections={playableSongData.sections}
-            currentSectionId={currentSectionId}
-            currentTime={currentTime}
-            onSectionSelect={handleSectionSelect}
-        />
-        <div className="flex items-center justify-between w-full">
+        {/* SectionProgressBar for Mobile - hidden on md and up */}
+        <div className="w-full md:hidden">
+            <SectionProgressBar
+                sections={playableSongData.sections}
+                currentSectionId={currentSectionId}
+                currentTime={currentTime}
+                onSectionSelect={handleSectionSelect}
+            />
+        </div>
+        
+        {/* This div contains controls and, on desktop, the progress bar */}
+        <div className="flex items-center justify-between w-full gap-1 md:gap-2">
             <div className="flex items-center gap-1">
                 <Button 
                     onClick={() => handleSongNavigation('prev')} 
@@ -606,7 +594,18 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                     <SkipForward className="w-5 h-5" />
                 </Button>
             </div>
-            <div className="text-sm font-mono text-muted-foreground">
+
+            {/* SectionProgressBar - for desktop, fills the space */}
+            <div className="hidden md:flex flex-grow min-w-0 mx-2">
+                <SectionProgressBar
+                    sections={playableSongData.sections}
+                    currentSectionId={currentSectionId}
+                    currentTime={currentTime}
+                    onSectionSelect={handleSectionSelect}
+                />
+            </div>
+            
+            <div className="text-sm font-mono text-muted-foreground flex-shrink-0">
               {formatTime(currentTime)} / {formatTime(playableSongData.totalDuration)}
             </div>
         </div>
