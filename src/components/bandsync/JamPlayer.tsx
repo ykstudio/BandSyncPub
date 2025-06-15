@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import {
   Play, Pause, SkipBack, SkipForward, ListMusic, Wifi, WifiOff,
-  AlertTriangle, Loader2, RefreshCw,
+  AlertTriangle, Loader2,
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
@@ -403,7 +403,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           }
         }}
         disabled={!firebaseInitialized && !db}
-        className="transform scale-[0.80] origin-center"
+        className="transform scale-[0.60] origin-center"
       />
     </div>
   );
