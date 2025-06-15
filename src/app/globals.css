@@ -14,7 +14,7 @@ body {
     --card: 200 45% 15%; /* Original Slightly lighter dark blue than background */
     --card-foreground: 200 15% 90%;
 
-    --chords-panel-background: 200 45% 35%; /* Lighter background for chords panel - light mode */
+    --chords-panel-background: 200 36% 25%; /* Lighter background for chords panel - light mode */
 
     --popover: 200 45% 12%;
     --popover-foreground: 200 15% 90%;
@@ -66,7 +66,7 @@ body {
     --card: 200 45% 10%; /* Original Even darker card background */
     --card-foreground: 200 15% 85%;
 
-    --chords-panel-background: 200 45% 30%; /* Lighter background for chords panel - dark mode */
+    --chords-panel-background: 200 36% 20%; /* Lighter background for chords panel - dark mode */
 
     --popover: 200 45% 8%;
     --popover-foreground: 200 15% 85%;
