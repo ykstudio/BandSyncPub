@@ -81,7 +81,10 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
 
   return (
     <div 
-      className="relative pt-4 px-4 rounded-lg shadow-md h-24 md:h-96 overflow-hidden"
+      className={cn(
+        "relative rounded-lg shadow-md h-24 md:h-96 overflow-hidden",
+        "md:pt-4 md:px-4" // Removed default pt-4 px-4, applies only from md up
+      )}
       style={{ backgroundColor: 'hsl(var(--chords-panel-background))' }}
     >
       <div 
@@ -96,7 +99,9 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
           "flex overflow-x-auto overflow-y-hidden h-full items-center",
           "space-x-4 md:space-x-6", 
           "pt-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent", 
-          "scroll-pl-32 md:scroll-pl-64 scroll-pr-32 md:scroll-pr-64" 
+          // scroll-pl/pr adjusted for better centering effect, esp. on mobile
+          "scroll-pl-[calc(50%-theme(spacing.16))] scroll-pr-[calc(50%-theme(spacing.16))]", // Example: center a 8rem chord element
+          "md:scroll-pl-64 md:scroll-pr-64" 
         )}
       >
         {chords.map((chord, index) => {
