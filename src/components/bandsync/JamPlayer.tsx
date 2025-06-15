@@ -514,13 +514,21 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             />
           </div>
 
-          {/* Right Side: Stacked Sync Toggle, Jam Name, Song Count */}
-          <div className="flex flex-col items-end text-right ml-4 gap-1">
+          {/* Right Side: Stacked Sync Toggle, Jam Name, Song Count AND SongInfo for mobile */}
+          <div className="flex flex-col items-end text-right ml-auto md:ml-4 gap-1 w-full md:w-auto">
             <SyncToggle />
             <h2 className="text-lg md:text-xl font-semibold text-primary truncate">{jamSession?.name}</h2>
             <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
               Song {currentSongIndex + 1} of {playlist.length}
             </p>
+             {/* SongInfo for MOBILE - to appear below "Song X of Y" */}
+            <div className="block md:hidden w-full text-left mt-2"> 
+              <SongInfo
+                  title={currentDisplaySongInfo.title}
+                  author={currentDisplaySongInfo.author}
+                  songKey={currentDisplaySongInfo.key}
+              />
+            </div>
           </div>
         </div>
         
@@ -555,7 +563,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       </CardContent>
 
       <CardFooter className="flex-shrink-0 flex flex-col gap-2 p-3 border-t bg-background">
-        {/* Mobile specific layout for ProgressBar and SongInfo */}
+        {/* Mobile specific layout for ProgressBar */}
         <div className="w-full flex flex-col gap-2 md:hidden">
           <SectionProgressBar
               sections={playableSongData.sections}
@@ -563,14 +571,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
               currentTime={currentTime}
               onSectionSelect={handleSectionSelect}
           />
-          {/* SongInfo for mobile */}
-          <div className="px-1"> 
-            <SongInfo
-              title={currentDisplaySongInfo.title}
-              author={currentDisplaySongInfo.author}
-              songKey={currentDisplaySongInfo.key}
-            />
-          </div>
         </div>
         
         <div className="flex items-center justify-between w-full gap-1 md:gap-2">
@@ -626,3 +626,4 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </Card>
   );
 }
+
