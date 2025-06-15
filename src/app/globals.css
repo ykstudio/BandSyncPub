@@ -60,38 +60,40 @@ body {
   }
 
   .dark {
-    --background: 200 50% 5%; /* Even darker blue */
-    --foreground: 200 15% 85%; /* Slightly dimmer off-white */
+    --background: 200 50% 5%; /* Even darker blue - Matches screenshot's main bg */
+    --foreground: 200 15% 85%; /* Slightly dimmer off-white - Matches screenshot text */
 
-    --card: 200 45% 10%; /* Original Dark Card BG */
+    --card: 200 45% 10%; /* Dark Card BG for headers/footers - Matches screenshot */
     --card-foreground: 200 15% 85%;
 
-    --chords-panel-background: 200 36% 20%; /* Tuned dark mode chords panel */
+    --chords-panel-background: 200 36% 20%; /* Tuned dark mode chords panel BG - Matches screenshot */
 
     --popover: 200 45% 8%;
     --popover-foreground: 200 15% 85%;
 
-    --primary: 180 70% 60%; /* Slightly brighter cyan */
+    --primary: 180 70% 60%; /* Slightly brighter cyan - Matches screenshot titles/icons */
     --primary-foreground: 0 0% 100%;
-    --primary-text-on-light: 195 81% 31%; /* Remains dark cyan as it's for light backgrounds */
+    /* --primary-text-on-light remains as is, used by lyrics panel which is always light */
 
-    --secondary: 200 40% 20%;
+    --secondary: 200 40% 20%; /* For secondary buttons etc. */
     --secondary-foreground: 200 15% 75%;
 
     --muted: 200 35% 25%;
-    --muted-foreground: 200 15% 55%;
+    --muted-foreground: 200 15% 55%; /* For less prominent text - Matches screenshot */
 
-    --accent: 90 65% 55%; /* Slightly brighter/more saturated Yellowish Green */
-    --accent-foreground: 0 0% 100%;
-    --accent-light-solid-bg: 90 50% 22%; 
-    --accent-pulse-darker-target: 90 50% 15%;
+    --accent: 90 65% 55%; /* Slightly brighter/more saturated Yellowish Green - Matches screenshot metronome dot, play button */
+    --accent-foreground: 0 0% 100%; /* White text on accent elements */
+    
+    /* Corrected to match screenshot's light green accent backgrounds */
+    --accent-light-solid-bg: 90 70% 75%; 
+    --accent-pulse-darker-target: 90 70% 65%;
 
     --destructive: 0 75% 55%; /* Slightly brighter red */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 30% 20%;
+    --border: 200 30% 20%; /* Darker border for dark theme */
     --input: 200 30% 20%;
-    --ring: 180 70% 60%;
+    --ring: 180 70% 60%; /* Brighter cyan for rings */
 
     --sidebar-background: 200 50% 7%;
     --sidebar-foreground: 200 15% 80%;
@@ -160,4 +162,3 @@ body {
   0% { opacity: 0; transform: translateX(100%) scale(0.9); }
   100% { opacity: 1; transform: translateX(0) scale(1); }
 }
-
