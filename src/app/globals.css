@@ -11,8 +11,10 @@ body {
     --background: 200 50% 10%; /* Very dark blue */
     --foreground: 200 15% 90%; /* Off-white/lightest gray */
 
-    --card: 200 45% 35%; /* Slightly lighter dark blue than background - NOW 20% LIGHTER */
+    --card: 200 45% 15%; /* Original Slightly lighter dark blue than background */
     --card-foreground: 200 15% 90%;
+
+    --chords-panel-background: 200 45% 35%; /* Lighter background for chords panel - light mode */
 
     --popover: 200 45% 12%;
     --popover-foreground: 200 15% 90%;
@@ -61,8 +63,10 @@ body {
     --background: 200 50% 5%; /* Even darker blue */
     --foreground: 200 15% 85%; /* Slightly dimmer off-white */
 
-    --card: 200 45% 30%; /* NOW 20% LIGHTER */
+    --card: 200 45% 10%; /* Original Even darker card background */
     --card-foreground: 200 15% 85%;
+
+    --chords-panel-background: 200 45% 30%; /* Lighter background for chords panel - dark mode */
 
     --popover: 200 45% 8%;
     --popover-foreground: 200 15% 85%;

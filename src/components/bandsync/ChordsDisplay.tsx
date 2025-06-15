@@ -79,7 +79,10 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
   const currentChordPulseDurationStr = pulseDuration.toFixed(2);
 
   return (
-    <div className="p-4 bg-card rounded-lg shadow-md h-24 md:h-96 overflow-hidden">
+    <div 
+      className="p-4 rounded-lg shadow-md h-24 md:h-96 overflow-hidden"
+      style={{ backgroundColor: 'hsl(var(--chords-panel-background))' }}
+    >
       <div 
         ref={scrollContainerRef} 
         className={cn(
