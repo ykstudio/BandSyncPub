@@ -106,13 +106,12 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
           if (isVisuallyPrevious) {
             chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-px text-3xl sm:text-5xl md:text-6xl leading-none';
           } else if (isVisuallyCurrent) {
-            chordSpecificClasses = 'font-bold text-accent text-5xl sm:text-7xl md:text-9xl leading-none bg-accent-lightBg px-4 py-2 rounded-xl';
+            chordSpecificClasses = 'font-bold text-5xl sm:text-7xl md:text-9xl leading-none bg-accent-lightBg px-4 py-2 rounded-xl';
             if (isPlaying && songBpm > 0) {
               animationClass = 'animate-chord-bg-pulse';
-              animationStyle = {
-                animationDuration: `${currentChordPulseDurationStr}s`,
-              };
+              animationStyle.animationDuration = `${currentChordPulseDurationStr}s`;
             }
+            animationStyle.color = 'hsl(var(--current-chord-text))';
           } else if (isVisuallyNext) {
             chordSpecificClasses = 'text-primary text-6xl sm:text-8xl md:text-[10rem] leading-none';
           } else {
