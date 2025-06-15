@@ -1,7 +1,7 @@
 // src/components/ThemeToggle.tsx
 'use client';
 
-import { Moon, Sun, Palette } from 'lucide-react'; // Added Palette
+import { Moon, Sun, Palette } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
@@ -13,6 +13,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+// HSL string values for primary colors of custom themes for icon preview
+const TROPIC_PRIMARY_HSL = 'hsl(180 60% 45%)';
+const CHINATOWN_PRIMARY_HSL = 'hsl(40 90% 60%)';
+const PEACH_PRIMARY_HSL = 'hsl(20 90% 70%)';
+
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -23,19 +28,21 @@ export function ThemeToggle() {
 
   if (!mounted) {
     // Render a placeholder or null until the theme is resolved client-side
-    // to avoid hydration mismatch if the button icon depends on the theme.
     return <Button variant="outline" size="icon" disabled className="h-[1.2rem] w-[1.2rem]" />;
   }
 
   const renderIcon = () => {
+    // The icon in the button will adopt the current theme's primary color via `text-primary`
+    const iconClassName = "h-[1.2rem] w-[1.2rem] transition-all text-primary";
+    
     if (resolvedTheme === 'dark') {
-      return <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />;
+      return <Moon className={iconClassName} />;
     }
     if (resolvedTheme === 'light') {
-      return <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />;
+      return <Sun className={iconClassName} />;
     }
-    // For tropic, chinatown, peach - use Palette icon
-    return <Palette className="h-[1.2rem] w-[1.2rem] transition-all" />;
+    // For tropic, chinatown, peach - use Palette icon, also colored with current theme's primary
+    return <Palette className={iconClassName} />;
   };
 
   return (
@@ -56,16 +63,15 @@ export function ThemeToggle() {
           Light
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('tropic')}>
-          {/* Using Palette as a generic icon for custom themes for now */}
-          <Palette className="mr-2 h-4 w-4" /> 
+          <Palette className="mr-2 h-4 w-4" style={{ color: TROPIC_PRIMARY_HSL }} /> 
           Tropic
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('chinatown')}>
-          <Palette className="mr-2 h-4 w-4" />
+          <Palette className="mr-2 h-4 w-4" style={{ color: CHINATOWN_PRIMARY_HSL }} />
           Chinatown
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('peach')}>
-          <Palette className="mr-2 h-4 w-4" />
+          <Palette className="mr-2 h-4 w-4" style={{ color: PEACH_PRIMARY_HSL }} />
           Peach
         </DropdownMenuItem>
       </DropdownMenuContent>
