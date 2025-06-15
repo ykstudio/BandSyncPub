@@ -4,7 +4,7 @@
 
 import { Moon, Sun, Palette, TreePalm, Landmark, Apple } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { Button } from '@/components/ui/button';
@@ -28,24 +28,55 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
   const isMobile = useIsMobile();
   const [isVisible, setIsVisible] = useState(true);
+  const hideThemeToggleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
+  const showAndRestartThemeToggleHideTimer = useCallback(() => {
     if (isMobile) {
-      setIsVisible(true); // Reset for mobile view or on initial mobile load
-      const timer = setTimeout(() => {
+      setIsVisible(true);
+      if (hideThemeToggleTimerRef.current) {
+        clearTimeout(hideThemeToggleTimerRef.current);
+      }
+      hideThemeToggleTimerRef.current = setTimeout(() => {
         setIsVisible(false);
       }, 5000);
-      return () => clearTimeout(timer);
-    } else {
-      setIsVisible(true); // Always visible on desktop
     }
   }, [isMobile]);
 
+  useEffect(() => {
+    if (isMobile) {
+      showAndRestartThemeToggleHideTimer(); // Initial show and start timer
+
+      const handleInteraction = () => {
+        showAndRestartThemeToggleHideTimer();
+      };
+      
+      window.addEventListener('click', handleInteraction);
+      window.addEventListener('touchmove', handleInteraction);
+
+      return () => {
+        if (hideThemeToggleTimerRef.current) {
+          clearTimeout(hideThemeToggleTimerRef.current);
+        }
+        window.removeEventListener('click', handleInteraction);
+        window.removeEventListener('touchmove', handleInteraction);
+      };
+    } else {
+      // Ensure button is always visible and timer is cleared on desktop
+      setIsVisible(true);
+      if (hideThemeToggleTimerRef.current) {
+        clearTimeout(hideThemeToggleTimerRef.current);
+        hideThemeToggleTimerRef.current = null;
+      }
+    }
+  }, [isMobile, showAndRestartThemeToggleHideTimer]);
+
+
   if (!mounted) {
+    // Render a placeholder or nothing until mounted to avoid hydration mismatch
     return <Button variant="outline" size="icon" disabled className="h-[1.2rem] w-[1.2rem]" />;
   }
 

@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -16,18 +16,47 @@ export default function JamPage() {
   const jamId = typeof params.jamId === 'string' ? params.jamId : undefined;
   const isMobile = useIsMobile();
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(true);
+  const hideBackButtonTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showAndRestartBackButtonHideTimer = useCallback(() => {
+    if (isMobile) {
+      setIsBackButtonVisible(true);
+      if (hideBackButtonTimerRef.current) {
+        clearTimeout(hideBackButtonTimerRef.current);
+      }
+      hideBackButtonTimerRef.current = setTimeout(() => {
+        setIsBackButtonVisible(false);
+      }, 5000);
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     if (isMobile) {
-      setIsBackButtonVisible(true); // Reset visibility on mobile switch or initial load
-      const timer = setTimeout(() => {
-        setIsBackButtonVisible(false);
-      }, 5000);
-      return () => clearTimeout(timer);
+      showAndRestartBackButtonHideTimer(); // Initial show and start timer
+
+      const handleInteraction = () => {
+        showAndRestartBackButtonHideTimer();
+      };
+
+      window.addEventListener('click', handleInteraction);
+      window.addEventListener('touchmove', handleInteraction);
+
+      return () => {
+        if (hideBackButtonTimerRef.current) {
+          clearTimeout(hideBackButtonTimerRef.current);
+        }
+        window.removeEventListener('click', handleInteraction);
+        window.removeEventListener('touchmove', handleInteraction);
+      };
     } else {
-      setIsBackButtonVisible(true); // Always visible on desktop
+      // Ensure button is always visible and timer is cleared on desktop
+      setIsBackButtonVisible(true);
+      if (hideBackButtonTimerRef.current) {
+        clearTimeout(hideBackButtonTimerRef.current);
+        hideBackButtonTimerRef.current = null;
+      }
     }
-  }, [isMobile]);
+  }, [isMobile, showAndRestartBackButtonHideTimer]);
 
   if (!jamId) {
     return (
@@ -66,14 +95,14 @@ export default function JamPage() {
 
   const backButtonContainerClasses = isMobile
     ? isBackButtonVisible
-      ? "opacity-100 max-h-14 mb-4" // Adjusted max-h for Button size="sm" (h-9) + mb-4
+      ? "opacity-100 max-h-14 mb-4"
       : "opacity-0 max-h-0 mb-0 overflow-hidden pointer-events-none"
     : "opacity-100 max-h-14 mb-4";
 
   const mainContainerPadding = isMobile
     ? isBackButtonVisible
       ? "py-8"
-      : "pt-2 pb-8" // Reduced top padding when button is hidden
+      : "pt-2 pb-8" 
     : "py-8";
 
 
