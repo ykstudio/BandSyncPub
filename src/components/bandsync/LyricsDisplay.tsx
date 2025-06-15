@@ -205,13 +205,14 @@ export function LyricsDisplay({
                                   className={cn(
                                     "absolute bottom-full left-0 translate-y-[5px] text-xs sm:text-sm font-semibold leading-none p-1 rounded-md",
                                     isChordSymbolActive 
-                                      ? "bg-accent-lightBg text-accent font-bold" 
+                                      ? "bg-accent-lightBg font-bold" 
                                       : isChordSymbolPast
                                       ? "text-neutral-500 bg-neutral-100" 
                                       : isChordSymbolUpcoming 
                                       ? "text-primary-on-light" 
                                       : "text-primary-on-light"
                                   )}
+                                  style={isChordSymbolActive ? { color: 'hsl(var(--current-chord-text))' } : {}}
                                 >
                                   {chordForThisWord.chord}
                                 </span>
@@ -242,13 +243,14 @@ export function LyricsDisplay({
                           className={cn(
                             "text-sm font-semibold p-1 rounded-md",
                              isChordSymbolActive 
-                              ? "bg-accent-lightBg text-accent font-bold" 
+                              ? "bg-accent-lightBg font-bold" 
                               : isChordSymbolPast
                               ? "text-neutral-500 bg-neutral-100" 
                               : isChordSymbolUpcoming 
                               ? "text-primary-on-light" 
                               : "text-primary-on-light" 
                           )}
+                          style={isChordSymbolActive ? { color: 'hsl(var(--current-chord-text))' } : {}}
                         >
                           {chord.chord}
                         </span>
