@@ -276,19 +276,16 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         }
         else if (remoteIsPlaying !== localIsPlaying) {
             setIsPlaying(remoteIsPlaying);
-            // Only set time if it's a state change to playing (to get latest time)
-            // or if becoming paused (to sync final position)
             if (remoteIsPlaying || !localIsPlaying) {
                 setCurrentTime(remoteCurrentTime);
             }
         }
-        else { // Song and IsPlaying state are the same
-            if (remoteIsPlaying) { // Both are playing
+        else { 
+            if (remoteIsPlaying) { 
                  if (remoteCurrentTime > localCurrentTime && (remoteCurrentTime - localCurrentTime > TIME_DRIFT_TOLERANCE_PLAYING)) {
                     setCurrentTime(remoteCurrentTime);
                 }
-                 // Do NOT go backwards if remote time is less than local time while playing
-            } else { // Both are paused
+            } else { 
                 if (Math.abs(localCurrentTime - remoteCurrentTime) > 0.05) { 
                     setCurrentTime(remoteCurrentTime);
                 }
@@ -379,7 +376,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   };
 
   const SyncToggle = () => (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-1.5"> {/* Adjusted space for scaled switch */}
       <Switch
         id="sync-toggle"
         checked={isSyncEnabled}
@@ -398,14 +395,14 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           } else {
             toast({ title: "Sync Enabled", description: "Attempting to connect to shared session." });
             setIsLoadingSessionState(true); 
-            // Allow Firestore to establish connection and sync
-            setTimeout(() => { localUpdateInProgressRef.current = false; }, 500); // A small delay
+            setTimeout(() => { localUpdateInProgressRef.current = false; }, 500);
           }
         }}
         disabled={!firebaseInitialized && !db}
+        className="transform scale-[0.80] origin-center" // Scaled switch
       />
-      <Label htmlFor="sync-toggle" className="text-sm flex items-center gap-1">
-        {isSyncEnabled && firebaseInitialized && db ? <Wifi className="w-4 h-4 text-green-500" /> : <WifiOff className="w-4 h-4 text-red-500" />}
+      <Label htmlFor="sync-toggle" className="text-xs flex items-center gap-1 select-none"> {/* Smaller text and icon */}
+        {isSyncEnabled && firebaseInitialized && db ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-red-500" />}
         Real-time Sync
       </Label>
     </div>
@@ -507,22 +504,33 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   return (
     <Card className="shadow-xl w-full flex flex-col h-[calc(100vh-4rem)]">
       <CardHeader className="flex-shrink-0">
+        {/* Jam Bar: Name, Song Count, Sync Toggle */}
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-semibold text-primary truncate max-w-xs sm:max-w-md md:max-w-lg">{jamSession?.name}</h2>
-          <p className="text-sm text-muted-foreground whitespace-nowrap">
-            Song {currentSongIndex + 1} of {playlist.length}
-          </p>
+          <h2 className="text-xl font-semibold text-primary truncate">{jamSession?.name}</h2>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+              Song {currentSongIndex + 1} of {playlist.length}
+            </p>
+            <SyncToggle />
+          </div>
         </div>
-        <SongInfo
-          title={currentDisplaySongInfo.title}
-          author={currentDisplaySongInfo.author}
-          songKey={currentDisplaySongInfo.key}
-        />
-        <div className="flex justify-between items-center mt-3 gap-4">
+
+        {/* Song Details: Title, Author, Key AND Metronome */}
+        <div className="flex justify-between items-start mt-1">
+          <SongInfo
+            title={currentDisplaySongInfo.title}
+            author={currentDisplaySongInfo.author}
+            songKey={currentDisplaySongInfo.key}
+          />
           <Metronome bpm={currentDisplaySongInfo.bpm} isPlaying={isPlaying} />
-          <SyncToggle />
         </div>
-         {(!firebaseInitialized || !db) && (<p className="text-xs text-destructive mt-1 text-right"> (Firebase not configured, Sync disabled)</p>)}
+        
+        {/* Firebase Configuration Warning */}
+        {(!firebaseInitialized || !db) && (
+          <p className="text-xs text-destructive mt-1 text-right">
+             (Firebase not configured, Sync disabled)
+          </p>
+        )}
       </CardHeader>
 
       <CardContent className="flex-grow overflow-y-auto space-y-2 p-3 md:p-4">
@@ -548,7 +556,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       </CardContent>
 
       <CardFooter className="flex-shrink-0 flex flex-col gap-2 p-3 border-t bg-background">
-        {/* SectionProgressBar for Mobile - hidden on md and up */}
         <div className="w-full md:hidden">
             <SectionProgressBar
                 sections={playableSongData.sections}
@@ -558,7 +565,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             />
         </div>
         
-        {/* This div contains controls and, on desktop, the progress bar */}
         <div className="flex items-center justify-between w-full gap-1 md:gap-2">
             <div className="flex items-center gap-1">
                 <Button 
@@ -595,7 +601,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                 </Button>
             </div>
 
-            {/* SectionProgressBar - for desktop, fills the space */}
             <div className="hidden md:flex flex-grow min-w-0 mx-2">
                 <SectionProgressBar
                     sections={playableSongData.sections}
@@ -613,4 +618,3 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </Card>
   );
 }
-
