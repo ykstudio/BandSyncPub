@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'PT Sans', sans-serif;
 }
 
 @layer base {
@@ -63,17 +63,17 @@ body {
     --background: 200 50% 5%; /* Even darker blue */
     --foreground: 200 15% 85%; /* Slightly dimmer off-white */
 
-    --card: 200 45% 10%; /* Original Even darker card background */
+    --card: 200 45% 10%; /* Original Dark Card BG */
     --card-foreground: 200 15% 85%;
 
-    --chords-panel-background: 200 36% 20%; /* Lighter background for chords panel - dark mode */
+    --chords-panel-background: 200 36% 20%; /* Tuned dark mode chords panel */
 
     --popover: 200 45% 8%;
     --popover-foreground: 200 15% 85%;
 
     --primary: 180 70% 60%; /* Slightly brighter cyan */
     --primary-foreground: 0 0% 100%;
-    --primary-text-on-light: 195 81% 31%; /* Darker Cyan for light backgrounds (can be same or different) */
+    --primary-text-on-light: 195 81% 31%; /* Remains dark cyan as it's for light backgrounds */
 
     --secondary: 200 40% 20%;
     --secondary-foreground: 200 15% 75%;
@@ -160,3 +160,4 @@ body {
   0% { opacity: 0; transform: translateX(100%) scale(0.9); }
   100% { opacity: 1; transform: translateX(0) scale(1); }
 }
+
