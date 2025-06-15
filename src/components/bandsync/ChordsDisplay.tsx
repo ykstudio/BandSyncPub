@@ -83,12 +83,12 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
     <div 
       className={cn(
         "relative rounded-lg shadow-md h-24 md:h-96 overflow-hidden",
-        "md:pt-4 md:px-4" // Removed default pt-4 px-4, applies only from md up
+        "md:pt-4 md:px-4" 
       )}
       style={{ backgroundColor: 'hsl(var(--chords-panel-background))' }}
     >
       <div 
-        className="absolute top-2 right-2 z-10 p-2 rounded-md"
+        className="absolute top-0 right-0 md:top-2 md:right-2 z-10 p-2 rounded-md"
         style={{ backgroundColor: 'hsl(var(--metronome-background-in-chords-panel))' }}
       >
         <Metronome bpm={songBpm} isPlaying={isPlaying} />
@@ -99,8 +99,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
           "flex overflow-x-auto overflow-y-hidden h-full items-center",
           "space-x-4 md:space-x-6", 
           "pt-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent", 
-          // scroll-pl/pr adjusted for better centering effect, esp. on mobile
-          "scroll-pl-[calc(50%-theme(spacing.16))] scroll-pr-[calc(50%-theme(spacing.16))]", // Example: center a 8rem chord element
+          "scroll-pl-[calc(50%-theme(spacing.16))] scroll-pr-[calc(50%-theme(spacing.16))]", 
           "md:scroll-pl-64 md:scroll-pr-64" 
         )}
       >
