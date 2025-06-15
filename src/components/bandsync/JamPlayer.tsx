@@ -504,7 +504,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     <Card className="shadow-xl w-full flex flex-col h-[calc(100vh-4rem)]">
       <CardHeader className={cn(
           "flex-shrink-0",
-          "p-3 md:p-4" // Reduced padding for mobile and desktop
+          "p-3 md:p-4" 
         )}>
         <div className="flex justify-between items-start">
           <div className="hidden md:block flex-1">
@@ -515,19 +515,20 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             />
           </div>
 
-          <div className="flex flex-col items-end text-right ml-auto md:ml-4 gap-1 w-full md:w-auto">
-            <div className="flex md:hidden flex-row items-center justify-between w-full mb-1">
-              <h2 className="text-lg font-semibold text-accent truncate">
-                {jamSession?.name}
-              </h2>
-              <div className="flex items-center gap-2">
-                <SyncToggle />
-                <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                  Song {currentSongIndex + 1} of {playlist.length}
-                </p>
-              </div>
+          <div className="flex flex-col items-end text-right ml-auto md:ml-4 w-full md:w-auto">
+            {/* Row 1: Jam Name | Sync Icon - Song X of Y (Mobile) */}
+            <div className="flex md:hidden flex-row items-center justify-between w-full mb-0">
+                <h2 className="text-lg md:text-xl font-semibold text-accent truncate">
+                    {jamSession?.name}
+                </h2>
+                <div className="flex items-center gap-2">
+                    <SyncToggle /> {/* Shows only Wifi icon & Switch in mobile */}
+                    <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                        Song {currentSongIndex + 1} of {playlist.length}
+                    </p>
+                </div>
             </div>
-
+            {/* Desktop layout for Sync, Jam Name, Song count */}
             <div className="hidden md:flex flex-col items-end text-right gap-1">
                 <SyncToggle />
                 <h2 className="text-lg md:text-xl font-semibold text-accent truncate self-end">
@@ -538,7 +539,8 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                 </p>
             </div>
             
-            <div className="block md:hidden w-full text-left mt-1"> 
+            {/* Row 2: SongInfo (Mobile) */}
+            <div className="block md:hidden w-full text-left mt-0"> 
               <SongInfo
                   title={currentDisplaySongInfo.title}
                   author={currentDisplaySongInfo.author}
@@ -556,30 +558,34 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       </CardHeader>
 
       <CardContent className="flex-grow overflow-y-auto space-y-2 p-3 md:p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 h-full">
-          <LyricsDisplay
-            lyrics={playableSongData.lyrics}
-            chords={playableSongData.chords}
-            sections={playableSongData.sections}
-            currentTime={currentTime}
-            activeSongChord={activeSongChord}
-            activeLyricWordInfo={activeLyricWordInfo}
-            currentSectionId={currentSectionId}
-            activeLineKeyForHighlight={activeLineKeyForHighlight}
-            songIsPlaying={isPlayingRef.current}
-          />
-          <ChordsDisplay 
-            chords={playableSongData.chords} 
-            currentTime={currentTime} 
-            songBpm={currentDisplaySongInfo.bpm}
-            isPlaying={isPlaying} 
-          />
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-2 h-full">
+          <div className="flex-grow-[3] basis-0 md:flex-grow-0 md:basis-auto overflow-hidden relative">
+            <LyricsDisplay
+              lyrics={playableSongData.lyrics}
+              chords={playableSongData.chords}
+              sections={playableSongData.sections}
+              currentTime={currentTime}
+              activeSongChord={activeSongChord}
+              activeLyricWordInfo={activeLyricWordInfo}
+              currentSectionId={currentSectionId}
+              activeLineKeyForHighlight={activeLineKeyForHighlight}
+              songIsPlaying={isPlayingRef.current}
+            />
+          </div>
+          <div className="flex-grow-[7] basis-0 md:flex-grow-0 md:basis-auto overflow-hidden relative">
+            <ChordsDisplay 
+              chords={playableSongData.chords} 
+              currentTime={currentTime} 
+              songBpm={currentDisplaySongInfo.bpm}
+              isPlaying={isPlaying} 
+            />
+          </div>
         </div>
       </CardContent>
 
       <CardFooter className={cn(
           "flex-shrink-0 flex flex-col gap-2 border-t bg-background",
-          "p-3 md:p-4" // Reduced padding for mobile and desktop
+          "p-3 md:p-4"
         )}>
         <div className="w-full flex flex-col gap-2 md:hidden">
           <SectionProgressBar
