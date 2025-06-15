@@ -515,14 +515,14 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           </div>
         </div>
 
-        {/* Song Details: Title, Author, Key AND Metronome */}
+        {/* Song Details: Title, Author, Key. Metronome moved to ChordsDisplay */}
         <div className="flex justify-between items-start mt-1">
           <SongInfo
             title={currentDisplaySongInfo.title}
             author={currentDisplaySongInfo.author}
             songKey={currentDisplaySongInfo.key}
           />
-          <Metronome bpm={currentDisplaySongInfo.bpm} isPlaying={isPlaying} />
+          {/* Metronome was here, now moved to ChordsDisplay */}
         </div>
         
         {/* Firebase Configuration Warning */}

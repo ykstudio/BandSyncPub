@@ -17,6 +17,7 @@ body {
     --card-foreground: 200 15% 85%;
 
     --chords-panel-background: 200 36% 20%; /* Tuned dark mode chords panel BG */
+    --metronome-background-in-chords-panel: 200 36% 18%; /* chords-panel-background L*0.9 */
 
     --popover: 200 45% 8%;
     --popover-foreground: 200 15% 85%;
@@ -71,6 +72,7 @@ body {
     --card-foreground: 200 15% 15%;
 
     --chords-panel-background: 200 36% 90%; /* Light, slightly desaturated blue-gray for light mode */
+    --metronome-background-in-chords-panel: 200 36% 81%; /* chords-panel-background L*0.9 */
 
     --popover: 0 0% 98%;
     --popover-foreground: 200 15% 15%;
@@ -124,6 +126,7 @@ body {
     --card-foreground: 200 15% 25%; /* Same as main foreground */
 
     --chords-panel-background: 200 70% 90%; /* Very light Sky Blue, like a clear sky reflection */
+    --metronome-background-in-chords-panel: 200 70% 81%; /* chords-panel-background L*0.9 */
 
     --popover: 350 65% 90%; /* Same as card */
     --popover-foreground: 200 15% 25%;
@@ -179,6 +182,7 @@ body {
     --card-foreground: 45 80% 85%;
 
     --chords-panel-background: 30 20% 25%; /* Dark Wood Brown */
+    --metronome-background-in-chords-panel: 30 20% 22.5%; /* chords-panel-background L*0.9 */
 
     --popover: 0 60% 18%;
     --popover-foreground: 45 5% 25%; /* Dark warm grey for popover text */
@@ -232,6 +236,7 @@ body {
     --card-foreground: 30 15% 30%;
 
     --chords-panel-background: 25 70% 88%; /* Slightly Desaturated Peach */
+    --metronome-background-in-chords-panel: 25 70% 79.2%; /* chords-panel-background L*0.9 */
 
     --popover: 30 80% 92%;
     --popover-foreground: 30 15% 30%;

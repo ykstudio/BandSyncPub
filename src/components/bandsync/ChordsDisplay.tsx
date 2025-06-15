@@ -4,6 +4,7 @@
 import type { ChordChange } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import React, { useEffect, useRef } from 'react';
+import { Metronome } from './Metronome';
 
 interface ChordsDisplayProps {
   chords: ChordChange[];
@@ -80,9 +81,15 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
 
   return (
     <div 
-      className="pt-4 px-4 rounded-lg shadow-md h-24 md:h-96 overflow-hidden"
+      className="relative pt-4 px-4 rounded-lg shadow-md h-24 md:h-96 overflow-hidden"
       style={{ backgroundColor: 'hsl(var(--chords-panel-background))' }}
     >
+      <div 
+        className="absolute top-2 right-2 z-10 p-2 rounded-md"
+        style={{ backgroundColor: 'hsl(var(--metronome-background-in-chords-panel))' }}
+      >
+        <Metronome bpm={songBpm} isPlaying={isPlaying} />
+      </div>
       <div 
         ref={scrollContainerRef} 
         className={cn(
