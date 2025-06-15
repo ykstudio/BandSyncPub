@@ -1,3 +1,4 @@
+
 // src/components/ThemeToggle.tsx
 'use client';
 
@@ -19,7 +20,7 @@ const DARK_ICON_COLOR = 'hsl(220, 40%, 30%)'; // Navy Blue
 const LIGHT_ICON_COLOR = 'hsl(0, 0%, 100%)';  // White
 const TROPIC_ICON_COLOR = 'hsl(30, 90%, 55%)'; // Orange
 const CHINATOWN_ICON_COLOR = 'hsl(0, 80%, 55%)'; // Red
-const PEACH_PRIMARY_HSL = 'hsl(20 90% 70%)'; // Peach Theme Primary (for its icon)
+const PEACH_APPLE_ICON_COLOR = 'hsl(5, 85%, 73%)'; // Reddish-pink peach for Apple icon
 
 
 export function ThemeToggle() {
@@ -78,7 +79,7 @@ export function ThemeToggle() {
           Chinatown
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('peach')}>
-          <Apple className="mr-2 h-4 w-4" style={{ color: PEACH_PRIMARY_HSL }} />
+          <Apple className="mr-2 h-4 w-4" style={{ color: PEACH_APPLE_ICON_COLOR }} />
           Peach
         </DropdownMenuItem>
       </DropdownMenuContent>
