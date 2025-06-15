@@ -338,17 +338,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     }
     localUpdateInProgressRef.current = false;
   }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, playableSongData.totalDuration, playlist.length]);
-
-  const handleResetCurrentSong = useCallback(async () => {
-    if (playlist.length === 0) return;
-    localUpdateInProgressRef.current = true;
-    setIsPlaying(false);
-    setCurrentTime(0);
-    if (isSyncEnabled && firebaseInitialized) {
-      await updateFirestoreSession({ isPlaying: false, currentTime: 0, currentSongIndexInJam: currentSongIndexRef.current });
-    }
-    localUpdateInProgressRef.current = false;
-  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, playlist.length]);
   
   const handleSongNavigation = useCallback(async (direction: 'next' | 'prev') => {
     if (playlist.length === 0) return;
@@ -615,15 +604,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                     className="rounded-xl"
                 >
                     <SkipForward className="w-5 h-5" />
-                </Button>
-                 <Button 
-                    onClick={handleResetCurrentSong} 
-                    variant="secondary" 
-                    size="icon" 
-                    aria-label="Reset Current Song"
-                    className="rounded-xl"
-                  >
-                    <RefreshCw className="w-5 h-5" />
                 </Button>
             </div>
             <div className="text-sm font-mono text-muted-foreground">
