@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import {
   Play, Pause, SkipBack, SkipForward, ListMusic, Wifi, WifiOff,
-  AlertTriangle, Loader2,
+  AlertTriangle, Loader2, RefreshCw,
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
@@ -376,7 +376,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   };
 
   const SyncToggle = () => (
-    <div className="flex items-center space-x-1.5"> {/* Adjusted space for scaled switch */}
+    <div className="flex items-center space-x-1.5">
+      <Label htmlFor="sync-toggle" className="text-xs flex items-center gap-1 select-none">
+        {isSyncEnabled && firebaseInitialized && db ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-red-500" />}
+        Real-time Sync
+      </Label>
       <Switch
         id="sync-toggle"
         checked={isSyncEnabled}
@@ -399,12 +403,8 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           }
         }}
         disabled={!firebaseInitialized && !db}
-        className="transform scale-[0.80] origin-center" // Scaled switch
+        className="transform scale-[0.80] origin-center"
       />
-      <Label htmlFor="sync-toggle" className="text-xs flex items-center gap-1 select-none"> {/* Smaller text and icon */}
-        {isSyncEnabled && firebaseInitialized && db ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-red-500" />}
-        Real-time Sync
-      </Label>
     </div>
   );
 
@@ -620,3 +620,4 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </Card>
   );
 }
+
