@@ -11,7 +11,7 @@ export default {
     container: {
       center: true,
       padding: {
-        DEFAULT: '1rem', // Default horizontal padding (like px-4)
+        DEFAULT: '0.25rem', // Default horizontal padding (like px-1)
         sm: '2rem',    // Horizontal padding for sm screens and up (like px-8)
       },
       screens: { // Max-width of the container at different breakpoints
