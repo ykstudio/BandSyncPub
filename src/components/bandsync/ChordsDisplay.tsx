@@ -82,7 +82,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
   return (
     <div 
       className={cn(
-        "relative rounded-lg shadow-md h-24 md:h-96 overflow-hidden",
+        "relative rounded-lg shadow-md h-24 md:h-[32rem] overflow-hidden",
         "md:pt-4 md:px-4" 
       )}
       style={{ backgroundColor: 'hsl(var(--chords-panel-background))' }}

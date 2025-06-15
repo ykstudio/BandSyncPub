@@ -105,7 +105,7 @@ export function LyricsDisplay({
   return (
     <div
       ref={scrollContainerRef}
-      className="space-y-1 text-lg md:text-xl bg-white text-neutral-800 rounded-lg shadow-md h-64 md:h-96 overflow-y-scroll border border-border scroll-pt-20"
+      className="space-y-1 text-lg md:text-xl bg-white text-neutral-800 rounded-lg shadow-md h-64 md:h-[32rem] overflow-y-scroll border border-border scroll-pt-20"
     >
       {sections.map((section, sectionIndex) => {
         const lyricLinesInSection = lyrics.filter(line => {
