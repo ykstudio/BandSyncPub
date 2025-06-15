@@ -590,7 +590,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                     size="icon" 
                     aria-label="Previous Song"
                     disabled={currentSongIndex === 0}
-                    className="rounded-lg"
+                    className="rounded-xl"
                 >
                     <SkipBack className="w-5 h-5" />
                 </Button>
@@ -599,7 +599,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                   size="icon" 
                   aria-label={isPlaying ? 'Pause' : 'Play'} 
                   className={cn(
-                    "w-10 h-10 rounded-lg",
+                    "w-10 h-10 rounded-xl",
                     "bg-accent text-accent-foreground hover:bg-accent/90"
                   )}
                 >
@@ -611,7 +611,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                     size="icon" 
                     aria-label="Next Song"
                     disabled={currentSongIndex >= playlist.length - 1}
-                    className="rounded-lg"
+                    className="rounded-xl"
                 >
                     <SkipForward className="w-5 h-5" />
                 </Button>
@@ -620,7 +620,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                     variant="secondary" 
                     size="icon" 
                     aria-label="Reset Current Song"
-                    className="rounded-lg"
+                    className="rounded-xl"
                   >
                     <RefreshCw className="w-5 h-5" />
                 </Button>
