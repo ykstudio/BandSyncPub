@@ -175,7 +175,7 @@ body {
     --chords-panel-background: 30 20% 25%; /* Dark Wood Brown */
 
     --popover: 0 60% 18%;
-    --popover-foreground: 45 80% 85%;
+    --popover-foreground: 45 5% 25%; /* Dark warm grey for popover text */
 
     --primary: 40 90% 60%; /* Gold */
     --primary-foreground: 0 0% 10%; /* Near Black */
