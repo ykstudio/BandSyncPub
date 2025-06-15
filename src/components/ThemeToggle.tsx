@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 // Specific HSL/color string values for icons in the dropdown
 const DARK_ICON_NAVY_COLOR = 'hsl(220, 40%, 30%)';
 const LIGHT_ICON_WHITE_COLOR = 'hsl(0, 0%, 100%)'; 
-const TROPIC_ICON_ORANGE_COLOR = 'hsl(30, 90%, 55%)';
+const TROPIC_ICON_ORANGE_COLOR = 'hsl(30, 90%, 55%)'; // This is for TreePalm, Mango accent is hsl(35 90% 60%)
 const CHINATOWN_ICON_RED_COLOR = 'hsl(0, 80%, 55%)';
 const PEACH_APPLE_ICON_REDDISH_PINK_COLOR = 'hsl(5, 85%, 73%)';
 
@@ -39,13 +39,16 @@ export function ThemeToggle() {
   const renderMainButtonIcon = () => {
     const iconClassName = "h-[1.2rem] w-[1.2rem] transition-all text-primary";
     
-    if (resolvedTheme === 'dark') {
+    // Use theme (the explicitly set theme) first, then resolvedTheme as fallback for icon logic
+    const currentThemeForIcon = theme || resolvedTheme;
+
+    if (currentThemeForIcon === 'dark') {
       return <Moon className={iconClassName} />;
     }
-    if (resolvedTheme === 'light') {
+    if (currentThemeForIcon === 'light') {
       return <Sun className={iconClassName} />;
     }
-    // For tropic, chinatown, peach - use Palette icon, also colored with current theme's primary
+    // For tropic, chinatown, peach - use Palette icon, colored with current theme's primary
     return <Palette className={iconClassName} />;
   };
 
@@ -59,7 +62,7 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end"
-        className="bg-neutral-200 dark:bg-neutral-700 text-neutral-800"
+        className="bg-neutral-200 dark:bg-neutral-700" // Removed text-neutral-800
       >
         <DropdownMenuItem onClick={() => setTheme('dark')}>
           <Moon className="mr-2 h-4 w-4" style={{ color: DARK_ICON_NAVY_COLOR }} />
@@ -85,4 +88,3 @@ export function ThemeToggle() {
     </DropdownMenu>
   );
 }
-
