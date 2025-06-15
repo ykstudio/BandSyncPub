@@ -517,7 +517,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           {/* Right Side: Stacked Sync Toggle, Jam Name, Song Count */}
           <div className="flex flex-col items-end text-right ml-4 gap-1">
             <SyncToggle />
-            <h2 className="text-xl font-semibold text-primary truncate">{jamSession?.name}</h2>
+            <h2 className="text-lg md:text-xl font-semibold text-primary truncate">{jamSession?.name}</h2>
             <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
               Song {currentSongIndex + 1} of {playlist.length}
             </p>
