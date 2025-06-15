@@ -182,15 +182,15 @@ export function LyricsDisplay({
                           let wordTextStyle = 'text-neutral-800'; 
 
                           if (isThisTheCurrentSingingWord) {
-                            wordTextStyle = 'text-cyan-700 bg-accent-lightBg rounded-sm'; 
+                            wordTextStyle = 'text-primary-on-light bg-accent-lightBg rounded-sm'; 
                           } else if (isWordPast) {
                             wordTextStyle = 'text-neutral-500'; 
                           } else if (isLineActiveForStyling) {
-                            wordTextStyle = 'text-cyan-700'; 
+                            wordTextStyle = 'text-primary-on-light'; 
                           }
                           
                           if (!songIsPlaying && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0) && !isWordPast && !isThisTheCurrentSingingWord) {
-                            wordTextStyle = 'text-cyan-700'; 
+                            wordTextStyle = 'text-primary-on-light'; 
                           }
                           
                           return (
@@ -209,8 +209,8 @@ export function LyricsDisplay({
                                       : isChordSymbolPast
                                       ? "text-neutral-500 bg-neutral-100" 
                                       : isChordSymbolUpcoming 
-                                      ? "text-cyan-700" 
-                                      : "text-cyan-700"
+                                      ? "text-primary-on-light" 
+                                      : "text-primary-on-light"
                                   )}
                                 >
                                   {chordForThisWord.chord}
@@ -246,8 +246,8 @@ export function LyricsDisplay({
                               : isChordSymbolPast
                               ? "text-neutral-500 bg-neutral-100" 
                               : isChordSymbolUpcoming 
-                              ? "text-cyan-700" 
-                              : "text-cyan-700" 
+                              ? "text-primary-on-light" 
+                              : "text-primary-on-light" 
                           )}
                         >
                           {chord.chord}

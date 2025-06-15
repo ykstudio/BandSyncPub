@@ -21,6 +21,7 @@ body {
 
     --primary: 180 65% 55%; /* Bright Cyan */
     --primary-foreground: 0 0% 100%; /* White */
+    --primary-text-on-light: 195 81% 31%; /* Darker Cyan for light backgrounds */
 
     --secondary: 200 40% 25%; /* Muted dark blue */
     --secondary-foreground: 200 15% 80%; /* Light gray */
@@ -73,6 +74,7 @@ body {
 
     --primary: 180 70% 60%; /* Slightly brighter cyan */
     --primary-foreground: 0 0% 100%;
+    --primary-text-on-light: 195 81% 31%; /* Darker Cyan for light backgrounds (can be same or different) */
 
     --secondary: 200 40% 20%;
     --secondary-foreground: 200 15% 75%;
