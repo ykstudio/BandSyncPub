@@ -16,15 +16,15 @@ import {
 import { cn } from '@/lib/utils';
 
 // Specific HSL/color string values for icons in the dropdown
-const DARK_ICON_COLOR = 'hsl(220, 40%, 30%)'; // Navy Blue
-const LIGHT_ICON_COLOR = 'hsl(0, 0%, 100%)';  // White
-const TROPIC_ICON_COLOR = 'hsl(30, 90%, 55%)'; // Orange
-const CHINATOWN_ICON_COLOR = 'hsl(0, 80%, 55%)'; // Red
-const PEACH_APPLE_ICON_COLOR = 'hsl(5, 85%, 73%)'; // Reddish-pink peach for Apple icon
+const DARK_ICON_NAVY_COLOR = 'hsl(220, 40%, 30%)';
+const LIGHT_ICON_WHITE_COLOR = 'hsl(0, 0%, 100%)'; 
+const TROPIC_ICON_ORANGE_COLOR = 'hsl(30, 90%, 55%)';
+const CHINATOWN_ICON_RED_COLOR = 'hsl(0, 80%, 55%)';
+const PEACH_APPLE_ICON_REDDISH_PINK_COLOR = 'hsl(5, 85%, 73%)';
 
 
 export function ThemeToggle() {
-  const { setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -37,7 +37,6 @@ export function ThemeToggle() {
   }
 
   const renderMainButtonIcon = () => {
-    // The icon in the button will adopt the current theme's primary color via `text-primary`
     const iconClassName = "h-[1.2rem] w-[1.2rem] transition-all text-primary";
     
     if (resolvedTheme === 'dark') {
@@ -60,29 +59,30 @@ export function ThemeToggle() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end"
-        className="bg-neutral-200 dark:bg-neutral-700"
+        className="bg-neutral-200 dark:bg-neutral-700 text-neutral-800"
       >
         <DropdownMenuItem onClick={() => setTheme('dark')}>
-          <Moon className="mr-2 h-4 w-4" style={{ color: DARK_ICON_COLOR }} />
+          <Moon className="mr-2 h-4 w-4" style={{ color: DARK_ICON_NAVY_COLOR }} />
           Dark
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('light')}>
-          <Sun className="mr-2 h-4 w-4" style={{ color: LIGHT_ICON_COLOR }} />
+          <Sun className="mr-2 h-4 w-4" style={{ color: LIGHT_ICON_WHITE_COLOR }} />
           Light
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('tropic')}>
-          <TreePalm className="mr-2 h-4 w-4" style={{ color: TROPIC_ICON_COLOR }} /> 
+          <TreePalm className="mr-2 h-4 w-4" style={{ color: TROPIC_ICON_ORANGE_COLOR }} /> 
           Tropic
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('chinatown')}>
-          <Landmark className="mr-2 h-4 w-4" style={{ color: CHINATOWN_ICON_COLOR }} />
+          <Landmark className="mr-2 h-4 w-4" style={{ color: CHINATOWN_ICON_RED_COLOR }} />
           Chinatown
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('peach')}>
-          <Apple className="mr-2 h-4 w-4" style={{ color: PEACH_APPLE_ICON_COLOR }} />
+          <Apple className="mr-2 h-4 w-4" style={{ color: PEACH_APPLE_ICON_REDDISH_PINK_COLOR }} />
           Peach
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
+
