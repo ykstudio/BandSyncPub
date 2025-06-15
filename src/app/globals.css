@@ -11,7 +11,7 @@ body {
     --background: 200 50% 10%; /* Very dark blue */
     --foreground: 200 15% 90%; /* Off-white/lightest gray */
 
-    --card: 200 45% 15%; /* Slightly lighter dark blue than background */
+    --card: 200 45% 35%; /* Slightly lighter dark blue than background - NOW 20% LIGHTER */
     --card-foreground: 200 15% 90%;
 
     --popover: 200 45% 12%;
@@ -61,7 +61,7 @@ body {
     --background: 200 50% 5%; /* Even darker blue */
     --foreground: 200 15% 85%; /* Slightly dimmer off-white */
 
-    --card: 200 45% 10%;
+    --card: 200 45% 30%; /* NOW 20% LIGHTER */
     --card-foreground: 200 15% 85%;
 
     --popover: 200 45% 8%;
