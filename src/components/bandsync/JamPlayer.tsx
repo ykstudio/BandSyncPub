@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const FIRESTORE_UPDATE_INTERVAL = 2000; // Milliseconds
 const SESSION_ID_PREFIX = 'global-bandsync-session-jam-';
@@ -35,6 +36,7 @@ interface JamPlayerProps {
 
 export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const [jamSession, setJamSession] = useState<JamSession | null>(null);
   const [playlist, setPlaylist] = useState<SongEntry[]>([]);
@@ -50,11 +52,14 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   const [isLoadingSessionState, setIsLoadingSessionState] = useState(true);
   const [firebaseInitialized, setFirebaseInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isPlaybackControlsVisible, setIsPlaybackControlsVisible] = useState(true);
 
   const isPlayingRef = useRef(isPlaying);
   const currentSongIndexRef = useRef(currentSongIndex);
   const localUpdateInProgressRef = useRef(false); 
   const latestCurrentTimeRef = useRef(currentTime); 
+  const hidePlaybackControlsTimerRef = useRef<NodeJS.Timeout | null>(null);
+
 
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
   useEffect(() => { currentSongIndexRef.current = currentSongIndex; }, [currentSongIndex]);
@@ -62,6 +67,46 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
 
 
   const currentSessionId = `${SESSION_ID_PREFIX}${jamId}`;
+
+  const showAndRestartPlaybackControlsHideTimer = useCallback(() => {
+    if (isMobile) {
+      setIsPlaybackControlsVisible(true);
+      if (hidePlaybackControlsTimerRef.current) {
+        clearTimeout(hidePlaybackControlsTimerRef.current);
+      }
+      hidePlaybackControlsTimerRef.current = setTimeout(() => {
+        setIsPlaybackControlsVisible(false);
+      }, 5000);
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (isMobile) {
+      showAndRestartPlaybackControlsHideTimer(); 
+
+      const handleInteraction = () => {
+        showAndRestartPlaybackControlsHideTimer();
+      };
+
+      window.addEventListener('click', handleInteraction);
+      window.addEventListener('touchmove', handleInteraction);
+
+      return () => {
+        if (hidePlaybackControlsTimerRef.current) {
+          clearTimeout(hidePlaybackControlsTimerRef.current);
+        }
+        window.removeEventListener('click', handleInteraction);
+        window.removeEventListener('touchmove', handleInteraction);
+      };
+    } else {
+      setIsPlaybackControlsVisible(true);
+      if (hidePlaybackControlsTimerRef.current) {
+        clearTimeout(hidePlaybackControlsTimerRef.current);
+        hidePlaybackControlsTimerRef.current = null;
+      }
+    }
+  }, [isMobile, showAndRestartPlaybackControlsHideTimer]);
+
 
   useEffect(() => {
     setIsLoadingJamData(true);
@@ -402,7 +447,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           }
         }}
         disabled={!firebaseInitialized && !db}
-        className="transform scale-[0.60] origin-center hidden md:block"
+        className={cn("transform scale-[0.60] origin-center", isMobile ? "hidden" : "md:block")}
       />
     </div>
   );
@@ -499,6 +544,10 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     );
   }
 
+  const playbackControlsContainerClasses = isMobile && !isPlaybackControlsVisible
+    ? "opacity-0 max-h-0 overflow-hidden pointer-events-none"
+    : "opacity-100 max-h-10";
+
 
   return (
     <Card className="shadow-xl w-full flex flex-col h-[calc(100vh-4rem)]">
@@ -515,21 +564,18 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
             />
           </div>
 
-          {/* Right side of Header - Mobile: JamName/Sync+Count, then SongInfo. Desktop: Sync, JamName, Count */}
           <div className="flex flex-col items-end text-right ml-auto md:ml-4 w-full md:w-auto">
-            {/* Mobile: Jam Name | Sync Icon - Song X of Y */}
             <div className="flex md:hidden flex-row items-center justify-between w-full mb-0">
                 <h2 className="text-lg font-semibold text-accent truncate">
                     {jamSession?.name}
                 </h2>
                 <div className="flex items-center gap-2">
-                    <SyncToggle /> {/* Shows only Wifi icon & Switch in mobile */}
+                    <SyncToggle />
                     <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                         Song {currentSongIndex + 1} of {playlist.length}
                     </p>
                 </div>
             </div>
-            {/* Desktop layout for Sync, Jam Name, Song count */}
             <div className="hidden md:flex flex-col items-end text-right gap-1">
                 <SyncToggle />
                 <h2 className="text-lg md:text-xl font-semibold text-accent truncate self-end">
@@ -540,7 +586,6 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                 </p>
             </div>
             
-            {/* Mobile: SongInfo below Jam Name/Sync line */}
             <div className="block md:hidden w-full text-left mt-0"> 
               <SongInfo
                   title={currentDisplaySongInfo.title}
@@ -588,7 +633,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
           "flex-shrink-0 flex flex-col gap-2 border-t bg-background",
           "p-3 md:p-4"
         )}>
-        <div className="w-full flex flex-col gap-2 md:hidden"> {/* SectionProgressBar for Mobile */}
+        <div className="w-full flex flex-col gap-2 md:hidden">
           <SectionProgressBar
               sections={playableSongData.sections}
               currentSectionId={currentSectionId}
@@ -598,7 +643,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         </div>
         
         <div className="flex items-center justify-between w-full gap-1 md:gap-2">
-            <div className="flex items-center gap-1">
+            <div className={cn(
+                "flex items-center gap-1",
+                "transition-all duration-300 ease-in-out",
+                playbackControlsContainerClasses
+            )}>
                 <Button 
                     onClick={() => handleSongNavigation('prev')} 
                     variant="secondary" 
@@ -633,7 +682,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                 </Button>
             </div>
 
-            <div className="hidden md:flex flex-grow min-w-0 mx-2"> {/* SectionProgressBar for Desktop */}
+            <div className="hidden md:flex flex-grow min-w-0 mx-2">
                 <SectionProgressBar
                     sections={playableSongData.sections}
                     currentSectionId={currentSectionId}
@@ -650,5 +699,3 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </Card>
   );
 }
-
-    
