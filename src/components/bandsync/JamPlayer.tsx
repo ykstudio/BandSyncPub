@@ -599,9 +599,10 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
                   size="icon" 
                   aria-label={isPlaying ? 'Pause' : 'Play'} 
                   className={cn(
-                    "w-10 h-10 rounded-xl",
-                    "bg-accent text-accent-foreground hover:bg-accent/90"
+                    "w-10 h-10 rounded-xl text-accent-foreground",
+                    isPlaying && "bg-accent hover:bg-accent/90"
                   )}
+                  style={!isPlaying ? { backgroundColor: 'hsl(var(--play-button-paused-bg))' } : {}}
                 >
                     {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7" />}
                 </Button>
