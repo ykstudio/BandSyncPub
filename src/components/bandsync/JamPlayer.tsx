@@ -505,8 +505,8 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     <Card className="shadow-xl w-full flex flex-col h-[calc(100vh-4rem)]">
       <CardHeader className="flex-shrink-0">
         <div className="flex justify-between items-start"> {/* Main row for header content */}
-          {/* Left Side: SongInfo */}
-          <div className="flex-1">
+          {/* Left Side: SongInfo - ONLY FOR DESKTOP NOW */}
+          <div className="hidden md:block flex-1">
             <SongInfo
               title={currentDisplaySongInfo.title}
               author={currentDisplaySongInfo.author}
@@ -555,13 +555,22 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       </CardContent>
 
       <CardFooter className="flex-shrink-0 flex flex-col gap-2 p-3 border-t bg-background">
-        <div className="w-full md:hidden">
-            <SectionProgressBar
-                sections={playableSongData.sections}
-                currentSectionId={currentSectionId}
-                currentTime={currentTime}
-                onSectionSelect={handleSectionSelect}
+        {/* Mobile specific layout for ProgressBar and SongInfo */}
+        <div className="w-full flex flex-col gap-2 md:hidden">
+          <SectionProgressBar
+              sections={playableSongData.sections}
+              currentSectionId={currentSectionId}
+              currentTime={currentTime}
+              onSectionSelect={handleSectionSelect}
+          />
+          {/* SongInfo for mobile */}
+          <div className="px-1"> 
+            <SongInfo
+              title={currentDisplaySongInfo.title}
+              author={currentDisplaySongInfo.author}
+              songKey={currentDisplaySongInfo.key}
             />
+          </div>
         </div>
         
         <div className="flex items-center justify-between w-full gap-1 md:gap-2">
@@ -617,4 +626,3 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     </Card>
   );
 }
-

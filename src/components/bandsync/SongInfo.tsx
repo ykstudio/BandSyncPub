@@ -19,7 +19,7 @@ export function SongInfo({ title, author, songKey }: SongInfoProps) {
 
 
   return (
-    <div className="text-center md:text-left">
+    <div className="text-left">
       <h1 className="text-3xl font-bold font-headline text-primary">{mainTitle}</h1>
       {subTitlePart && (
         <h2 className="text-2xl font-bold font-headline text-primary -mt-2">{subTitlePart}</h2>
