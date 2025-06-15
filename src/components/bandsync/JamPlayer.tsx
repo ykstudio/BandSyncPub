@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { SongData, SessionState, ChordChange, LyricWord, SongSection, SongDisplayInfo, JamSession, SongEntry } from '@/lib/types';
 import { FULL_SONG_DATA, placeholderPlayableSongData } from '@/lib/song-data';
 import { SongInfo } from './SongInfo';
-import { Metronome } from './Metronome';
+// Metronome is now imported and used within ChordsDisplay
 import { SectionProgressBar } from './SectionProgressBar';
 import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
@@ -504,25 +504,27 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   return (
     <Card className="shadow-xl w-full flex flex-col h-[calc(100vh-4rem)]">
       <CardHeader className="flex-shrink-0">
-        {/* Jam Bar: Name, Song Count, Sync Toggle */}
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-semibold text-primary truncate">{jamSession?.name}</h2>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-              Song {currentSongIndex + 1} of {playlist.length}
-            </p>
-            <SyncToggle />
+        <div className="flex justify-between items-start"> {/* Main row for header content */}
+          {/* Left Side: SongInfo */}
+          <div className="flex-1">
+            <SongInfo
+              title={currentDisplaySongInfo.title}
+              author={currentDisplaySongInfo.author}
+              songKey={currentDisplaySongInfo.key}
+            />
           </div>
-        </div>
 
-        {/* Song Details: Title, Author, Key. Metronome moved to ChordsDisplay */}
-        <div className="flex justify-between items-start mt-1">
-          <SongInfo
-            title={currentDisplaySongInfo.title}
-            author={currentDisplaySongInfo.author}
-            songKey={currentDisplaySongInfo.key}
-          />
-          {/* Metronome was here, now moved to ChordsDisplay */}
+          {/* Right Side: Stacked Jam Name, Song Count, Sync Toggle */}
+          <div className="flex flex-col items-end text-right ml-4">
+            <h2 className="text-xl font-semibold text-primary truncate">{jamSession?.name}</h2>
+            {/* Container for song count and sync toggle, in a row, below Jam Name */}
+            <div className="flex items-center gap-2 sm:gap-3 mt-1">
+              <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
+                Song {currentSongIndex + 1} of {playlist.length}
+              </p>
+              <SyncToggle />
+            </div>
+          </div>
         </div>
         
         {/* Firebase Configuration Warning */}
