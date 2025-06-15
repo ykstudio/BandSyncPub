@@ -122,17 +122,17 @@ export function LyricsDisplay({
             <h3
               ref={el => sectionHeaderRefs.current[section.id] = el}
               className={cn(
-                "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-neutral-300 pl-4", // Changed border-border to border-neutral-300
+                "text-base sm:text-lg font-semibold sticky top-0 py-2 z-10 border-b border-neutral-300 pl-4",
                 isActiveSection 
                   ? "text-accent font-bold bg-accent-lightBg" 
-                  : "text-primary bg-neutral-100" // Inactive header bg
+                  : "text-primary bg-neutral-100" 
               )}
               id={`section-header-${section.id}`}
             >
               {section.name}
             </h3>
             
-            <div className="px-4 pt-10 pb-1"> {/* Increased pt-2 to pt-10 */}
+            <div className="px-4 pt-10 pb-1">
               {lyricLinesInSection.length > 0 ? (
                 lyricLinesInSection.map((line, lineIdxInSection) => { 
                   const lineKey = `${section.id}_${lineIdxInSection}`;
@@ -179,18 +179,18 @@ export function LyricsDisplay({
                           const isChordSymbolPast = !isChordSymbolActive && chordForThisWord && chordForThisWord.endTime < currentTime;
                           const isChordSymbolUpcoming = !isChordSymbolActive && !isChordSymbolPast && chordForThisWord;
 
-                          let wordTextStyle = 'text-neutral-800'; // Default dark text on white BG
+                          let wordTextStyle = 'text-neutral-800'; 
 
                           if (isThisTheCurrentSingingWord) {
                             wordTextStyle = 'text-cyan-700 bg-accent-lightBg rounded-sm'; 
                           } else if (isWordPast) {
                             wordTextStyle = 'text-neutral-500'; 
                           } else if (isLineActiveForStyling) {
-                            wordTextStyle = 'text-cyan-700'; // Changed from text-primary
+                            wordTextStyle = 'text-cyan-700'; 
                           }
                           
                           if (!songIsPlaying && sectionIndex === 0 && lineIdxInSection === 0 && currentTime < (line[0]?.startTime ?? 0) && !isWordPast && !isThisTheCurrentSingingWord) {
-                            wordTextStyle = 'text-cyan-700'; // Changed from text-primary
+                            wordTextStyle = 'text-cyan-700'; 
                           }
                           
                           return (
@@ -209,8 +209,8 @@ export function LyricsDisplay({
                                       : isChordSymbolPast
                                       ? "text-neutral-500 bg-neutral-100" 
                                       : isChordSymbolUpcoming 
-                                      ? "text-primary" 
-                                      : "text-primary"
+                                      ? "text-cyan-700" 
+                                      : "text-cyan-700"
                                   )}
                                 >
                                   {chordForThisWord.chord}
@@ -246,8 +246,8 @@ export function LyricsDisplay({
                               : isChordSymbolPast
                               ? "text-neutral-500 bg-neutral-100" 
                               : isChordSymbolUpcoming 
-                              ? "text-primary" 
-                              : "text-primary" 
+                              ? "text-cyan-700" 
+                              : "text-cyan-700" 
                           )}
                         >
                           {chord.chord}
