@@ -64,7 +64,7 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
             'flex items-center justify-center text-xs font-medium transition-colors duration-300 ease-in-out border-r border-border last:border-r-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-0',
             'px-2',
             isActive
-              ? ['bg-accent-lightBg', 'text-accent', 'font-semibold', 'flex-grow', 'flex-shrink-0']
+              ? ['bg-accent-lightBg', 'font-semibold', 'flex-grow', 'flex-shrink-0'] // Removed 'text-accent'
               : ['text-secondary-foreground', 'hover:bg-secondary/80', 'flex-shrink']
           );
 
@@ -73,6 +73,7 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
             dynamicStyles = {
               flexBasis: 'auto',
               minWidth: 'max-content',
+              color: 'hsl(var(--current-chord-text))', // Added color style for active section
             };
           } else {
              dynamicStyles = {
@@ -106,3 +107,4 @@ export function SectionProgressBar({ sections, currentSectionId, onSectionSelect
     </div>
   );
 }
+
