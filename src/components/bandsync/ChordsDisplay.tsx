@@ -15,13 +15,14 @@ interface ChordsDisplayProps {
 
 export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: ChordsDisplayProps) {
   const pulseDuration = songBpm > 0 ? 60 / songBpm : 0.5;
-  const anticipationLeadTime = 0; 
-  const targetDisplayTime = currentTime + anticipationLeadTime;
+  // No anticipation lead time needed for this scrolling logic as we use actual currentTime
+  const targetDisplayTime = currentTime; 
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const chordItemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
+    // Resize refs array when chords change (e.g. new song)
     chordItemRefs.current = chordItemRefs.current.slice(0, chords.length);
   }, [chords]);
 
@@ -48,33 +49,73 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
 
 
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      let activeElement: HTMLDivElement | null = null;
-      
-      let elementToScrollToIndex = -1;
-
-      if (visuallyCurrentChordIndex !== -1) {
-        elementToScrollToIndex = visuallyCurrentChordIndex;
-      } else if (visuallyNextChord) { 
-        const nextChordGlobalIndex = chords.findIndex(c => c.startTime === visuallyNextChord!.startTime && c.chord === visuallyNextChord!.chord);
-        if (nextChordGlobalIndex !== -1) {
-          elementToScrollToIndex = nextChordGlobalIndex;
-        }
-      }
-
-      if (elementToScrollToIndex !== -1 && chordItemRefs.current[elementToScrollToIndex]) {
-        activeElement = chordItemRefs.current[elementToScrollToIndex];
-      }
-      
-      if (activeElement) {
-        activeElement.scrollIntoView({
-          behavior: 'auto', 
-          inline: 'center', 
-          block: 'nearest', 
-        });
-      }
+    if (!scrollContainerRef.current || chords.length === 0) {
+      return;
     }
-  }, [visuallyCurrentChordIndex, visuallyNextChord, chords]); 
+
+    const container = scrollContainerRef.current;
+    const containerCenter = container.offsetWidth / 2;
+
+    const getElementScrollToCenter = (element: HTMLDivElement | null): number | null => {
+      if (!element) return null;
+      // Calculate the scrollLeft value needed to center this element
+      const elementCenterRelativeToContainer = element.offsetLeft + element.offsetWidth / 2;
+      return elementCenterRelativeToContainer - containerCenter;
+    };
+
+    let targetScrollLeft: number | null = null;
+
+    const currentChordGlobalIndex = visuallyCurrentChord ? chords.indexOf(visuallyCurrentChord) : -1;
+    const nextChordGlobalIndex = visuallyNextChord ? chords.indexOf(visuallyNextChord) : -1;
+
+    const currentChordEl = currentChordGlobalIndex !== -1 ? chordItemRefs.current[currentChordGlobalIndex] : null;
+    const nextChordEl = nextChordGlobalIndex !== -1 ? chordItemRefs.current[nextChordGlobalIndex] : null;
+
+    if (visuallyCurrentChord && currentChordEl) {
+      const scrollPosForCurrentChord = getElementScrollToCenter(currentChordEl);
+
+      if (scrollPosForCurrentChord === null) return; // Should not happen if currentChordEl exists
+
+      if (visuallyNextChord && nextChordEl) {
+        // We have a current chord and a next chord, so we interpolate the scroll
+        const scrollPosForNextChord = getElementScrollToCenter(nextChordEl);
+
+        if (scrollPosForNextChord === null) { // Should not happen if nextChordEl exists
+            targetScrollLeft = scrollPosForCurrentChord;
+        } else {
+            const chordDuration = visuallyCurrentChord.endTime - visuallyCurrentChord.startTime;
+            if (chordDuration > 0) {
+            const timeIntoChord = currentTime - visuallyCurrentChord.startTime;
+            let progress = timeIntoChord / chordDuration;
+            progress = Math.min(1, Math.max(0, progress)); // Clamp progress
+
+            targetScrollLeft = scrollPosForCurrentChord + (scrollPosForNextChord - scrollPosForCurrentChord) * progress;
+            } else {
+            // Chord has zero duration or an issue with times, snap to current chord's start or next if progress is 1
+             targetScrollLeft = (currentTime >= visuallyCurrentChord.endTime) ? scrollPosForNextChord : scrollPosForCurrentChord;
+            }
+        }
+      } else {
+        // Current chord is the last one, or next chord element not found. Center current.
+        targetScrollLeft = scrollPosForCurrentChord;
+      }
+    } else if (visuallyNextChord && nextChordEl) {
+      // Before the first chord plays, or current chord element not found. Center upcoming next.
+      targetScrollLeft = getElementScrollToCenter(nextChordEl);
+    } else if (chords.length > 0 && chordItemRefs.current[0] && getElementScrollToCenter(chordItemRefs.current[0]) !== null) {
+      // Fallback: If no specific current/next, try to center the very first chord
+      targetScrollLeft = getElementScrollToCenter(chordItemRefs.current[0]);
+    } else {
+      // No chords or elements to scroll to, perhaps scroll to beginning
+      targetScrollLeft = 0;
+    }
+    
+    if (targetScrollLeft !== null && Math.abs(container.scrollLeft - targetScrollLeft) > 0.5) { // Only scroll if significantly different
+      container.scrollLeft = targetScrollLeft;
+    }
+  // Dependency array: currentTime drives the continuous scroll.
+  // chords, visuallyCurrentChord, visuallyNextChord are included because their values determine scroll targets.
+  }, [currentTime, chords, visuallyCurrentChord, visuallyNextChord]);
 
 
   const currentChordPulseDurationStr = pulseDuration.toFixed(2);
@@ -99,7 +140,9 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
           "flex overflow-x-auto overflow-y-hidden h-full items-center",
           "space-x-4 md:space-x-6", 
           "pt-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent", 
-          "scroll-pl-[calc(50%-theme(spacing.16))] scroll-pr-[calc(50%-theme(spacing.16))]", 
+          // These scroll-padding values ensure that when an item is centered,
+          // there's space around it if it's near the beginning/end of the scrollable area.
+          "scroll-pl-[50vw] scroll-pr-[50vw]", // Large padding to allow centering of first/last items
           "md:scroll-pl-64 md:scroll-pr-64" 
         )}
       >
@@ -156,3 +199,4 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
     </div>
   );
 }
+
