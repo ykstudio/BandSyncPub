@@ -164,11 +164,13 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
             }
             animationStyle.color = 'hsl(var(--current-chord-text))';
           } else if (isVisuallyNext) {
-            chordSpecificClasses = 'text-primary text-6xl sm:text-8xl md:text-[10rem] leading-none';
+            chordSpecificClasses = 'text-primary text-5xl sm:text-7xl md:text-8xl leading-none'; // Adjusted font sizes for "next" chord
           } else if ( (indexOfNextChord !== -1 && index > indexOfNextChord) || (indexOfNextChord === -1 && indexOfCurrentChord !== -1 && index > indexOfCurrentChord) ) {
+            // This is a "far future" chord (after the "next" one)
             chordSpecificClasses = 'text-primary opacity-90 text-2xl sm:text-3xl md:text-5xl leading-none';
           }
            else {
+            // This is a "far past" chord or before the first "next" if song hasn't started.
             chordSpecificClasses = 'text-muted-foreground text-2xl sm:text-3xl md:text-5xl opacity-60 leading-none';
           }
 
