@@ -82,7 +82,7 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
   return (
     <div 
       className={cn(
-        "relative rounded-lg shadow-md h-full overflow-hidden", // Changed h-24 md:h-[32rem] to h-full
+        "relative rounded-lg shadow-md h-full overflow-hidden",
         "md:pt-4 md:px-4" 
       )}
       style={{ backgroundColor: 'hsl(var(--chords-panel-background))' }}
@@ -114,6 +114,9 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
           
           const baseKey = `${chord.chord}-${chord.startTime}-${index}`;
 
+          const indexOfNextChord = visuallyNextChord ? chords.indexOf(visuallyNextChord) : -1;
+          const indexOfCurrentChord = visuallyCurrentChord ? chords.indexOf(visuallyCurrentChord) : -1;
+
           if (isVisuallyPrevious) {
             chordSpecificClasses = 'text-muted-foreground opacity-75 transform translate-y-px text-3xl sm:text-5xl md:text-6xl leading-none';
           } else if (isVisuallyCurrent) {
@@ -125,7 +128,12 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
             animationStyle.color = 'hsl(var(--current-chord-text))';
           } else if (isVisuallyNext) {
             chordSpecificClasses = 'text-primary text-6xl sm:text-8xl md:text-[10rem] leading-none';
-          } else {
+          } else if ( (indexOfNextChord !== -1 && index > indexOfNextChord) || (indexOfNextChord === -1 && indexOfCurrentChord !== -1 && index > indexOfCurrentChord) ) {
+            // This is a "far future" chord (after the "next" or after "current" if no "next")
+            chordSpecificClasses = 'text-primary opacity-90 text-2xl sm:text-3xl md:text-5xl leading-none';
+          }
+           else {
+            // This covers "far past" chords or chords before the song starts if current/next are not defined as the first ones
             chordSpecificClasses = 'text-muted-foreground text-2xl sm:text-3xl md:text-5xl opacity-60 leading-none';
           }
 
@@ -148,4 +156,3 @@ export function ChordsDisplay({ chords, currentTime, songBpm, isPlaying }: Chord
     </div>
   );
 }
-
