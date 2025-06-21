@@ -1,8 +1,8 @@
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { AuthProvider } from '@/context/AuthContext';
+import { AuthGuard } from '@/components/bandsync/AuthGuard';
 
 export const metadata: Metadata = {
   title: 'BandSync',
@@ -22,18 +22,17 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider
-            attribute="class"
-            // defaultTheme will be handled by ThemeProvider internal default
-            enableSystem={false} // Explicitly disable system if we are not offering it
-            disableTransitionOnChange
-        >
-          <div className="fixed top-4 right-4 z-50">
-            <ThemeToggle />
-          </div>
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider
+              attribute="class"
+              enableSystem={false}
+              disableTransitionOnChange
+          >
+            <AuthGuard>
+              {children}
+            </AuthGuard>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
