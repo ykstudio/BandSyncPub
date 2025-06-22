@@ -35,126 +35,118 @@ export const whileMyGuitarGentlyWeepsData: SongData = preProcessSongData({
   bpm: 116,
   key: "Am / A",
   sections: [
-    { id: "intro", name: "Intro", duration: 8 },
-    { id: "verse1", name: "Verse 1", duration: 16 },
-    { id: "chorus1", name: "Chorus", duration: 16 },
-    { id: "verse2", name: "Verse 2", duration: 16 },
-    { id: "chorus2", name: "Chorus", duration: 16 },
-    { id: "solo1", name: "Guitar Solo", duration: 16 },
-    { id: "verse3", name: "Verse 3", duration: 16 },
-    { id: "chorus3", name: "Chorus", duration: 16 },
-    { id: "outro", name: "Outro Solo", duration: 24 },
+    { id: "intro", name: "Intro", duration: 13.5 },
+    { id: "verse1", name: "Verse 1", duration: 27 },
+    { id: "chorus1", name: "Chorus", duration: 27 },
+    { id: "verse2", name: "Verse 2", duration: 27 },
+    { id: "chorus2", name: "Chorus", duration: 27 },
+    { id: "solo1", name: "Guitar Solo", duration: 27 },
+    { id: "verse3", name: "Verse 3", duration: 27 },
+    { id: "chorus3", name: "Chorus", duration: 27 },
+    { id: "outro", name: "Outro Solo", duration: 40.5 },
   ],
   lyrics: [
-    // Verse 1 (Global time: 8s - 24s)
     [
-      { text: "I", startTime: 8.0, endTime: 8.2 }, { text: "look", startTime: 8.3, endTime: 8.6 }, { text: "at", startTime: 8.6, endTime: 8.8 }, { text: "you", startTime: 8.9, endTime: 9.2 }, { text: "all,", startTime: 9.3, endTime: 9.8 },
-      { text: "see", startTime: 10.0, endTime: 10.3 }, { text: "the", startTime: 10.3, endTime: 10.5 }, { text: "love", startTime: 10.6, endTime: 11.0 }, { text: "there", startTime: 11.0, endTime: 11.3 }, { text: "that's", startTime: 11.3, endTime: 11.6 }, { text: "sleeping", startTime: 11.6, endTime: 12.3 }
+      { text: "I", startTime: 13.5, endTime: 13.84 }, { text: "look", startTime: 13.97, endTime: 14.51 }, { text: "at", startTime: 14.51, endTime: 14.85 }, { text: "you", startTime: 14.96, endTime: 15.52 }, { text: "all,", startTime: 15.69, endTime: 16.54 },
+      { text: "see", startTime: 16.88, endTime: 17.39 }, { text: "the", startTime: 17.39, endTime: 17.72 }, { text: "love", startTime: 17.89, endTime: 18.56 }, { text: "there", startTime: 18.56, endTime: 19.07 }, { text: "that's", startTime: 19.07, endTime: 19.58 }, { text: "sleeping", startTime: 19.58, endTime: 20.76 }
     ],
     [
-      { text: "While", startTime: 12.5, endTime: 13.0 }, { text: "my", startTime: 13.0, endTime: 13.2 }, { text: "guitar", startTime: 13.3, endTime: 14.0 }, { text: "gently", startTime: 14.2, endTime: 14.8 }, { text: "weeps", startTime: 15.0, endTime: 15.8 }
+      { text: "While", startTime: 21.09, endTime: 21.94 }, { text: "my", startTime: 21.94, endTime: 22.27 }, { text: "guitar", startTime: 22.44, endTime: 23.62 }, { text: "gently", startTime: 23.96, endTime: 25.0 }, { text: "weeps", startTime: 25.31, endTime: 26.65 }
     ],
     [
-      { text: "I", startTime: 16.0, endTime: 16.2 }, { text: "look", startTime: 16.3, endTime: 16.6 }, { text: "at", startTime: 16.6, endTime: 16.8 }, { text: "the", startTime: 16.8, endTime: 17.0 }, { text: "floor", startTime: 17.1, endTime: 17.6 },
-      { text: "and", startTime: 17.7, endTime: 18.0 }, { text: "I", startTime: 18.0, endTime: 18.2 }, { text: "see", startTime: 18.3, endTime: 18.6 }, { text: "it", startTime: 18.6, endTime: 18.8 }, { text: "needs", startTime: 18.9, endTime: 19.3 }, { text: "sweeping", startTime: 19.3, endTime: 20.0 }
+      { text: "I", startTime: 27.0, endTime: 27.34 }, { text: "look", startTime: 27.47, endTime: 28.01 }, { text: "at", startTime: 28.01, endTime: 28.35 }, { text: "the", startTime: 28.35, endTime: 28.69 }, { text: "floor", startTime: 28.86, endTime: 29.7 },
+      { text: "and", startTime: 29.87, endTime: 30.38 }, { text: "I", startTime: 30.38, endTime: 30.71 }, { text: "see", startTime: 30.88, endTime: 31.39 }, { text: "it", startTime: 31.39, endTime: 31.72 }, { text: "needs", startTime: 31.89, endTime: 32.56 }, { text: "sweeping", startTime: 32.56, endTime: 33.75 }
     ],
     [
-      { text: "Still", startTime: 20.2, endTime: 20.8 }, { text: "my", startTime: 20.8, endTime: 21.0 }, { text: "guitar", startTime: 21.1, endTime: 21.8 }, { text: "gently", startTime: 22.0, endTime: 22.6 }, { text: "weeps", startTime: 22.8, endTime: 23.6 }
-    ],
-    // Chorus 1 (Global time: 24s - 40s)
-    [
-      { text: "I", startTime: 24.0, endTime: 24.2 }, { text: "don't", startTime: 24.3, endTime: 24.7 }, { text: "know", startTime: 24.7, endTime: 25.0 }, { text: "why", startTime: 25.2, endTime: 25.8 },
-      { text: "nobody", startTime: 26.2, endTime: 26.9 }, { text: "told", startTime: 27.0, endTime: 27.4 }, { text: "you", startTime: 27.4, endTime: 27.8 }
+      { text: "Still", startTime: 34.09, endTime: 35.1 }, { text: "my", startTime: 35.1, endTime: 35.44 }, { text: "guitar", startTime: 35.6, endTime: 36.84 }, { text: "gently", startTime: 37.12, endTime: 38.16 }, { text: "weeps", startTime: 38.48, endTime: 39.82 }
     ],
     [
-      { text: "How", startTime: 28.0, endTime: 28.4 }, { text: "to", startTime: 28.4, endTime: 28.6 }, { text: "unfold", startTime: 29.0, endTime: 29.8 }, { text: "your", startTime: 30.2, endTime: 30.6 }, { text: "love", startTime: 30.8, endTime: 31.5 }
+      { text: "I", startTime: 40.5, endTime: 40.84 }, { text: "don't", startTime: 41.01, endTime: 41.66 }, { text: "know", startTime: 41.66, endTime: 42.19 }, { text: "why", startTime: 42.52, endTime: 43.54 },
+      { text: "nobody", startTime: 44.21, endTime: 45.4 }, { text: "told", startTime: 45.56, endTime: 46.24 }, { text: "you", startTime: 46.24, endTime: 46.76 }
     ],
     [
-      { text: "I", startTime: 32.0, endTime: 32.2 }, { text: "don't", startTime: 32.3, endTime: 32.7 }, { text: "know", startTime: 32.7, endTime: 33.0 }, { text: "how", startTime: 33.2, endTime: 33.8 },
-      { text: "someone", startTime: 34.2, endTime: 34.9 }, { text: "controlled", startTime: 35.0, endTime: 35.6 }, { text: "you", startTime: 35.6, endTime: 35.9 }
+      { text: "How", startTime: 47.25, endTime: 47.92 }, { text: "to", startTime: 47.92, endTime: 48.26 }, { text: "unfold", startTime: 48.94, endTime: 50.29 }, { text: "your", startTime: 50.96, endTime: 51.64 }, { text: "love", startTime: 52.02, endTime: 53.16 }
     ],
     [
-      { text: "They", startTime: 36.0, endTime: 36.4 }, { text: "bought", startTime: 36.6, endTime: 37.2 }, { text: "and", startTime: 37.4, endTime: 37.8 }, { text: "sold", startTime: 38.2, endTime: 38.8 }, { text: "you", startTime: 38.8, endTime: 39.2 }
-    ],
-    // Verse 2 (Global time: 40s - 56s)
-    [
-      { text: "I", startTime: 40.0, endTime: 40.2 }, { text: "look", startTime: 40.3, endTime: 40.6 }, { text: "at", startTime: 40.6, endTime: 40.8 }, { text: "the", startTime: 40.8, endTime: 41.0 }, { text: "world", startTime: 41.1, endTime: 41.6 },
-      { text: "and", startTime: 41.7, endTime: 42.0 }, { text: "I", startTime: 42.0, endTime: 42.2 }, { text: "notice", startTime: 42.4, endTime: 43.0 }, { text: "it's", startTime: 43.0, endTime: 43.2 }, { text: "turning", startTime: 43.2, endTime: 43.9 }
+      { text: "I", startTime: 54.0, endTime: 54.34 }, { text: "don't", startTime: 54.47, endTime: 55.12 }, { text: "know", startTime: 55.12, endTime: 55.69 }, { text: "how", startTime: 56.02, endTime: 57.04 },
+      { text: "someone", startTime: 57.71, endTime: 58.89 }, { text: "controlled", startTime: 59.06, endTime: 59.91 }, { text: "you", startTime: 59.91, endTime: 60.36 }
     ],
     [
-      { text: "While", startTime: 44.0, endTime: 44.5 }, { text: "my", startTime: 44.5, endTime: 44.7 }, { text: "guitar", startTime: 44.8, endTime: 45.5 }, { text: "gently", startTime: 45.7, endTime: 46.3 }, { text: "weeps", startTime: 46.5, endTime: 47.3 }
+      { text: "They", startTime: 60.75, endTime: 61.42 }, { text: "bought", startTime: 61.76, endTime: 62.78 }, { text: "and", startTime: 63.11, endTime: 63.79 }, { text: "sold", startTime: 64.46, endTime: 65.48 }, { text: "you", startTime: 65.48, endTime: 66.15 }
     ],
     [
-      { text: "With", startTime: 48.0, endTime: 48.4 }, { text: "every", startTime: 48.5, endTime: 49.0 }, { text: "mistake", startTime: 49.2, endTime: 49.9 }, { text: "we", startTime: 50.0, endTime: 50.2 },
-      { text: "must", startTime: 50.3, endTime: 50.7 }, { text: "surely", startTime: 50.8, endTime: 51.3 }, { text: "be", startTime: 51.3, endTime: 51.5 }, { text: "learning", startTime: 51.5, endTime: 52.2 }
+      { text: "I", startTime: 67.5, endTime: 67.84 }, { text: "look", startTime: 68.01, endTime: 68.55 }, { text: "at", startTime: 68.55, endTime: 68.89 }, { text: "the", startTime: 68.89, endTime: 69.22 }, { text: "world", startTime: 69.39, endTime: 70.09 },
+      { text: "and", startTime: 70.26, endTime: 70.88 }, { text: "I", startTime: 70.88, endTime: 71.21 }, { text: "notice", startTime: 71.55, endTime: 72.56 }, { text: "it's", startTime: 72.56, endTime: 72.9 }, { text: "turning", startTime: 72.9, endTime: 74.08 }
     ],
     [
-      { text: "Still", startTime: 52.4, endTime: 53.0 }, { text: "my", startTime: 53.0, endTime: 53.2 }, { text: "guitar", startTime: 53.3, endTime: 54.0 }, { text: "gently", startTime: 54.2, endTime: 54.8 }, { text: "weeps", startTime: 55.0, endTime: 55.8 }
-    ],
-    // Chorus 2 (Global time: 56s - 72s)
-    [
-      { text: "I", startTime: 56.0, endTime: 56.2 }, { text: "don't", startTime: 56.3, endTime: 56.7 }, { text: "know", startTime: 56.7, endTime: 57.0 }, { text: "why", startTime: 57.2, endTime: 57.8 },
-      { text: "nobody", startTime: 58.2, endTime: 58.9 }, { text: "told", startTime: 59.0, endTime: 59.4 }, { text: "you", startTime: 59.4, endTime: 59.8 }
+      { text: "While", startTime: 74.25, endTime: 75.1 }, { text: "my", startTime: 75.1, endTime: 75.43 }, { text: "guitar", startTime: 75.6, endTime: 76.78 }, { text: "gently", startTime: 77.12, endTime: 78.16 }, { text: "weeps", startTime: 78.47, endTime: 79.82 }
     ],
     [
-      { text: "How", startTime: 60.0, endTime: 60.4 }, { text: "to", startTime: 60.4, endTime: 60.6 }, { text: "unfold", startTime: 61.0, endTime: 61.8 }, { text: "your", startTime: 62.2, endTime: 62.6 }, { text: "love", startTime: 62.8, endTime: 63.5 }
+      { text: "With", startTime: 81.0, endTime: 81.68 }, { text: "every", startTime: 81.84, endTime: 82.69 }, { text: "mistake", startTime: 83.02, endTime: 84.19 }, { text: "we", startTime: 84.38, endTime: 84.71 },
+      { text: "must", startTime: 84.88, endTime: 85.56 }, { text: "surely", startTime: 85.72, endTime: 86.62 }, { text: "be", startTime: 86.62, endTime: 86.96 }, { text: "learning", startTime: 86.96, endTime: 87.98 }
     ],
     [
-      { text: "I", startTime: 64.0, endTime: 64.2 }, { text: "don't", startTime: 64.3, endTime: 64.7 }, { text: "know", startTime: 64.7, endTime: 65.0 }, { text: "how", startTime: 65.2, endTime: 65.8 },
-      { text: "someone", startTime: 66.2, endTime: 66.9 }, { text: "controlled", startTime: 67.0, endTime: 67.6 }, { text: "you", startTime: 67.6, endTime: 67.9 }
+      { text: "Still", startTime: 88.42, endTime: 89.44 }, { text: "my", startTime: 89.44, endTime: 89.78 }, { text: "guitar", startTime: 89.94, endTime: 91.12 }, { text: "gently", startTime: 91.46, endTime: 92.48 }, { text: "weeps", startTime: 92.81, endTime: 94.16 }
     ],
     [
-      { text: "They", startTime: 68.0, endTime: 68.4 }, { text: "bought", startTime: 68.6, endTime: 69.2 }, { text: "and", startTime: 69.4, endTime: 69.8 }, { text: "sold", startTime: 70.2, endTime: 70.8 }, { text: "you", startTime: 70.8, endTime: 71.2 }
-    ],
-    // Verse 3 (Global time: 88s - 104s), after solo (72s-88s)
-    [
-      { text: "I", startTime: 88.0, endTime: 88.2 }, { text: "look", startTime: 88.3, endTime: 88.6 }, { text: "at", startTime: 88.6, endTime: 88.8 }, { text: "you", startTime: 88.9, endTime: 89.2 }, { text: "all,", startTime: 89.3, endTime: 89.8 },
-      { text: "see", startTime: 90.0, endTime: 90.3 }, { text: "the", startTime: 90.3, endTime: 90.5 }, { text: "love", startTime: 90.6, endTime: 91.0 }, { text: "there", startTime: 91.0, endTime: 91.3 }, { text: "that's", startTime: 91.3, endTime: 91.6 }, { text: "sleeping", startTime: 91.6, endTime: 92.3 }
+      { text: "I", startTime: 94.5, endTime: 94.84 }, { text: "don't", startTime: 95.01, endTime: 95.66 }, { text: "know", startTime: 95.66, endTime: 96.19 }, { text: "why", startTime: 96.52, endTime: 97.54 },
+      { text: "nobody", startTime: 98.21, endTime: 99.4 }, { text: "told", startTime: 99.56, endTime: 100.24 }, { text: "you", startTime: 100.24, endTime: 100.76 }
     ],
     [
-      { text: "While", startTime: 92.5, endTime: 93.0 }, { text: "my", startTime: 93.0, endTime: 93.2 }, { text: "guitar", startTime: 93.3, endTime: 94.0 }, { text: "gently", startTime: 94.2, endTime: 94.8 }, { text: "weeps", startTime: 95.0, endTime: 95.8 }
+      { text: "How", startTime: 101.25, endTime: 101.92 }, { text: "to", startTime: 101.92, endTime: 102.26 }, { text: "unfold", startTime: 102.94, endTime: 104.29 }, { text: "your", startTime: 104.96, endTime: 105.64 }, { text: "love", startTime: 106.02, endTime: 107.16 }
     ],
     [
-      { text: "Look", startTime: 96.0, endTime: 96.5 }, { text: "at", startTime: 96.5, endTime: 96.7 }, { text: "you", startTime: 96.8, endTime: 97.2 }, { text: "all...", startTime: 97.3, endTime: 98.0 }
+      { text: "I", startTime: 108.0, endTime: 108.34 }, { text: "don't", startTime: 108.47, endTime: 109.12 }, { text: "know", startTime: 109.12, endTime: 109.69 }, { text: "how", startTime: 110.02, endTime: 111.04 },
+      { text: "someone", startTime: 111.71, endTime: 112.89 }, { text: "controlled", startTime: 113.06, endTime: 113.91 }, { text: "you", startTime: 113.91, endTime: 114.36 }
     ],
     [
-      { text: "Still", startTime: 100.2, endTime: 100.8 }, { text: "my", startTime: 100.8, endTime: 101.0 }, { text: "guitar", startTime: 101.1, endTime: 101.8 }, { text: "gently", startTime: 102.0, endTime: 102.6 }, { text: "weeps", startTime: 102.8, endTime: 103.6 }
-    ],
-    // Chorus 3 (Global time: 104s - 120s)
-    [
-      { text: "I", startTime: 104.0, endTime: 104.2 }, { text: "don't", startTime: 104.3, endTime: 104.7 }, { text: "know", startTime: 104.7, endTime: 105.0 }, { text: "why", startTime: 105.2, endTime: 105.8 },
-      { text: "nobody", startTime: 106.2, endTime: 106.9 }, { text: "told", startTime: 107.0, endTime: 107.4 }, { text: "you", startTime: 107.4, endTime: 107.8 }
+      { text: "They", startTime: 114.75, endTime: 115.42 }, { text: "bought", startTime: 115.76, endTime: 116.78 }, { text: "and", startTime: 117.11, endTime: 117.79 }, { text: "sold", startTime: 118.46, endTime: 119.48 }, { text: "you", startTime: 119.48, endTime: 120.15 }
     ],
     [
-      { text: "How", startTime: 108.0, endTime: 108.4 }, { text: "to", startTime: 108.4, endTime: 108.6 }, { text: "unfold", startTime: 109.0, endTime: 109.8 }, { text: "your", startTime: 110.2, endTime: 110.6 }, { text: "love", startTime: 110.8, endTime: 111.5 }
+      { text: "I", startTime: 148.5, endTime: 148.84 }, { text: "look", startTime: 148.97, endTime: 149.51 }, { text: "at", startTime: 149.51, endTime: 149.85 }, { text: "you", startTime: 149.96, endTime: 150.52 }, { text: "all,", startTime: 150.69, endTime: 151.54 },
+      { text: "see", startTime: 151.88, endTime: 152.39 }, { text: "the", startTime: 152.39, endTime: 152.72 }, { text: "love", startTime: 152.89, endTime: 153.56 }, { text: "there", startTime: 153.56, endTime: 154.07 }, { text: "that's", startTime: 154.07, endTime: 154.58 }, { text: "sleeping", startTime: 154.58, endTime: 155.76 }
     ],
     [
-      { text: "I", startTime: 112.0, endTime: 112.2 }, { text: "don't", startTime: 112.3, endTime: 112.7 }, { text: "know", startTime: 112.7, endTime: 113.0 }, { text: "how", startTime: 113.2, endTime: 113.8 },
-      { text: "someone", startTime: 114.2, endTime: 114.9 }, { text: "controlled", startTime: 115.0, endTime: 115.6 }, { text: "you", startTime: 115.6, endTime: 115.9 }
+      { text: "While", startTime: 156.09, endTime: 156.94 }, { text: "my", startTime: 156.94, endTime: 157.27 }, { text: "guitar", startTime: 157.44, endTime: 158.62 }, { text: "gently", startTime: 158.96, endTime: 160.0 }, { text: "weeps", startTime: 160.31, endTime: 161.65 }
     ],
     [
-      { text: "They", startTime: 116.0, endTime: 116.4 }, { text: "bought", startTime: 116.6, endTime: 117.2 }, { text: "and", startTime: 117.4, endTime: 117.8 }, { text: "sold", startTime: 118.2, endTime: 118.8 }, { text: "you", startTime: 118.8, endTime: 119.2 }
+      { text: "Look", startTime: 162.0, endTime: 162.84 }, { text: "at", startTime: 162.84, endTime: 163.18 }, { text: "you", startTime: 163.35, endTime: 163.91 }, { text: "all...", startTime: 164.08, endTime: 165.38 }
+    ],
+    [
+      { text: "Still", startTime: 169.09, endTime: 170.1 }, { text: "my", startTime: 170.1, endTime: 170.44 }, { text: "guitar", startTime: 170.6, endTime: 171.84 }, { text: "gently", startTime: 172.12, endTime: 173.16 }, { text: "weeps", startTime: 173.48, endTime: 174.82 }
+    ],
+    [
+      { text: "I", startTime: 175.5, endTime: 175.84 }, { text: "don't", startTime: 176.01, endTime: 176.66 }, { text: "know", startTime: 176.66, endTime: 177.19 }, { text: "why", startTime: 177.52, endTime: 178.54 },
+      { text: "nobody", startTime: 179.21, endTime: 180.4 }, { text: "told", startTime: 180.56, endTime: 181.24 }, { text: "you", startTime: 181.24, endTime: 181.76 }
+    ],
+    [
+      { text: "How", startTime: 182.25, endTime: 182.92 }, { text: "to", startTime: 182.92, endTime: 183.26 }, { text: "unfold", startTime: 183.94, endTime: 185.29 }, { text: "your", startTime: 185.96, endTime: 186.64 }, { text: "love", startTime: 187.02, endTime: 188.16 }
+    ],
+    [
+      { text: "I", startTime: 189.0, endTime: 189.34 }, { text: "don't", startTime: 189.47, endTime: 190.12 }, { text: "know", startTime: 190.12, endTime: 190.69 }, { text: "how", startTime: 191.02, endTime: 192.04 },
+      { text: "someone", startTime: 192.71, endTime: 193.89 }, { text: "controlled", startTime: 194.06, endTime: 194.91 }, { text: "you", startTime: 194.91, endTime: 195.36 }
+    ],
+    [
+      { text: "They", startTime: 195.75, endTime: 196.42 }, { text: "bought", startTime: 196.76, endTime: 197.78 }, { text: "and", startTime: 198.11, endTime: 198.79 }, { text: "sold", startTime: 199.46, endTime: 200.48 }, { text: "you", startTime: 200.48, endTime: 201.15 }
     ],
   ],
   chords: [
-    { chord: "Am", startTime: 0, endTime: 2 }, { chord: "G", startTime: 2, endTime: 4 }, { chord: "D/F#", startTime: 4, endTime: 6 }, { chord: "Fmaj7", startTime: 6, endTime: 8 },
-    { chord: "Am", startTime: 8, endTime: 10 }, { chord: "G", startTime: 10, endTime: 12 }, { chord: "D/F#", startTime: 12, endTime: 14 }, { chord: "Fmaj7", startTime: 14, endTime: 16 },
-    { chord: "Am", startTime: 16, endTime: 18 }, { chord: "G", startTime: 18, endTime: 20 }, { chord: "C", startTime: 20, endTime: 22 }, { chord: "E", startTime: 22, endTime: 24 },
-    { chord: "A", startTime: 24, endTime: 26 }, { chord: "C#m", startTime: 26, endTime: 28 }, { chord: "F#m", startTime: 28, endTime: 30 }, { chord: "C#m", startTime: 30, endTime: 32 },
-    { chord: "Bm", startTime: 32, endTime: 34 }, { chord: "E7", startTime: 34, endTime: 36 }, { chord: "A", startTime: 36, endTime: 38 }, { chord: "E", startTime: 38, endTime: 40 },
-    { chord: "Am", startTime: 40, endTime: 42 }, { chord: "G", startTime: 42, endTime: 44 }, { chord: "D/F#", startTime: 44, endTime: 46 }, { chord: "Fmaj7", startTime: 46, endTime: 48 },
-    { chord: "Am", startTime: 48, endTime: 50 }, { chord: "G", startTime: 50, endTime: 52 }, { chord: "C", startTime: 52, endTime: 54 }, { chord: "E", startTime: 54, endTime: 56 },
-    { chord: "A", startTime: 56, endTime: 58 }, { chord: "C#m", startTime: 58, endTime: 60 }, { chord: "F#m", startTime: 60, endTime: 62 }, { chord: "C#m", startTime: 62, endTime: 64 },
-    { chord: "Bm", startTime: 64, endTime: 66 }, { chord: "E7", startTime: 66, endTime: 68 }, { chord: "A", startTime: 68, endTime: 70 }, { chord: "E", startTime: 70, endTime: 72 },
-    { chord: "Am", startTime: 72, endTime: 74 }, { chord: "G", startTime: 74, endTime: 76 }, { chord: "D/F#", startTime: 76, endTime: 78 }, { chord: "Fmaj7", startTime: 78, endTime: 80 },
-    { chord: "Am", startTime: 80, endTime: 82 }, { chord: "G", startTime: 82, endTime: 84 }, { chord: "C", startTime: 84, endTime: 86 }, { chord: "E", startTime: 86, endTime: 88 },
-    { chord: "Am", startTime: 88, endTime: 90 }, { chord: "G", startTime: 90, endTime: 92 }, { chord: "D/F#", startTime: 92, endTime: 94 }, { chord: "Fmaj7", startTime: 94, endTime: 96 },
-    { chord: "Am", startTime: 96, endTime: 98 }, { chord: "G", startTime: 98, endTime: 100 }, { chord: "C", startTime: 100, endTime: 102 }, { chord: "E", startTime: 102, endTime: 104 },
-    { chord: "A", startTime: 104, endTime: 106 }, { chord: "C#m", startTime: 106, endTime: 108 }, { chord: "F#m", startTime: 108, endTime: 110 }, { chord: "C#m", startTime: 110, endTime: 112 },
-    { chord: "Bm", startTime: 112, endTime: 114 }, { chord: "E7", startTime: 114, endTime: 116 }, { chord: "A", startTime: 116, endTime: 118 }, { chord: "E", startTime: 118, endTime: 120 },
-    { chord: "Am", startTime: 120, endTime: 122 }, { chord: "G", startTime: 122, endTime: 124 }, { chord: "D/F#", startTime: 124, endTime: 126 }, { chord: "Fmaj7", startTime: 126, endTime: 128 },
-    { chord: "Am", startTime: 128, endTime: 130 }, { chord: "G", startTime: 130, endTime: 132 }, { chord: "D/F#", startTime: 132, endTime: 134 }, { chord: "Fmaj7", startTime: 134, endTime: 136 },
-    { chord: "Am", startTime: 136, endTime: 138 }, { chord: "G", startTime: 138, endTime: 140 }, { chord: "D/F#", startTime: 140, endTime: 142 }, { chord: "Fmaj7", startTime: 142, endTime: 144 },
+    { chord: "Am", startTime: 0, endTime: 3.38 }, { chord: "G", startTime: 3.38, endTime: 6.75 }, { chord: "D/F#", startTime: 6.75, endTime: 10.12 }, { chord: "Fmaj7", startTime: 10.12, endTime: 13.5 },
+    { chord: "Am", startTime: 13.5, endTime: 16.88 }, { chord: "G", startTime: 16.88, endTime: 20.25 }, { chord: "D/F#", startTime: 20.25, endTime: 23.62 }, { chord: "Fmaj7", startTime: 23.62, endTime: 27.0 },
+    { chord: "Am", startTime: 27.0, endTime: 30.38 }, { chord: "G", startTime: 30.38, endTime: 33.75 }, { chord: "C", startTime: 33.75, endTime: 37.12 }, { chord: "E", startTime: 37.12, endTime: 40.5 },
+    { chord: "A", startTime: 40.5, endTime: 43.88 }, { chord: "C#m", startTime: 43.88, endTime: 47.25 }, { chord: "F#m", startTime: 47.25, endTime: 50.62 }, { chord: "C#m", startTime: 50.62, endTime: 54.0 },
+    { chord: "Bm", startTime: 54.0, endTime: 57.38 }, { chord: "E7", startTime: 57.38, endTime: 60.75 }, { chord: "A", startTime: 60.75, endTime: 64.12 }, { chord: "E", startTime: 64.12, endTime: 67.5 },
+    { chord: "Am", startTime: 67.5, endTime: 70.88 }, { chord: "G", startTime: 70.88, endTime: 74.25 }, { chord: "D/F#", startTime: 74.25, endTime: 77.62 }, { chord: "Fmaj7", startTime: 77.62, endTime: 81.0 },
+    { chord: "Am", startTime: 81.0, endTime: 84.38 }, { chord: "G", startTime: 84.38, endTime: 87.75 }, { chord: "C", startTime: 87.75, endTime: 91.12 }, { chord: "E", startTime: 91.12, endTime: 94.5 },
+    { chord: "A", startTime: 94.5, endTime: 97.88 }, { chord: "C#m", startTime: 97.88, endTime: 101.25 }, { chord: "F#m", startTime: 101.25, endTime: 104.62 }, { chord: "C#m", startTime: 104.62, endTime: 108.0 },
+    { chord: "Bm", startTime: 108.0, endTime: 111.38 }, { chord: "E7", startTime: 111.38, endTime: 114.75 }, { chord: "A", startTime: 114.75, endTime: 118.12 }, { chord: "E", startTime: 118.12, endTime: 121.5 },
+    { chord: "Am", startTime: 121.5, endTime: 124.88 }, { chord: "G", startTime: 124.88, endTime: 128.25 }, { chord: "D/F#", startTime: 128.25, endTime: 131.62 }, { chord: "Fmaj7", startTime: 131.62, endTime: 135.0 },
+    { chord: "Am", startTime: 135.0, endTime: 138.38 }, { chord: "G", startTime: 138.38, endTime: 141.75 }, { chord: "C", startTime: 141.75, endTime: 145.12 }, { chord: "E", startTime: 145.12, endTime: 148.5 },
+    { chord: "Am", startTime: 148.5, endTime: 151.88 }, { chord: "G", startTime: 151.88, endTime: 155.25 }, { chord: "D/F#", startTime: 155.25, endTime: 158.62 }, { chord: "Fmaj7", startTime: 158.62, endTime: 162.0 },
+    { chord: "Am", startTime: 162.0, endTime: 165.38 }, { chord: "G", startTime: 165.38, endTime: 168.75 }, { chord: "C", startTime: 168.75, endTime: 172.12 }, { chord: "E", startTime: 172.12, endTime: 175.5 },
+    { chord: "A", startTime: 175.5, endTime: 178.88 }, { chord: "C#m", startTime: 178.88, endTime: 182.25 }, { chord: "F#m", startTime: 182.25, endTime: 185.62 }, { chord: "C#m", startTime: 185.62, endTime: 189.0 },
+    { chord: "Bm", startTime: 189.0, endTime: 192.38 }, { chord: "E7", startTime: 192.38, endTime: 195.75 }, { chord: "A", startTime: 195.75, endTime: 199.12 }, { chord: "E", startTime: 199.12, endTime: 202.5 },
+    { chord: "Am", startTime: 202.5, endTime: 205.88 }, { chord: "G", startTime: 205.88, endTime: 209.25 }, { chord: "D/F#", startTime: 209.25, endTime: 212.62 }, { chord: "Fmaj7", startTime: 212.62, endTime: 216.0 },
   ],
 });
 
