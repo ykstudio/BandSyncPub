@@ -143,7 +143,9 @@ export let whileMyGuitarGentlyWeepsData: SongData = preProcessSongData({
     return;
   }
 
-  // 1. Calculate average word duration
+  // --- Step 1: Adjust word timings based on sentence position (even/odd) ---
+
+  // 1a. Calculate average word duration
   let totalWordDuration = 0;
   let wordCount = 0;
   for (const line of data.lyrics) {
@@ -154,7 +156,7 @@ export let whileMyGuitarGentlyWeepsData: SongData = preProcessSongData({
   }
   const averageDuration = wordCount > 0 ? totalWordDuration / wordCount : 0.4;
 
-  // 2. Determine the shifts needed at each line ending
+  // 1b. Determine the shifts needed at each line ending
   const shifts = [];
   for (let i = 0; i < data.lyrics.length; i++) {
     const line = data.lyrics[i];
@@ -173,18 +175,16 @@ export let whileMyGuitarGentlyWeepsData: SongData = preProcessSongData({
     const shiftAmount = newDuration - originalDuration;
 
     if (shiftAmount > 0) {
-      // The shift should be applied to all events *after* this word's original end time.
       shifts.push({ time: lastWord.endTime, amount: shiftAmount });
     }
   }
   
   shifts.sort((a, b) => a.time - b.time);
 
-  // 3. Create a function to get the cumulative shift for any given original timestamp
-  const getCumulativeShift = (timestamp) => {
+  // 1c. Create a function to get the cumulative shift for any given original timestamp
+  const getCumulativeShift = (timestamp: number) => {
     let totalShift = 0;
     for (const shift of shifts) {
-      // A strict greater-than ensures the shift is applied only after the change point.
       if (timestamp > shift.time) { 
         totalShift += shift.amount;
       }
@@ -192,11 +192,8 @@ export let whileMyGuitarGentlyWeepsData: SongData = preProcessSongData({
     return totalShift;
   };
 
-  // 4. Apply the shifts to all timed data points
-  // Important: We must apply the shift based on the *original* times to avoid compounding errors.
-  // We create new arrays/objects to store the shifted data.
-  
-  const shiftedLyrics = data.lyrics.map(line => 
+  // 1d. Apply the shifts to all timed data points to get intermediate timings
+  const intermediateLyrics = data.lyrics.map(line => 
     line.map(word => ({
       ...word,
       startTime: word.startTime + getCumulativeShift(word.startTime),
@@ -204,25 +201,53 @@ export let whileMyGuitarGentlyWeepsData: SongData = preProcessSongData({
     }))
   );
 
-  const shiftedChords = data.chords.map(chord => ({
+  const intermediateChords = data.chords.map(chord => ({
     ...chord,
     startTime: chord.startTime + getCumulativeShift(chord.startTime),
     endTime: chord.endTime + getCumulativeShift(chord.endTime)
   }));
   
-  const shiftedSections = data.sections.map(section => ({
+  const intermediateSections = data.sections.map(section => ({
     ...section,
     startTime: section.startTime + getCumulativeShift(section.startTime),
     endTime: section.endTime + getCumulativeShift(section.endTime)
   }));
 
-  const shiftedTotalDuration = data.totalDuration + getCumulativeShift(data.totalDuration);
+  const intermediateTotalDuration = data.totalDuration + getCumulativeShift(data.totalDuration);
 
-  // 5. Update the main data object
-  whileMyGuitarGentlyWeepsData.lyrics = shiftedLyrics;
-  whileMyGuitarGentlyWeepsData.chords = shiftedChords;
-  whileMyGuitarGentlyWeepsData.sections = shiftedSections;
-  whileMyGuitarGentlyWeepsData.totalDuration = shiftedTotalDuration;
+  // --- Step 2: Scale all intermediate timings to fit the target duration of 3:36 (216 seconds) ---
+
+  const targetDuration = 216;
+  if (intermediateTotalDuration <= 0) return; // Avoid division by zero
+
+  const scalingFactor = targetDuration / intermediateTotalDuration;
+
+  const finalLyrics = intermediateLyrics.map(line => 
+    line.map(word => ({
+        ...word,
+        startTime: word.startTime * scalingFactor,
+        endTime: word.endTime * scalingFactor,
+    }))
+  );
+
+  const finalChords = intermediateChords.map(chord => ({
+      ...chord,
+      startTime: chord.startTime * scalingFactor,
+      endTime: chord.endTime * scalingFactor,
+  }));
+
+  const finalSections = intermediateSections.map(section => ({
+      ...section,
+      startTime: section.startTime * scalingFactor,
+      endTime: section.endTime * scalingFactor,
+      duration: (section.endTime - section.startTime) * scalingFactor, // Re-calculate duration based on scaled times
+  }));
+
+  // Update the main data object with the final, scaled values
+  whileMyGuitarGentlyWeepsData.lyrics = finalLyrics;
+  whileMyGuitarGentlyWeepsData.chords = finalChords;
+  whileMyGuitarGentlyWeepsData.sections = finalSections;
+  whileMyGuitarGentlyWeepsData.totalDuration = targetDuration;
 })();
 
 
@@ -594,6 +619,7 @@ SONGS.forEach(songEntry => {
 // sampleSong is used in forms for the info message.
 export const sampleSong = whileMyGuitarGentlyWeepsData; 
 export const detailedSongExamples = [whileMyGuitarGentlyWeepsData.title, sultansOfSwingData.title, stairwayToHeavenData.title];
+
 
 
 
