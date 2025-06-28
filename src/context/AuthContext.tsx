@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -13,7 +12,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Hardcoded password for the prototype
-const PROTOTYPE_PASSWORD = 'bandsync';
+const PROTOTYPE_PASSWORD = process.env.NEXT_PUBLIC_PROTOTYPE_PASSWORD || 'bandsync';
 const SESSION_STORAGE_KEY = 'bandsync_auth';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
