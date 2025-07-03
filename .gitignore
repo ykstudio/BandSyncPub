@@ -46,3 +46,47 @@ firestore-debug.log
 
 # local env files
 .env.local
+
+# Logs
+logs
+*.log
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+.env
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/
+
+# sveltekit
+.svelte-kit/
+
+# Netlify
+.netlify/
+
+# Bandit Sync
+.clinerules/
+.cursor/
+.github/
+.roo/
+.roomodes
+.taskmaster/
+.trae/
+.windsurf/
+AGENTS.md
+CLAUDE.md
+migrations/
+src/lib/supabase.ts
+supabase-schema.sql
+firebase-service-account.json 

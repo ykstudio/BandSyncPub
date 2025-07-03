@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -10,8 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getTypedSupabaseClient } from '@/lib/supabase';
 import { SONGS, detailedSongExamples } from '@/lib/song-data'; 
 import type { SongEntry } from '@/lib/types';
 import { PlusCircle, Trash2, Music2, Info, ChevronUp, ChevronDown } from 'lucide-react';
@@ -73,20 +71,27 @@ export function CreateJamForm() {
       toast({ title: 'No Songs Selected', description: 'Please add at least one song to your Jam.', variant: 'destructive' });
       return;
     }
-    if (!db) {
-      toast({ title: 'Firebase Error', description: 'Firebase is not configured. Cannot save Jam.', variant: 'destructive' });
-      return;
-    }
 
     setIsLoading(true);
     try {
-      const jamDocRef = await addDoc(collection(db, 'jams'), {
+      const supabase = getTypedSupabaseClient();
+      const newJam = {
         name: jamName,
-        songIds: selectedSongs.map(s => s.id),
-        createdAt: serverTimestamp(),
-      });
+        song_ids: selectedSongs.map(s => s.id),
+      };
+
+      const { data: createdJam, error } = await supabase
+        .from('jams')
+        .insert(newJam)
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
       toast({ title: 'Jam Created!', description: `"${jamName}" has been successfully created.` });
-      router.push(`/jam/${jamDocRef.id}`);
+      router.push(`/jam/${createdJam.id}`);
     } catch (error) {
       console.error('Error creating Jam:', error);
       toast({ title: 'Error Creating Jam', description: 'Could not save your Jam Session. Please try again.', variant: 'destructive' });

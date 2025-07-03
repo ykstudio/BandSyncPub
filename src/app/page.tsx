@@ -1,52 +1,54 @@
-
 'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { db } from '@/lib/firebase';
-import type { JamSession } from '@/lib/types';
-import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
+import { getTypedSupabaseClient, JamRecord } from '@/lib/supabase';
 import React, { useEffect, useState } from 'react';
 import { ListMusic, PlusCircle, Pencil } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function HomePage() {
-  const [jams, setJams] = useState<JamSession[]>([]);
+  const [jams, setJams] = useState<JamRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!db) {
-      setError("Firebase is not configured. Cannot load Jams.");
-      setIsLoading(false);
-      return;
-    }
+    const supabase = getTypedSupabaseClient();
 
-    const jamsCollectionRef = collection(db, 'jams');
-    const q = query(jamsCollectionRef, orderBy('createdAt', 'desc'));
+    const fetchInitialJams = async () => {
+      const { data, error: fetchError } = await supabase
+        .from('jams')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const jamsData: JamSession[] = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        jamsData.push({
-          id: doc.id,
-          name: data.name,
-          songIds: data.songIds,
-          createdAt: data.createdAt,
-        });
-      });
-      setJams(jamsData);
+      if (fetchError) {
+        console.error("Error fetching Jams:", fetchError);
+        setError("Could not fetch Jam Sessions. Please try again later.");
+        setJams([]);
+      } else {
+        setJams(data || []);
+        setError(null);
+      }
       setIsLoading(false);
-      setError(null);
-    }, (err) => {
-      console.error("Error fetching Jams:", err);
-      setError("Could not fetch Jam Sessions. Please try again later.");
-      setIsLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
+    fetchInitialJams();
+
+    const channel = supabase
+      .channel('jams-follow-on')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'jams' },
+        (payload) => {
+          setJams((currentJams) => [payload.new as JamRecord, ...currentJams]);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
@@ -114,10 +116,10 @@ export default function HomePage() {
                   </Link>
                 </CardTitle>
                 <CardDescription>
-                  {jam.songIds.length} song{jam.songIds.length !== 1 ? 's' : ''}
-                  {jam.createdAt && (
+                  {jam.song_ids.length} song{jam.song_ids.length !== 1 ? 's' : ''}
+                  {jam.created_at && (
                     <span className="block text-xs mt-1">
-                      Created: {new Date((jam.createdAt as Timestamp).seconds * 1000).toLocaleDateString()}
+                      Created: {new Date(jam.created_at).toLocaleDateString()}
                     </span>
                   )}
                 </CardDescription>

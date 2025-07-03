@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useParams } from 'next/navigation';
@@ -104,8 +103,8 @@ export default function JamPage() {
 
 
   return (
-    <main className={cn("container mx-auto min-h-screen", mainContainerPadding)}>
-       <div className={cn("transition-all duration-300 ease-in-out", backButtonContainerClasses)}>
+    <main className={cn("mx-auto h-[calc(100vh-4rem)] px-4 sm:px-6 lg:px-8", mainContainerPadding)} data-name="jam-page-main-container">
+       <div className={cn("transition-all duration-300 ease-in-out", backButtonContainerClasses)} data-name="back-button-container">
          <Link href="/" passHref>
            <Button variant="outline" size="sm">
              <ChevronLeft className="mr-1 h-4 w-4" />

@@ -1,8 +1,7 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import type { SongData, SessionState, ChordChange, LyricWord, SongSection, SongDisplayInfo, JamSession, SongEntry } from '@/lib/types';
+import type { SongData, ChordChange, LyricWord, SongSection, SongEntry, SongDisplayInfo, JamSession as FirebaseJamSession } from '@/lib/types';
 import { FULL_SONG_DATA, placeholderPlayableSongData } from '@/lib/song-data';
 import { SongInfo } from './SongInfo';
 import { SectionProgressBar } from './SectionProgressBar';
@@ -10,12 +9,9 @@ import { LyricsDisplay } from './LyricsDisplay';
 import { ChordsDisplay } from './ChordsDisplay';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
-import {
-  Play, Pause, SkipBack, SkipForward, ListMusic, Wifi, WifiOff,
-  AlertTriangle, Loader2,
-} from 'lucide-react';
-import { db } from '@/lib/firebase';
-import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { Play, Pause, SkipBack, SkipForward, ListMusic, Wifi, WifiOff, AlertTriangle, Loader2, ChevronLeft } from 'lucide-react';
+import { getTypedSupabaseClient, JamRecord, SessionRecord, generateSessionId } from '@/lib/supabase';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
@@ -23,11 +19,9 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-const FIRESTORE_UPDATE_INTERVAL = 2000; // Milliseconds
-const SESSION_ID_PREFIX = 'global-bandsync-session-jam-';
-const LYRIC_ACTIVE_BUFFER_MS = 0.1; // 100ms buffer
-const TIME_DRIFT_TOLERANCE_PLAYING = 0.15; // seconds
-
+const SESSION_STATE_PERSIST_INTERVAL = 5000;
+const LYRIC_ACTIVE_BUFFER_MS = 0.1; 
+const TIME_DRIFT_TOLERANCE_PLAYING = 0.25;
 
 interface JamPlayerProps {
   jamId: string;
@@ -37,663 +31,292 @@ interface JamPlayerProps {
 export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-
-  const [jamSession, setJamSession] = useState<JamSession | null>(null);
+  const [jamSession, setJamSession] = useState<JamRecord | null>(null);
   const [playlist, setPlaylist] = useState<SongEntry[]>([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
-  
-  const [playableSongData, setPlayableSongData] = useState<SongData>(placeholderPlayableSongData); 
+  const [playableSongData, setPlayableSongData] = useState<SongData>(placeholderPlayableSongData);
   const [currentDisplaySongInfo, setCurrentDisplaySongInfo] = useState<SongDisplayInfo>(placeholderPlayableSongData);
-
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSyncEnabled, setIsSyncEnabled] = useState(true);
-  const [isLoadingJamData, setIsLoadingJamData] = useState(true);
-  const [isLoadingSessionState, setIsLoadingSessionState] = useState(true);
-  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPlaybackControlsVisible, setIsPlaybackControlsVisible] = useState(true);
-
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const isPlayingRef = useRef(isPlaying);
-  const currentSongIndexRef = useRef(currentSongIndex);
-  const localUpdateInProgressRef = useRef(false); 
-  const latestCurrentTimeRef = useRef(currentTime); 
+  const latestCurrentTimeRef = useRef(currentTime);
+  const localUpdateInProgressRef = useRef(false);
+  const animationFrameRef = useRef<number>();
+  const lastPersistTimeRef = useRef<number>(Date.now());
   const hidePlaybackControlsTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
-  useEffect(() => { currentSongIndexRef.current = currentSongIndex; }, [currentSongIndex]);
   useEffect(() => { latestCurrentTimeRef.current = currentTime; }, [currentTime]);
-
-
-  const currentSessionId = `${SESSION_ID_PREFIX}${jamId}`;
-
   const showAndRestartPlaybackControlsHideTimer = useCallback(() => {
     if (isMobile) {
       setIsPlaybackControlsVisible(true);
-      if (hidePlaybackControlsTimerRef.current) {
-        clearTimeout(hidePlaybackControlsTimerRef.current);
-      }
-      hidePlaybackControlsTimerRef.current = setTimeout(() => {
-        setIsPlaybackControlsVisible(false);
-      }, 5000);
+      if (hidePlaybackControlsTimerRef.current) clearTimeout(hidePlaybackControlsTimerRef.current);
+      hidePlaybackControlsTimerRef.current = setTimeout(() => setIsPlaybackControlsVisible(false), 5000);
     }
   }, [isMobile]);
-
   useEffect(() => {
     if (isMobile) {
-      showAndRestartPlaybackControlsHideTimer(); 
-
-      const handleInteraction = () => {
-        showAndRestartPlaybackControlsHideTimer();
-      };
-
+      showAndRestartPlaybackControlsHideTimer();
+      const handleInteraction = () => showAndRestartPlaybackControlsHideTimer();
       window.addEventListener('click', handleInteraction);
       window.addEventListener('touchmove', handleInteraction);
-
       return () => {
-        if (hidePlaybackControlsTimerRef.current) {
-          clearTimeout(hidePlaybackControlsTimerRef.current);
-        }
+        if (hidePlaybackControlsTimerRef.current) clearTimeout(hidePlaybackControlsTimerRef.current);
         window.removeEventListener('click', handleInteraction);
         window.removeEventListener('touchmove', handleInteraction);
       };
     } else {
       setIsPlaybackControlsVisible(true);
-      if (hidePlaybackControlsTimerRef.current) {
-        clearTimeout(hidePlaybackControlsTimerRef.current);
-        hidePlaybackControlsTimerRef.current = null;
-      }
+      if (hidePlaybackControlsTimerRef.current) clearTimeout(hidePlaybackControlsTimerRef.current);
     }
   }, [isMobile, showAndRestartPlaybackControlsHideTimer]);
-
-
   useEffect(() => {
-    setIsLoadingJamData(true);
-    setError(null);
-    if (!db || !jamId) {
-      setError(!db ? "Firebase not configured." : "Jam ID is missing.");
-      setIsLoadingJamData(false);
-      return;
-    }
-
-    const jamDocRef = doc(db, 'jams', jamId);
-    getDoc(jamDocRef).then(docSnap => {
-      if (docSnap.exists()) {
-        const jamData = docSnap.data() as Omit<JamSession, 'id'>;
-        setJamSession({ id: docSnap.id, ...jamData });
-        
-        const jamPlaylist: SongEntry[] = jamData.songIds
-          .map(songId => {
-            const songMeta = FULL_SONG_DATA[songId]; 
-            if (songMeta) {
-              return { 
-                id: songMeta.id,
-                title: songMeta.title,
-                artistId: "", 
-                artistName: songMeta.author,
-                key: songMeta.key,
-                bpm: songMeta.bpm,
-              };
-            }
-            const fallbackEntry = placeholderPlayableSongData;
-            return {
-                id: songId, 
-                title: "Unknown Song",
-                artistId: "",
-                artistName: "Unknown Artist",
-                key: fallbackEntry.key,
-                bpm: fallbackEntry.bpm,
-            };
-          })
-          .filter(Boolean) as SongEntry[];
-        
-        setPlaylist(jamPlaylist);
-        if (jamPlaylist.length === 0) {
-          setError("This Jam has no songs.");
-        }
+    const supabase = getTypedSupabaseClient();
+    const rtChannel = supabase.channel(`jam-session-${jamId}`, { config: { broadcast: { self: false } } });
+    setChannel(rtChannel);
+    const setupJam = async () => {
+      setIsLoading(true);
+      setError(null);
+      const { data: jamData, error: jamError } = await supabase.from('jams').select('*').eq('id', jamId).single();
+      if (jamError || !jamData) { setError("Jam Session not found."); setIsLoading(false); return; }
+      setJamSession(jamData);
+      const jamPlaylist: SongEntry[] = jamData.song_ids.map((songId: string) => {
+        const songMeta = FULL_SONG_DATA[songId];
+        return songMeta ? { id: songId, title: songMeta.title, artistId: "", artistName: songMeta.author, key: songMeta.key, bpm: songMeta.bpm } : null;
+      }).filter(Boolean) as SongEntry[];
+      setPlaylist(jamPlaylist);
+      if (jamPlaylist.length === 0) setError("This Jam has no songs.");
+      const sessionId = generateSessionId(jamId);
+      const { data: sessionData } = await supabase.from('sessions').select('*').eq('id', sessionId).single();
+      let effectiveSession: SessionRecord;
+      if (sessionData) {
+        effectiveSession = sessionData;
       } else {
-        setError("Jam Session not found.");
+        const { data: newSession, error: createError } = await supabase.from('sessions').insert({ id: sessionId, jam_id: jamId }).select().single();
+        if (createError || !newSession) { setError("Could not create a session for this jam."); setIsLoading(false); return; }
+        effectiveSession = newSession;
       }
-    }).catch(err => {
-      console.error("Error fetching Jam:", err);
-      setError("Could not load Jam Session data.");
-    }).finally(() => {
-        // setIsLoadingJamData(false) handled by Firestore listener or sync off
-    });
+      setCurrentTime(effectiveSession.playback_time);
+      setIsPlaying(effectiveSession.is_playing);
+      setCurrentSongIndex(effectiveSession.current_song_index_in_jam);
+      setIsLoading(false);
+    };
+    setupJam();
+    rtChannel.on('broadcast', { event: 'PLAYBACK_STATE_UPDATE' }, ({ payload }) => {
+      if (localUpdateInProgressRef.current) return;
+      const { time: remoteTime, playing: remoteIsPlaying, songIndex: remoteSongIndex } = payload;
+      if (typeof remoteIsPlaying === 'boolean' && isPlayingRef.current !== remoteIsPlaying) setIsPlaying(remoteIsPlaying);
+      if (typeof remoteSongIndex === 'number' && remoteSongIndex !== currentSongIndex) {
+        setCurrentSongIndex(remoteSongIndex);
+        setCurrentTime(0);
+      }
+      if (typeof remoteTime === 'number') {
+        if (Math.abs(latestCurrentTimeRef.current - remoteTime) > TIME_DRIFT_TOLERANCE_PLAYING) setCurrentTime(remoteTime);
+      }
+    }).subscribe();
+    return () => { supabase.removeChannel(rtChannel); setChannel(null); };
   }, [jamId]);
-
   useEffect(() => {
     if (playlist.length > 0 && currentSongIndex >= 0 && currentSongIndex < playlist.length) {
-      const currentSongEntry = playlist[currentSongIndex];
-      const songDataForPlayback = FULL_SONG_DATA[currentSongEntry.id] || {
-        ...placeholderPlayableSongData, 
-        id: currentSongEntry.id,
-        title: currentSongEntry.title,
-        author: currentSongEntry.artistName,
-        bpm: currentSongEntry.bpm,
-        key: currentSongEntry.key,
-      };
-      
-      setPlayableSongData(songDataForPlayback);
-      setCurrentDisplaySongInfo({
-        id: songDataForPlayback.id,
-        title: songDataForPlayback.title,
-        author: songDataForPlayback.author,
-        key: songDataForPlayback.key,
-        bpm: songDataForPlayback.bpm,
-      });
-
-    } else if (playlist.length === 0 && jamSession) { 
-      const defaultEmptySong = placeholderPlayableSongData;
-      setCurrentDisplaySongInfo({id: 'empty', title: 'No songs in Jam', author:'', bpm: defaultEmptySong.bpm, key: defaultEmptySong.key});
-      setPlayableSongData(defaultEmptySong);
+      const entry = playlist[currentSongIndex];
+      const data = FULL_SONG_DATA[entry.id] || { ...placeholderPlayableSongData, id: entry.id, title: entry.title, author: entry.artistName, bpm: entry.bpm, key: entry.key };
+      setPlayableSongData(data);
+      setCurrentDisplaySongInfo({ id: data.id, title: data.title, author: data.author, key: data.key, bpm: data.bpm });
+    } else if (playlist.length === 0 && jamSession) {
+      const d = placeholderPlayableSongData;
+      setCurrentDisplaySongInfo({id: 'empty', title: 'No songs in Jam', author:'', bpm: d.bpm, key: d.key});
+      setPlayableSongData(d);
     }
   }, [currentSongIndex, playlist, jamSession]);
 
+  const broadcastPlaybackState = useCallback((state: any) => {
+    if (channel && isSyncEnabled) channel.send({ type: 'broadcast', event: 'PLAYBACK_STATE_UPDATE', payload: state });
+  }, [channel, isSyncEnabled]);
 
-  useEffect(() => {
-    if (db) setFirebaseInitialized(true);
-    setIsLoadingSessionState(isSyncEnabled && db);
-  }, [isSyncEnabled, db]);
-
-  const updateFirestoreSession = useCallback(async (newState: Partial<SessionState>) => {
-    if (!isSyncEnabled || !db || !firebaseInitialized) return;
-    const sessionDocRef = doc(db, 'sessions', currentSessionId);
-    try {
-      await setDoc(sessionDocRef, { ...newState, lastUpdated: serverTimestamp() }, { merge: true });
-    } catch (error) {
-      console.error("Error updating Firestore session:", error);
-      toast({ title: "Sync Error", description: "Could not update shared session.", variant: "destructive" });
-    }
-  }, [isSyncEnabled, db, firebaseInitialized, toast, currentSessionId]);
-
-
-  useEffect(() => {
-    let localTimerIntervalId: NodeJS.Timeout | undefined = undefined;
-
-    if (isPlayingRef.current && playlist.length > 0 && playableSongData.totalDuration > 0) {
-      localTimerIntervalId = setInterval(() => {
-        if (localUpdateInProgressRef.current) return; 
-
-        setCurrentTime((prevTime) => {
-          const nextTime = prevTime + 0.1; 
-          if (nextTime >= playableSongData.totalDuration) {
-            setIsPlaying(false); 
-            const nextSongIndex = currentSongIndexRef.current + 1;
-            if (nextSongIndex < playlist.length) { 
-              localUpdateInProgressRef.current = true;
-              setCurrentSongIndex(nextSongIndex);
-              setCurrentTime(0);
-              setIsPlaying(true); 
-              if (isSyncEnabled && firebaseInitialized) {
-                updateFirestoreSession({ isPlaying: true, currentTime: 0, currentSongIndexInJam: nextSongIndex })
-                  .finally(() => { localUpdateInProgressRef.current = false; });
-              } else {
-                localUpdateInProgressRef.current = false;
-              }
-              return 0; 
-            } else { 
-              if (isSyncEnabled && firebaseInitialized) {
-                localUpdateInProgressRef.current = true;
-                updateFirestoreSession({ isPlaying: false, currentTime: playableSongData.totalDuration, currentSongIndexInJam: currentSongIndexRef.current })
-                  .finally(() => { localUpdateInProgressRef.current = false; });
-              } else {
-                localUpdateInProgressRef.current = false;
-              }
-              return playableSongData.totalDuration; 
-            }
-          }
-          return nextTime; 
-        });
-      }, 100);
-    }
-    return () => {
-      if (localTimerIntervalId) clearInterval(localTimerIntervalId);
-    };
-  }, [isPlaying, playableSongData.totalDuration, isSyncEnabled, firebaseInitialized, playlist, updateFirestoreSession]);
-
-  useEffect(() => {
-    let firestoreUpdateIntervalId: NodeJS.Timeout | undefined = undefined;
-    if (isPlayingRef.current && isSyncEnabled && firebaseInitialized && playlist.length > 0) {
-      firestoreUpdateIntervalId = setInterval(() => {
-        if (!localUpdateInProgressRef.current) { 
-          localUpdateInProgressRef.current = true; 
-          updateFirestoreSession({ 
-            currentTime: latestCurrentTimeRef.current, 
-            isPlaying: true, 
-            currentSongIndexInJam: currentSongIndexRef.current 
-          }).finally(() => {
-            localUpdateInProgressRef.current = false; 
-          });
-        }
-      }, FIRESTORE_UPDATE_INTERVAL);
-    }
-    return () => {
-      if (firestoreUpdateIntervalId) clearInterval(firestoreUpdateIntervalId);
-    };
-  }, [isPlaying, isSyncEnabled, firebaseInitialized, playlist.length, updateFirestoreSession]);
-
-
-  useEffect(() => {
-    if (!isSyncEnabled || !db || !firebaseInitialized || !jamSession) {
-      setIsLoadingSessionState(false);
-      setIsLoadingJamData(false); 
-      if (jamSession && playlist.length > 0) setIsLoadingJamData(false); 
-      return;
-    }
-    
-    setIsLoadingSessionState(true); 
-    if (!jamSession) setIsLoadingJamData(true); 
-
-    const sessionDocRef = doc(db, 'sessions', currentSessionId);
-    const unsubscribe = onSnapshot(sessionDocRef, (snapshot) => {
-      setIsLoadingSessionState(false); 
-      if (!jamSession && snapshot.exists()) { 
-          setIsLoadingJamData(false);
-      } else if (jamSession) {
-          setIsLoadingJamData(false); 
-      }
-
-      if (snapshot.metadata.hasPendingWrites || localUpdateInProgressRef.current) {
-        return;
-      }
-
-      if (snapshot.exists()) {
-        const remoteState = snapshot.data() as SessionState;
-        
-        localUpdateInProgressRef.current = true;
-
-        const remoteSongIndex = remoteState.currentSongIndexInJam;
-        const remoteIsPlaying = remoteState.isPlaying;
-        const remoteCurrentTime = remoteState.currentTime;
-
-        const localSongIndex = currentSongIndexRef.current;
-        const localIsPlaying = isPlayingRef.current;
-        const localCurrentTime = latestCurrentTimeRef.current;
-
-        if (remoteSongIndex !== undefined && remoteSongIndex !== localSongIndex &&
-            playlist.length > 0 && remoteSongIndex < playlist.length) {
-            setCurrentSongIndex(remoteSongIndex);
-            setCurrentTime(remoteCurrentTime); 
-            setIsPlaying(remoteIsPlaying);
-        }
-        else if (remoteIsPlaying !== localIsPlaying) {
-            setIsPlaying(remoteIsPlaying);
-            if (remoteIsPlaying || !localIsPlaying) {
-                setCurrentTime(remoteCurrentTime);
-            }
-        }
-        else { 
-            if (remoteIsPlaying) { 
-                 if (remoteCurrentTime > localCurrentTime && (remoteCurrentTime - localCurrentTime > TIME_DRIFT_TOLERANCE_PLAYING)) {
-                    setCurrentTime(remoteCurrentTime);
-                }
-            } else { 
-                if (Math.abs(localCurrentTime - remoteCurrentTime) > 0.05) { 
-                    setCurrentTime(remoteCurrentTime);
-                }
-            }
-        }
-        localUpdateInProgressRef.current = false; 
-      } else {
-        localUpdateInProgressRef.current = true;
-        updateFirestoreSession({
-            isPlaying: isPlayingRef.current, 
-            currentTime: latestCurrentTimeRef.current,
-            currentSongIndexInJam: currentSongIndexRef.current
-        }).finally(() => {
-            localUpdateInProgressRef.current = false;
-        });
-      }
-    }, (err) => {
-      console.error("Error listening to Firestore session:", err);
-      toast({ title: "Connection Error", description: "Could not connect to shared Jam session.", variant: "destructive" });
-      setIsLoadingSessionState(false);
-      setIsLoadingJamData(false);
-      localUpdateInProgressRef.current = false;
-    });
-    return () => {
-      unsubscribe();
-      localUpdateInProgressRef.current = false; 
-    }
-  }, [isSyncEnabled, db, firebaseInitialized, updateFirestoreSession, toast, currentSessionId, jamSession, playlist.length]);
-
-
-  const handlePlayPause = useCallback(async () => {
-    if (playlist.length === 0 || playableSongData.totalDuration === 0) return;
-    
-    localUpdateInProgressRef.current = true;
-    const newIsPlayingState = !isPlayingRef.current;
-    let newCurrentTimeState = latestCurrentTimeRef.current;
-
-    if (newCurrentTimeState >= playableSongData.totalDuration && newIsPlayingState) {
-      newCurrentTimeState = 0; 
-    }
-
-    setIsPlaying(newIsPlayingState);
-    setCurrentTime(newCurrentTimeState);
-
-    if (isSyncEnabled && firebaseInitialized) {
-      await updateFirestoreSession({ isPlaying: newIsPlayingState, currentTime: newCurrentTimeState, currentSongIndexInJam: currentSongIndexRef.current });
-    }
-    localUpdateInProgressRef.current = false;
-  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, playableSongData.totalDuration, playlist.length]);
+  const persistSessionState = useCallback(async (state: any) => {
+    if (!isSyncEnabled) return;
+    const supabase = getTypedSupabaseClient();
+    await supabase.from('sessions').update({ is_playing: state.isPlaying, playback_time: state.currentTime, current_song_index_in_jam: state.currentSongIndex }).eq('id', generateSessionId(jamId));
+  }, [isSyncEnabled, jamId]);
   
-  const handleSongNavigation = useCallback(async (direction: 'next' | 'prev') => {
-    if (playlist.length === 0) return;
+  const handleSongChange = useCallback((newIndex: number, options: { play?: boolean } = {}) => {
+    const { play = false } = options;
     localUpdateInProgressRef.current = true;
-    let newIndex = currentSongIndexRef.current;
-    if (direction === 'next') {
-      newIndex = Math.min(playlist.length - 1, currentSongIndexRef.current + 1);
-    } else {
-      newIndex = Math.max(0, currentSongIndexRef.current - 1);
-    }
+    setCurrentSongIndex(newIndex);
+    setCurrentTime(0);
+    setIsPlaying(play);
+    broadcastPlaybackState({ songIndex: newIndex, time: 0, playing: play });
+    persistSessionState({ isPlaying: play, currentTime: 0, currentSongIndex: newIndex });
+    setTimeout(() => { localUpdateInProgressRef.current = false; }, 200);
+  }, [broadcastPlaybackState, persistSessionState]);
 
-    if (newIndex !== currentSongIndexRef.current || latestCurrentTimeRef.current > 0 || isPlayingRef.current) {
-      setCurrentSongIndex(newIndex);
-      setCurrentTime(0);
-      setIsPlaying(false);
-      if (isSyncEnabled && firebaseInitialized) {
-        await updateFirestoreSession({ isPlaying: false, currentTime: 0, currentSongIndexInJam: newIndex });
+  useEffect(() => {
+    const tick = () => {
+      if (!isPlayingRef.current) return;
+
+      const newTime = Math.min(latestCurrentTimeRef.current + (16 / 1000), playableSongData.totalDuration);
+
+      if (newTime >= playableSongData.totalDuration && playableSongData.totalDuration > 0) {
+        if (currentSongIndex < playlist.length - 1) {
+          handleSongChange(currentSongIndex + 1, { play: true });
+        } else {
+          setIsPlaying(false);
+          setCurrentTime(playableSongData.totalDuration);
+          persistSessionState({ isPlaying: false, currentTime: playableSongData.totalDuration, currentSongIndex });
+        }
+      } else {
+        setCurrentTime(newTime);
+
+        if (Date.now() - lastPersistTimeRef.current > SESSION_STATE_PERSIST_INTERVAL) {
+          persistSessionState({ isPlaying: isPlayingRef.current, currentTime: newTime, currentSongIndex });
+          lastPersistTimeRef.current = Date.now();
+        }
+
+        animationFrameRef.current = requestAnimationFrame(tick);
       }
+    };
+
+    if (isPlaying) {
+      animationFrameRef.current = requestAnimationFrame(tick);
+    } else if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
     }
-    localUpdateInProgressRef.current = false;
-  }, [playlist.length, isSyncEnabled, firebaseInitialized, updateFirestoreSession]);
 
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isPlaying, playableSongData.totalDuration, currentSongIndex, playlist.length, handleSongChange, persistSessionState]);
 
-  const handleSectionSelect = useCallback(async (newTime: number) => {
-    if (playlist.length === 0 || playableSongData.totalDuration === 0) return;
+  const handlePlayPause = () => {
+    localUpdateInProgressRef.current = true;
+    const newIsPlaying = !isPlaying;
+    setIsPlaying(newIsPlaying);
+    broadcastPlaybackState({ playing: newIsPlaying, time: currentTime });
+    persistSessionState({ isPlaying: newIsPlaying, currentTime, currentSongIndex });
+    setTimeout(() => { localUpdateInProgressRef.current = false; }, 200);
+  };
+  const handleSeek = (direction: 'forward' | 'backward') => {
+    localUpdateInProgressRef.current = true;
+    const newTime = Math.max(0, Math.min(currentTime + (direction === 'forward' ? 10 : -10), playableSongData.totalDuration));
+    setCurrentTime(newTime);
+    broadcastPlaybackState({ time: newTime });
+    persistSessionState({ isPlaying, currentTime: newTime, currentSongIndex });
+    setTimeout(() => { localUpdateInProgressRef.current = false; }, 200);
+  };
+  const handleScrub = (newTime: number) => {
     localUpdateInProgressRef.current = true;
     setCurrentTime(newTime);
-    if (isSyncEnabled && firebaseInitialized) {
-      await updateFirestoreSession({ currentTime: newTime, isPlaying: isPlayingRef.current, currentSongIndexInJam: currentSongIndexRef.current });
-    }
-    localUpdateInProgressRef.current = false;
-  }, [isSyncEnabled, firebaseInitialized, updateFirestoreSession, playlist.length, playableSongData.totalDuration]);
-
-
-  const formatTime = (timeInSeconds: number) => {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    broadcastPlaybackState({ time: newTime });
+    persistSessionState({ isPlaying, currentTime: newTime, currentSongIndex });
+    setTimeout(() => { localUpdateInProgressRef.current = false; }, 200);
   };
 
-  const SyncToggle = () => (
-    <div className="flex items-center space-x-1.5">
-       <Label htmlFor="sync-toggle" className="text-xs flex items-center gap-1 select-none">
-        {isSyncEnabled && firebaseInitialized && db ? <Wifi className="w-3 h-3 text-green-500" /> : <WifiOff className="w-3 h-3 text-red-500" />}
-        <span className="hidden md:inline">Real-time Sync</span>
-      </Label>
-      <Switch
-        id="sync-toggle"
-        checked={isSyncEnabled}
-        onCheckedChange={(checked) => {
-          localUpdateInProgressRef.current = true; 
-          setIsSyncEnabled(checked);
-          if (!checked) {
-            toast({ title: "Sync Disabled", description: "Playback is now local." });
-            setIsLoadingSessionState(false); 
-            localUpdateInProgressRef.current = false;
-          } else if (!firebaseInitialized || !db) {
-            toast({ title: "Sync Failed", description: "Firebase not configured. Sync remains off.", variant: "destructive" });
-            setIsSyncEnabled(false); 
-            setIsLoadingSessionState(false);
-            localUpdateInProgressRef.current = false;
-          } else {
-            toast({ title: "Sync Enabled", description: "Attempting to connect to shared session." });
-            setIsLoadingSessionState(true); 
-            setTimeout(() => { localUpdateInProgressRef.current = false; }, 500);
-          }
-        }}
-        disabled={!firebaseInitialized && !db}
-        className={cn("transform scale-[0.60] origin-center", isMobile ? "hidden" : "md:block")}
-      />
-    </div>
-  );
+  const handleNextSong = () => { if (currentSongIndex < playlist.length - 1) handleSongChange(currentSongIndex + 1, { play: isPlaying }); };
+  const handlePrevSong = () => { if (currentTime > 3 && playableSongData.totalDuration > 3) handleScrub(0); else if (currentSongIndex > 0) handleSongChange(currentSongIndex - 1, { play: isPlaying }); else handleScrub(0); };
+  
+  const { activeSection, progress, activeLyricWordInfo, activeLineKeyForHighlight, activeChord } = useMemo(() => {
+    if (!playableSongData || !playableSongData.sections || playableSongData.sections.length === 0) {
+      return { activeSection: null, progress: 0, activeLyricWordInfo: null, activeLineKeyForHighlight: null, activeChord: null };
+    }
 
-  const activeSongChord = useMemo(() => {
-    return playableSongData.chords.find(c => currentTime >= c.startTime && currentTime < c.endTime);
-  }, [currentTime, playableSongData.chords]);
+    const currentSection = playableSongData.sections.find(s => currentTime >= s.startTime && currentTime < s.endTime) || null;
+    const sectionProgress = currentSection ? ((currentTime - currentSection.startTime) / currentSection.duration) * 100 : 0;
 
-  const activeLyricWordInfo = useMemo(() => {
-    if (!playableSongData.lyrics || !playableSongData.sections) return null;
-    for (const section of playableSongData.sections) {
-      const lyricLinesInSection = playableSongData.lyrics.filter(line => {
-        if (line.length === 0) return false;
-        const firstWordTime = line[0].startTime;
-        return typeof firstWordTime === 'number' && firstWordTime >= section.startTime && firstWordTime < section.endTime;
-      });
-      for (let lineIndex = 0; lineIndex < lyricLinesInSection.length; lineIndex++) {
-        const line = lyricLinesInSection[lineIndex];
-        for (const word of line) {
-          if (currentTime >= word.startTime && currentTime < (word.endTime + LYRIC_ACTIVE_BUFFER_MS)) {
-            return { word, sectionId: section.id, lineIndexWithinSection: lineIndex };
+    let currentWordInfo: { word: LyricWord; sectionId: string; lineIndexWithinSection: number; } | null = null;
+    let currentLineKey: string | null = null;
+    
+    if (currentSection) {
+      const linesInSection = playableSongData.lyrics.filter(line => 
+          line.length > 0 && 
+          line[0].startTime >= currentSection.startTime && 
+          line[0].startTime < currentSection.endTime
+      );
+      
+      for (let i = 0; i < linesInSection.length; i++) {
+          const line = linesInSection[i];
+          if (line.length > 0 && currentTime >= line[0].startTime - LYRIC_ACTIVE_BUFFER_MS && currentTime <= line[line.length - 1].endTime + LYRIC_ACTIVE_BUFFER_MS) {
+              currentLineKey = `${currentSection.id}_${i}`;
+              
+              const activeWord = line.find(word => currentTime >= word.startTime && currentTime < word.endTime);
+              if (activeWord) {
+                  currentWordInfo = {
+                      word: activeWord,
+                      sectionId: currentSection.id,
+                      lineIndexWithinSection: i,
+                  };
+              }
+              break; 
           }
-        }
       }
     }
-    return null;
-  }, [currentTime, playableSongData.lyrics, playableSongData.sections]);
-  
-  const activeLineKeyForHighlight = useMemo(() => {
-    if (activeLyricWordInfo) {
-      return `${activeLyricWordInfo.sectionId}_${activeLyricWordInfo.lineIndexWithinSection}`;
-    }
-    return null;
-  }, [activeLyricWordInfo]);
 
-  const currentSectionId = useMemo(() => {
-    if (activeLyricWordInfo?.sectionId) return activeLyricWordInfo.sectionId;
-    if (activeSongChord) {
-      const sectionForChord = playableSongData.sections.find(s => activeSongChord.startTime >= s.startTime && activeSongChord.startTime < s.endTime);
-      if (sectionForChord) return sectionForChord.id;
-    }
-    const sectionByTime = playableSongData.sections.find(s => currentTime >= s.startTime && currentTime < s.endTime);
-    if (sectionByTime) return sectionByTime.id;
-    
-    if (playableSongData.sections.length > 0 && currentTime < playableSongData.sections[0].startTime) {
-        return playableSongData.sections[0].id;
-    }
-    if (playableSongData.sections.length > 0 && currentTime >= playableSongData.sections[playableSongData.sections.length -1].endTime) {
-        return playableSongData.sections[playableSongData.sections.length -1].id;
-    }
-    return null;
-  }, [currentTime, playableSongData.sections, activeLyricWordInfo, activeSongChord]);
+    const activeChord = playableSongData.chords.find(c => currentTime >= c.startTime && currentTime < c.endTime) || null;
 
+    return {
+      activeSection: currentSection,
+      progress: sectionProgress,
+      activeLyricWordInfo: currentWordInfo,
+      activeLineKeyForHighlight: currentLineKey,
+      activeChord
+    };
+  }, [currentTime, playableSongData]);
 
-  if (isLoadingJamData || (isSyncEnabled && isLoadingSessionState && firebaseInitialized && db)) {
-    return fallback || (
-      <div className="w-full flex flex-col justify-center items-center min-h-[400px] space-y-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-lg text-muted-foreground">
-          {isLoadingJamData ? "Loading Jam Session..." : "Connecting to session..."}
-        </p>
-        <div className="mt-2"> <SyncToggle /> </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full flex flex-col justify-center items-center min-h-[400px] text-center">
-        <AlertTriangle className="w-12 h-12 text-destructive mb-4" />
-        <h2 className="text-2xl font-semibold mb-2 text-destructive">Error Loading Jam</h2>
-        <p className="text-muted-foreground mb-6">{error}</p>
-        <Link href="/" passHref>
-          <Button variant="outline">Go to Homepage</Button>
-        </Link>
-      </div>
-    );
-  }
-  
-  if (playlist.length === 0) {
-     return (
-      <div className="w-full flex flex-col justify-center items-center min-h-[400px] text-center">
-        <ListMusic className="w-12 h-12 text-muted-foreground mb-4" />
-        <h2 className="text-2xl font-semibold mb-2">Empty Jam</h2>
-        <p className="text-muted-foreground mb-6">This Jam Session doesn't have any songs yet.</p>
-        <Link href="/create-jam" passHref>
-          <Button>Create a New Jam</Button>
-        </Link>
-         <div className="mt-8">
-          <SyncToggle />
-          {(!firebaseInitialized || !db) && (<p className="text-xs text-destructive mt-1"> (Firebase not configured - Sync disabled)</p>)}
-        </div>
-      </div>
-    );
-  }
-
-  const playbackControlsContainerClasses = isMobile && !isPlaybackControlsVisible
-    ? "opacity-0 max-h-0 overflow-hidden pointer-events-none"
-    : "opacity-100 max-h-10";
-
-
+  const formatTime = (timeInSeconds: number) => `${Math.floor(timeInSeconds / 60)}:${Math.floor(timeInSeconds % 60).toString().padStart(2, '0')}`;
+  const SyncToggle = () => <div className="flex items-center space-x-2">{isSyncEnabled ? <Wifi className="h-4 w-4 text-primary" /> : <WifiOff className="h-4 w-4 text-muted-foreground" />}<Label htmlFor="sync-mode" className={cn("text-sm", !isSyncEnabled && "text-muted-foreground")}>Real-time Sync</Label><Switch id="sync-mode" checked={isSyncEnabled} onCheckedChange={setIsSyncEnabled} /></div>;
+  if (isLoading) return fallback;
+  if (error) return <Card className="max-w-md mx-auto"><CardHeader><div className="flex items-center gap-4"><AlertTriangle className="h-8 w-8 text-destructive" /><h1 className="text-xl font-semibold text-destructive">Error Loading Jam</h1></div></CardHeader><CardContent><p className="text-muted-foreground">{error}</p></CardContent><CardFooter><Link href="/" passHref><Button variant="outline"><ChevronLeft className="mr-2 h-4 w-4" /> Back to Jams</Button></Link></CardFooter></Card>;
+  const playbackControlsClasses = isMobile ? isPlaybackControlsVisible ? "opacity-100" : "opacity-0 pointer-events-none" : "opacity-100";
   return (
-    <Card className="shadow-xl w-full flex flex-col h-[calc(100vh-4rem)]">
-      <CardHeader className={cn(
-          "flex-shrink-0",
-          "p-3 md:p-4" 
-        )}>
-        <div className="flex justify-between items-start">
-          <div className="hidden md:block flex-1"> {/* SongInfo for Desktop */}
-            <SongInfo
-              title={currentDisplaySongInfo.title}
-              author={currentDisplaySongInfo.author}
-              songKey={currentDisplaySongInfo.key}
-            />
-          </div>
-
-          <div className="flex flex-col items-end text-right ml-auto md:ml-4 w-full md:w-auto">
-            <div className="flex md:hidden flex-row items-center justify-between w-full mb-0">
-                <h2 className="text-lg font-semibold text-accent truncate">
-                    {jamSession?.name}
-                </h2>
-                <div className="flex items-center gap-2">
-                    <SyncToggle />
-                    <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                        Song {currentSongIndex + 1} of {playlist.length}
-                    </p>
-                </div>
-            </div>
-            <div className="hidden md:flex flex-col items-end text-right gap-1">
-                <SyncToggle />
-                <h2 className="text-lg md:text-xl font-semibold text-accent truncate self-end">
-                {jamSession?.name}
-                </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap self-end">
-                Song {currentSongIndex + 1} of {playlist.length}
-                </p>
-            </div>
-            
-            <div className="block md:hidden w-full text-left mt-0"> 
-              <SongInfo
-                  title={currentDisplaySongInfo.title}
-                  author={currentDisplaySongInfo.author}
-                  songKey={currentDisplaySongInfo.key}
-              />
-            </div>
-          </div>
+    <Card className="w-full h-full flex flex-col mx-auto overflow-hidden shadow-2xl bg-card/80 backdrop-blur-sm border-border/20" data-name="jam-player-card">
+      <CardHeader className="flex flex-col sm:flex-row justify-between items-start gap-4 px-6 pt-4 flex-shrink-0" data-name="jam-player-header">
+        <div data-name="header-title-section">
+          <h1 className="text-2xl font-bold text-primary font-headline tracking-tight">{jamSession?.name}</h1>
+          <p className="text-muted-foreground">Playing: {currentDisplaySongInfo.title} by {currentDisplaySongInfo.author}</p>
         </div>
-        
-        {(!firebaseInitialized || !db) && (
-          <p className="text-xs text-destructive mt-1 text-right">
-             (Firebase not configured, Sync disabled)
-          </p>
-        )}
+        <div className="flex-shrink-0" data-name="header-sync-toggle-section">
+            <SyncToggle />
+        </div>
       </CardHeader>
-
-      <CardContent className="flex-grow overflow-y-auto space-y-2 p-3 md:p-4">
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-2 h-full">
-          <div className="flex-grow-[6] basis-0 md:flex-grow-0 md:basis-auto overflow-hidden relative">
-            <LyricsDisplay
-              lyrics={playableSongData.lyrics}
-              chords={playableSongData.chords}
-              sections={playableSongData.sections}
-              currentTime={currentTime}
-              activeSongChord={activeSongChord}
-              activeLyricWordInfo={activeLyricWordInfo}
-              currentSectionId={currentSectionId}
-              activeLineKeyForHighlight={activeLineKeyForHighlight}
-              songIsPlaying={isPlayingRef.current}
-            />
+      <CardContent className="space-y-6 flex-grow min-h-0 flex flex-col" data-name="jam-player-content">
+        <div data-name="content-song-info-wrapper" className="flex-shrink-0">
+            <SongInfo title={currentDisplaySongInfo.title} author={currentDisplaySongInfo.author} songKey={currentDisplaySongInfo.key} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow min-h-0" data-name="content-lyrics-chords-grid">
+          <div data-name="lyrics-display-wrapper" className="overflow-y-auto">
+              <LyricsDisplay lyrics={playableSongData.lyrics} chords={playableSongData.chords} sections={playableSongData.sections} currentTime={currentTime} activeSongChord={activeChord || undefined} activeLyricWordInfo={activeLyricWordInfo} currentSectionId={activeSection?.id || null} activeLineKeyForHighlight={activeLineKeyForHighlight} songIsPlaying={isPlaying} />
           </div>
-          <div className="flex-grow-[4] basis-0 md:flex-grow-0 md:basis-auto overflow-hidden relative">
-            <ChordsDisplay 
-              chords={playableSongData.chords} 
-              currentTime={currentTime} 
-              songBpm={currentDisplaySongInfo.bpm}
-              isPlaying={isPlaying} 
-            />
+          <div data-name="chords-display-wrapper" className="overflow-y-auto">
+             <ChordsDisplay chords={playableSongData.chords} currentTime={currentTime} songBpm={playableSongData.bpm} isPlaying={isPlaying} />
           </div>
         </div>
       </CardContent>
+      <CardFooter className={cn("bg-background/50 backdrop-blur-sm border-t p-4 transition-opacity duration-300 flex-shrink-0", playbackControlsClasses)} data-name="jam-player-footer">
+        <div className="w-full flex justify-between items-center gap-4" data-name="footer-main-flex-container">
+          <div className="flex items-center gap-2 sm:gap-4" data-name="footer-playback-buttons">
+            <Button variant="ghost" size="icon" onClick={handlePrevSong}>
+              <SkipBack className="h-6 w-6" />
+            </Button>
+            <Button variant="default" size="icon" className="h-16 w-16 rounded-full shadow-lg" onClick={handlePlayPause}>
+              {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleNextSong} disabled={currentSongIndex >= playlist.length - 1}>
+              <SkipForward className="h-6 w-6" />
+            </Button>
+          </div>
 
-      <CardFooter className={cn(
-          "flex-shrink-0 flex flex-col gap-2 border-t bg-background",
-          "p-3 md:p-4"
-        )}>
-        <div className="w-full flex flex-col gap-2 md:hidden">
-          <SectionProgressBar
-              sections={playableSongData.sections}
-              currentSectionId={currentSectionId}
-              currentTime={currentTime}
-              onSectionSelect={handleSectionSelect}
-          />
-        </div>
-        
-        <div className="flex items-center justify-between w-full gap-1 md:gap-2">
-            <div className={cn(
-                "flex items-center gap-1",
-                "transition-all duration-300 ease-in-out",
-                playbackControlsContainerClasses
-            )}>
-                <Button 
-                    onClick={() => handleSongNavigation('prev')} 
-                    variant="secondary" 
-                    size="icon" 
-                    aria-label="Previous Song"
-                    disabled={currentSongIndex === 0}
-                    className="rounded-xl"
-                >
-                    <SkipBack className="w-5 h-5" />
-                </Button>
-                <Button 
-                  onClick={handlePlayPause} 
-                  size="icon" 
-                  aria-label={isPlaying ? 'Pause' : 'Play'} 
-                  className={cn(
-                    "w-10 h-10 rounded-xl text-accent-foreground",
-                    isPlaying && "bg-accent hover:bg-accent/90"
-                  )}
-                  style={!isPlaying ? { backgroundColor: 'hsl(var(--play-button-paused-bg))' } : {}}
-                >
-                    {isPlaying ? <Pause className="w-7 h-7" /> : <Play className="w-7 h-7" />}
-                </Button>
-                <Button 
-                    onClick={() => handleSongNavigation('next')} 
-                    variant="secondary" 
-                    size="icon" 
-                    aria-label="Next Song"
-                    disabled={currentSongIndex >= playlist.length - 1}
-                    className="rounded-xl"
-                >
-                    <SkipForward className="w-5 h-5" />
-                </Button>
-            </div>
+          <div className="flex-grow min-w-0 mx-4" data-name="footer-progress-bar-container">
+             <SectionProgressBar sections={playableSongData.sections} currentSectionId={activeSection?.id || null} onSectionSelect={handleScrub} currentTime={currentTime} />
+          </div>
 
-            <div className="hidden md:flex flex-grow min-w-0 mx-2">
-                <SectionProgressBar
-                    sections={playableSongData.sections}
-                    currentSectionId={currentSectionId}
-                    currentTime={currentTime}
-                    onSectionSelect={handleSectionSelect}
-                />
-            </div>
-            
-            <div className="text-sm font-mono text-muted-foreground flex-shrink-0">
-              {formatTime(currentTime)} / {formatTime(playableSongData.totalDuration)}
-            </div>
+          <div className="text-sm font-mono text-muted-foreground flex-shrink-0" data-name="footer-time-display">
+            {formatTime(currentTime)} / {formatTime(playableSongData.totalDuration)}
+          </div>
         </div>
       </CardFooter>
     </Card>

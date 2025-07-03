@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
@@ -35,13 +34,13 @@ export function AuthGuard({ children }: { children: ReactNode }) {
   // If authenticated, render the full app layout with chrome
   if (isAuthenticated) {
      return (
-        <>
-            <div className="fixed top-4 right-4 z-50">
+        <div data-name="auth-guard-wrapper">
+            <div className="fixed top-4 right-4 z-50" data-name="theme-toggle-container">
               <ThemeToggle />
             </div>
             {children}
             <Toaster />
-        </>
+        </div>
      );
   }
 
