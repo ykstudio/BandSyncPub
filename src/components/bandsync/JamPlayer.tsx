@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const SESSION_STATE_PERSIST_INTERVAL = 5000;
+const SESSION_STATE_BROADCAST_INTERVAL = 1000;
 const LYRIC_ACTIVE_BUFFER_MS = 0.1; 
 const TIME_DRIFT_TOLERANCE_PLAYING = 0.25;
 
@@ -48,6 +49,8 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
   const localUpdateInProgressRef = useRef(false);
   const animationFrameRef = useRef<number>();
   const lastPersistTimeRef = useRef<number>(Date.now());
+  const lastBroadcastTimeRef = useRef<number>(Date.now());
+  const lastFrameTimeRef = useRef<number | null>(null);
   const hidePlaybackControlsTimerRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
   useEffect(() => { latestCurrentTimeRef.current = currentTime; }, [currentTime]);
@@ -115,7 +118,19 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         setCurrentTime(0);
       }
       if (typeof remoteTime === 'number') {
-        if (Math.abs(latestCurrentTimeRef.current - remoteTime) > TIME_DRIFT_TOLERANCE_PLAYING) setCurrentTime(remoteTime);
+        const localTime = latestCurrentTimeRef.current;
+        if (!isPlayingRef.current) {
+            if (Math.abs(localTime - remoteTime) > TIME_DRIFT_TOLERANCE_PLAYING) {
+                setCurrentTime(remoteTime);
+            }
+            return;
+        }
+        if (remoteTime > localTime) {
+            const drift = remoteTime - localTime;
+            if (drift > TIME_DRIFT_TOLERANCE_PLAYING) {
+                setCurrentTime(remoteTime);
+            }
+        }
       }
     }).subscribe();
     return () => { supabase.removeChannel(rtChannel); setChannel(null); };
@@ -158,7 +173,12 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     const tick = () => {
       if (!isPlayingRef.current) return;
 
-      const newTime = Math.min(latestCurrentTimeRef.current + (16 / 1000), playableSongData.totalDuration);
+      const now = performance.now();
+      const lastFrameTime = lastFrameTimeRef.current || now;
+      const deltaTime = (now - lastFrameTime) / 1000;
+      lastFrameTimeRef.current = now;
+
+      const newTime = Math.min(latestCurrentTimeRef.current + deltaTime, playableSongData.totalDuration);
 
       if (newTime >= playableSongData.totalDuration && playableSongData.totalDuration > 0) {
         if (currentSongIndex < playlist.length - 1) {
@@ -171,6 +191,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
       } else {
         setCurrentTime(newTime);
 
+        if (Date.now() - lastBroadcastTimeRef.current > SESSION_STATE_BROADCAST_INTERVAL) {
+          broadcastPlaybackState({ time: newTime });
+          lastBroadcastTimeRef.current = Date.now();
+        }
+
         if (Date.now() - lastPersistTimeRef.current > SESSION_STATE_PERSIST_INTERVAL) {
           persistSessionState({ isPlaying: isPlayingRef.current, currentTime: newTime, currentSongIndex });
           lastPersistTimeRef.current = Date.now();
@@ -181,9 +206,11 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
     };
 
     if (isPlaying) {
+      lastFrameTimeRef.current = performance.now();
       animationFrameRef.current = requestAnimationFrame(tick);
     } else if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
+      lastFrameTimeRef.current = null;
     }
 
     return () => {
@@ -191,7 +218,7 @@ export function JamPlayer({ jamId, fallback }: JamPlayerProps) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isPlaying, playableSongData.totalDuration, currentSongIndex, playlist.length, handleSongChange, persistSessionState]);
+  }, [isPlaying, playableSongData.totalDuration, currentSongIndex, playlist.length, handleSongChange, persistSessionState, broadcastPlaybackState]);
 
   const handlePlayPause = () => {
     localUpdateInProgressRef.current = true;
