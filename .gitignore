@@ -89,4 +89,13 @@ CLAUDE.md
 migrations/
 src/lib/supabase.ts
 supabase-schema.sql
-firebase-service-account.json 
+firebase-service-account.json
+
+# editorconfig
+.editorconfig
+
+# Cursor
+# .cursor/
+!.cursor/rules/
+
+# User-specific files 

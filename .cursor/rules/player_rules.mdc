@@ -1,0 +1,81 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Jam Player Development Rules
+
+This document outlines the core principles that must be followed when developing any feature related to the Jam Player. The player is the heart of this application, and its user experience is our top priority.
+
+---
+
+## 1. High-Fidelity Playback
+
+The user's sense of timing and immersion is paramount. The player must feel responsive, smooth, and accurate.
+
+-   **Use High-Precision Timers**: For all playback-related timing (e.g., advancing the current time), **always** use `performance.now()` to calculate the real time elapsed between frames.
+    -   **❌ DON'T**: Use `setInterval` or a `requestAnimationFrame` loop that adds a fixed value on each tick. This leads to jerky, inconsistent playback.
+    -   **✅ DO**: Calculate the `deltaTime` between frames using `performance.now()` to ensure the timer advances smoothly and accurately, regardless of frame rate fluctuations.
+
+    ```typescript
+    // ✅ Good Example from JamPlayer.tsx
+    const tick = () => {
+      const now = performance.now();
+      const lastFrameTime = lastFrameTimeRef.current || now;
+      const deltaTime = (now - lastFrameTime) / 1000;
+      lastFrameTimeRef.current = now;
+
+      const newTime = Math.min(latestCurrentTimeRef.current + deltaTime, playableSongData.totalDuration);
+      // ...
+    }
+    ```
+
+---
+
+## 2. No Regressions on Core Features
+
+No change, no matter how small, should degrade the existing functionality of the player. After any significant refactoring or feature addition to the player components, the following features **must be manually verified**:
+
+-   [ ] **Autoplay**: Does the next song in the playlist automatically start when the current one ends?
+-   [ ] **Smooth Playback**: Is the timer advancing smoothly, without any backward jumps or stuttering?
+-   [ ] **Lyric Highlighting**: Is the currently sung word correctly highlighted in the `LyricsDisplay`?
+-   [ ] **Chord Highlighting**: Is the currently played chord correctly highlighted in the `LyricsDisplay`?
+-   [ ] **Section Progress**: Does the `SectionProgressBar` accurately reflect the current section and progress?
+-   [ ] **Real-Time Sync**: Do all connected players stay in sync (within ~1 second) during playback, play/pause, and song changes?
+
+---
+
+## 3. Real-Time Sync Integrity
+
+The multi-user experience relies on robust and logical synchronization.
+
+-   **"Source of Truth" Model**: The client that is actively **playing** is considered the source of truth.
+    -   An actively playing client should **broadcast** its state (time, play/pause status) frequently (e.g., every second).
+    -   An actively playing client should **ignore** incoming time updates that are *behind* its own current time to prevent backward jumps. It should only accept updates that are ahead of its time to "catch up."
+-   **Listener Model**: A client that is **paused** is a listener.
+    -   A paused client should always accept state updates from the channel to stay in sync with the active players.
+
+    ```typescript
+    // ✅ Good Example from JamPlayer.tsx's broadcast listener
+    rtChannel.on('broadcast', { event: 'PLAYBACK_STATE_UPDATE' }, ({ payload }) => {
+      // ...
+      if (typeof remoteTime === 'number') {
+        const localTime = latestCurrentTimeRef.current;
+        // If we are PAUSED, we are a listener and accept the remote time.
+        if (!isPlayingRef.current) {
+            if (Math.abs(localTime - remoteTime) > TIME_DRIFT_TOLERANCE_PLAYING) {
+                setCurrentTime(remoteTime);
+            }
+            return;
+        }
+        // If we are PLAYING, we are a source of truth. Only accept time if it's ahead of us.
+        if (remoteTime > localTime) {
+            const drift = remoteTime - localTime;
+            if (drift > TIME_DRIFT_TOLERANCE_PLAYING) {
+                setCurrentTime(remoteTime);
+            }
+        }
+      }
+    });
+    ```
+
